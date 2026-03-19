@@ -1,9 +1,8 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
-// Minimal viewer interface to open a window and run the main loop.
-// The implementation will live in view/src/blabla.cpp.
 class Viewer
 {
 public:
@@ -12,15 +11,15 @@ public:
     // Main loop – blocks until the user closes the window.
     void run();
 
-    // For now this is a no-op placeholder; you can hook your mesh/vision data here.
-    template <typename MeshT>
-    void setMesh(const MeshT&)
-    {
-        // Intentionally empty – connect to your rendering later.
-    }
+    // Set a render callback that is called every frame.
+    // The callback receives the current window width/height.
+    using RenderCallback = std::function<void(int width, int height)>;
+    void setRenderCallback(RenderCallback cb) { m_renderCallback = std::move(cb); }
 
 private:
     std::string m_title;
     int m_width;
     int m_height;
+
+    RenderCallback m_renderCallback;
 };
