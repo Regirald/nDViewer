@@ -15,25 +15,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ContourExtraction.h">
+    <ClInclude Include="include\ContourExtraction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DistanceTransform.h">
+    <ClInclude Include="include\DistanceTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MarchingCubes.h">
+    <ClInclude Include="include\MarchingCubes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MarchingSquares.h">
+    <ClInclude Include="include\MarchingSquares.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TopologyAnalysis.h">
+    <ClInclude Include="include\TopologyAnalysis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="blabla.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="src\blabla.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

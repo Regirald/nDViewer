@@ -15,22 +15,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ImplicitFunction.h">
+    <ClInclude Include="include\ImplicitFunction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LevelSet.h">
+    <ClInclude Include="include\LevelSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Manifold.h">
+    <ClInclude Include="include\Manifold.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
+    <ClInclude Include="include\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sphere.h">
-      <Filter>Header Files</Filter>
+    <ClCompile Include="src\blabla.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

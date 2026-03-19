@@ -127,13 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Concepts.h" />
-    <ClInclude Include="Field.h" />
-    <ClInclude Include="Grid.h" />
-    <ClInclude Include="Vec.h" />
+    <ClInclude Include="include\Concepts.h" />
+    <ClInclude Include="include\Field.h" />
+    <ClInclude Include="include\Grid.h" />
+    <ClInclude Include="include\Vec.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="blabla.cpp" />
+    <ClCompile Include="src\blabla.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

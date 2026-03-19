@@ -1,5 +1,5 @@
-#include <Sphere.h>
-#include <MarchingCubes.h>
+#include "Sphere.h"
+#include "MarchingCubes.h"
 
 int main() {
     // 1. Create implicit model

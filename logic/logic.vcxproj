@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Core;$(SolutionDir)Model</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Core\include;$(SolutionDir)Model\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,13 +128,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ContourExtraction.h" />
-    <ClInclude Include="DistanceTransform.h" />
-    <ClInclude Include="MarchingCubes.h" />
-    <ClInclude Include="MarchingSquares.h" />
-    <ClInclude Include="TopologyAnalysis.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\core\core.vcxproj">
       <Project>{83ade49b-7a22-4a8d-bc22-96f40bd6b2a5}</Project>
     </ProjectReference>
@@ -143,7 +136,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="blabla.cpp" />
+    <ClInclude Include="include\ContourExtraction.h" />
+    <ClInclude Include="include\DistanceTransform.h" />
+    <ClInclude Include="include\MarchingCubes.h" />
+    <ClInclude Include="include\MarchingSquares.h" />
+    <ClInclude Include="include\TopologyAnalysis.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\blabla.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
