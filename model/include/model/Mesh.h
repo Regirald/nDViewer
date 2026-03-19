@@ -1,5 +1,6 @@
+#pragma once
 #include <vector>
-#include "Vec.h"
+#include "core/Vec.h"
 
 template <size_t Dim>
 struct Mesh {

@@ -133,14 +133,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ImplicitFunction.h" />
-    <ClInclude Include="include\LevelSet.h" />
-    <ClInclude Include="include\Manifold.h" />
-    <ClInclude Include="include\Mesh.h" />
-    <ClInclude Include="include\sphere.h" />
+    <ClCompile Include="src\blabla.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\blabla.cpp" />
+    <ClInclude Include="include\model\ImplicitFunction.h" />
+    <ClInclude Include="include\model\LevelSet.h" />
+    <ClInclude Include="include\model\Manifold.h" />
+    <ClInclude Include="include\model\Mesh.h" />
+    <ClInclude Include="include\model\sphere.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,3 +1,4 @@
+#pragma once
 #include "ImplicitFunction.h"
 
 class Sphere : public ImplicitFunction<3> {

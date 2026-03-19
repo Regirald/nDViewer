@@ -136,14 +136,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ContourExtraction.h" />
-    <ClInclude Include="include\DistanceTransform.h" />
-    <ClInclude Include="include\MarchingCubes.h" />
-    <ClInclude Include="include\MarchingSquares.h" />
-    <ClInclude Include="include\TopologyAnalysis.h" />
+    <ClCompile Include="src\blabla.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\blabla.cpp" />
+    <ClInclude Include="include\logic\ContourExtraction.h" />
+    <ClInclude Include="include\logic\DistanceTransform.h" />
+    <ClInclude Include="include\logic\MarchingCubes.h" />
+    <ClInclude Include="include\logic\MarchingSquares.h" />
+    <ClInclude Include="include\logic\TopologyAnalysis.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

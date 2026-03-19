@@ -1,3 +1,4 @@
+#pragma once
 #include "Vec.h"
 
 template <size_t Dim, typename T>

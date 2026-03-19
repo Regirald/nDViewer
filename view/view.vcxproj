@@ -139,13 +139,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Camera.h" />
-    <ClInclude Include="include\GLMeshRenderer.h" />
-    <ClInclude Include="include\Viewer.h" />
-    <ClInclude Include="include\VolumeRenderer.h" />
+    <ClCompile Include="src\blabla.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\blabla.cpp" />
+    <ClInclude Include="include\view\Camera.h" />
+    <ClInclude Include="include\view\GLMeshRenderer.h" />
+    <ClInclude Include="include\view\Viewer.h" />
+    <ClInclude Include="include\view\VolumeRenderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,4 +1,5 @@
-#include "Vec.h"
+#pragma once
+#include "core/Vec.h"
 
 template <size_t Dim>
 class ImplicitFunction {

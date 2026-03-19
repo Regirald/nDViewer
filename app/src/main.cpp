@@ -1,5 +1,6 @@
-#include "Sphere.h"
-#include "MarchingCubes.h"
+#include "model/Sphere.h"
+#include "model/Mesh.h"
+#include "logic/MarchingCubes.h"
 
 int main() {
     // 1. Create implicit model

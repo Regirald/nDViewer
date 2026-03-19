@@ -1,5 +1,6 @@
-#include "Mesh.h"
-#include "Field.h"
+#pragma once
+#include "model/Mesh.h"
+#include "core/Field.h"
 
 class MarchingSquares {
 public:
