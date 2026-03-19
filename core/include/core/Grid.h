@@ -17,6 +17,12 @@ public:
         return m_data[flatten(idx)];
     }
 
+    const T& operator()(const Index& idx) const {
+        return m_data[flatten(idx)];
+    }
+
+    const Index& getSize() const { return m_size; }
+
 private:
     std::vector<T> m_data;
     Index m_size;

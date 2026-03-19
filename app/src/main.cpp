@@ -13,10 +13,33 @@ int main()
 
     // 2. Sample into scalar field
     ScalarField<3> field({ 64, 64, 64 });
-    // TODO: fill field from your vision pipeline.
+    // Fill field with 1.f inside the sphere and 0.f outside
+    for (int z = 0; z < 64; ++z)
+    {
+        for (int y = 0; y < 64; ++y)
+        {
+            for (int x = 0; x < 64; ++x)
+            {
+                Vec<3, float> p;
+                // Map indices from [0,63] to [-1,1]
+                p[0] = (static_cast<float>(x) / 63.0f) * 2.0f - 1.0f;
+                p[1] = (static_cast<float>(y) / 63.0f) * 2.0f - 1.0f;
+                p[2] = (static_cast<float>(z) / 63.0f) * 2.0f - 1.0f;
+
+                float value = sphere.evaluate(p);
+
+                Vec<3, int> idx;
+                idx[0] = x;
+                idx[1] = y;
+                idx[2] = z;
+
+                field(idx) = (value <= 0.0f) ? 1.0f : 0.0f;
+            }
+        }
+    }
 
     // 3. Extract topology
-    Mesh<3> mesh = MarchingCubes::extract(field, 0.0f);
+    Mesh<3> mesh = MarchingCubes::extract(field, 0.5f);
 
     // 4. Open a window dedicated to computer vision visualization
     Viewer viewer("Computer Vision Viewer", 1280, 720);
