@@ -136,6 +136,7 @@
     <ClCompile Include="src\blabla.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Circle.h" />
     <ClInclude Include="include\model\ImplicitFunction.h" />
     <ClInclude Include="include\model\LevelSet.h" />
     <ClInclude Include="include\model\Manifold.h" />
