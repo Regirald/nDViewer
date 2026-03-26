@@ -56,18 +56,31 @@ public:
                 mesh.indices.push_back(baseIndex + 2);
             };
 
+        auto emitEdge = [&](Vec2 a, Vec2 b)
+            {
+                // Record starting index of this triangle's vertices
+                int baseIndex = static_cast<int>(mesh.vertices.size());
+
+                mesh.vertices.push_back(a);
+                mesh.vertices.push_back(b);
+
+                // Push back triangle indices (counter-clockwise order ensured above)
+                mesh.indices.push_back(baseIndex);
+                mesh.indices.push_back(baseIndex + 1);
+            };
+
         for (int y = 0; y < dimy - 1; ++y)
         {
             for (int x = 0; x < dimx - 1; ++x)
             {
                 // Quad positions
                 std::array<Vec2, 4> pos = {
-                    Vec2{(float)x,     (float)y},     // 0
-                    Vec2{(float)x + 1, (float)y},     // 1
-                    Vec2{(float)x + 1, (float)y + 1}, // 2
-                    Vec2{(float)x,     (float)y + 1}  // 3
+                    Vec2{(float(x) / (dimx - 1)) * 2.0f - 1.0f,     (static_cast<float>(y) / (dimy - 1)) * 2.0f - 1.0f },     // 0
+                    Vec2{(float(x + 1) / (dimx - 1)) * 2.0f - 1.0f, (static_cast<float>(y) / (dimy - 1)) * 2.0f - 1.0f },     // 1
+                    Vec2{(float(x + 1) / (dimx - 1)) * 2.0f - 1.0f, (static_cast<float>(y + 1) / (dimy - 1)) * 2.0f - 1.0f}, // 2
+                    Vec2{(float(x) / (dimx - 1)) * 2.0f - 1.0f,     (static_cast<float>(y + 1) / (dimy - 1)) * 2.0f - 1.0f}  // 3
                 };
-
+                
                 // Quad values
                 std::array<float, 4> val = {
                     field({x, y}),
@@ -115,7 +128,9 @@ public:
 
                     // Fan triangulation
                     for (int i = 1; i + 1 < count; ++i)
+                    {
                         emitTriangle(poly[0], poly[i], poly[i + 1]);
+                    }
                 }
             }
         }
