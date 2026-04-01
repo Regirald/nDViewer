@@ -241,11 +241,7 @@ void Viewer::run()
 
         glEnd();
 
-        // Call user render callback if set.
-        if (m_renderCallback)
-        {
-            m_renderCallback(width, height, m_sceneMatrix);
-        }
+
 
         
 
@@ -255,9 +251,9 @@ void Viewer::run()
     ShutdownOpenGL();
 }
 
-void Viewer::setMesh(Mesh* mesh)
+void Viewer::setMesh(Mesh<2>* mesh)
 {
-    m_render.
+	m_render.setMesh(mesh);
 }
 
 

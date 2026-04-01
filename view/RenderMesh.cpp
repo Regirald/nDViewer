@@ -6,11 +6,11 @@ void RenderMesh<Dim>::render()
 {
     // Draw m_mesh
     glBegin(GL_LINES);
-    for (size_t i = 0; i < m_mesh.indices.size(); i += 3)
+    for (size_t i = 0; i < m_mesh->indices.size(); i += 3)
     {
-        const auto& v0 = m_mesh.vertices[m_mesh.indices[i]];
-        const auto& v1 = m_mesh.vertices[m_mesh.indices[i + 1]];
-        const auto& v2 = m_mesh.vertices[m_mesh.indices[i + 2]];
+        const auto& v0 = m_mesh->vertices[m_mesh->indices[i]];
+        const auto& v1 = m_mesh->vertices[m_mesh->indices[i + 1]];
+        const auto& v2 = m_mesh->vertices[m_mesh->indices[i + 2]];
 
         glVertex3f(v0[0], v0[1], 0.f);
         glVertex3f(v1[0], v1[1], 0.f);
@@ -21,3 +21,6 @@ void RenderMesh<Dim>::render()
     }
     glEnd();
 }
+
+template class RenderMesh<2>;
+template class RenderMesh<3>;

@@ -6,9 +6,6 @@
 // a generic container; for Dim == 3 we will interpret it as a 3D surface.
 template <size_t Dim>
 struct Mesh {
-    std::vector<Vec<Dim, float>> vertices;   // vertex positions
-    std::vector<unsigned int> indices;       // triangle index buffer (3 per tri)
-
     void clear()
     {
         vertices.clear();
@@ -19,4 +16,7 @@ struct Mesh {
     {
         return vertices.empty() || indices.empty();
     }
+
+    std::vector<Vec<Dim, float>> vertices;   // vertex positions
+    std::vector<unsigned int> indices;       // triangle index buffer (3 per tri)
 };

@@ -46,7 +46,7 @@ int main()
     // legacy fixed-function OpenGL. This keeps things simple while
     // wiring data flow from marching cubes to the GPU.
     
-    viewer.
+	viewer.setMesh(&mesh);
 
     viewer.run();
     return 0;

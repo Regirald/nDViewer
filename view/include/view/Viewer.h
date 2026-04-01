@@ -16,7 +16,6 @@ struct Mat4
         0.f, 0.f, 0.f, 1.f
     };
 };
-class Mesh;
 
 class Viewer
 {
@@ -26,7 +25,7 @@ public:
     // Main loop – blocks until the user closes the window.
     void run();
 
-    void setMesh(Mesh* mesh);
+    void setMesh(Mesh<2>* mesh);
 
     // Handle raw mouse messages from the window procedure.
     void handleMouseMessage(unsigned int msg, unsigned long long wParam, long long lParam);
@@ -46,5 +45,5 @@ private:
     float m_yaw     = 0.0f;
     float m_pitch   = 0.0f;
 
-    RendingManager m_render;
+    RenderingManager m_render;
 };

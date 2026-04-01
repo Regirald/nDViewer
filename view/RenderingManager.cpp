@@ -1,15 +1,14 @@
 #include "RenderingManager.h"
 #include "RenderMesh.h"
-#include "model/Mesh.h"
 
-void RendingManager::setMesh(Mesh<3>* mesh)
+void RenderingManager::setMesh(Mesh<2>* mesh)
 {
-	Render* render = new RenderMesh<3>(*mesh);
+	Render* render = new RenderMesh<2>(mesh);
 	renderContainer.push_back(render);
 }
 
 
-void RendingManager::renderScene()
+void RenderingManager::renderScene()
 {
 	for (Render* render : renderContainer)
 	{
