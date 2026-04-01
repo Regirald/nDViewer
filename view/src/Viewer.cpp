@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <gl/GL.h>
+#include <windowsx.h> 
 #include <string>
 #include "Viewer.h"
 
@@ -14,11 +15,23 @@ static HGLRC g_hGLRC = nullptr;
 static bool InitOpenGL(HWND hWnd);
 static void ShutdownOpenGL();
 
-// Simple window procedure that handles paint/resize/close.
+// Store a pointer to the Viewer instance in the GWLP_USERDATA so we can
+// forward mouse messages to it.
 static LRESULT CALLBACK SimpleWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    Viewer* viewer = reinterpret_cast<Viewer*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
     switch (msg)
     {
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_MOUSEMOVE:
+        if (viewer)
+        {
+            viewer->handleMouseMessage(msg, wParam, lParam);
+        }
+        break;
+
     case WM_CLOSE:
         DestroyWindow(hWnd);
         return 0;
@@ -28,8 +41,10 @@ static LRESULT CALLBACK SimpleWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
         return 0;
 
     default:
-        return DefWindowProc(hWnd, msg, wParam, lParam);
+        break;
     }
+
+    return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 Viewer::Viewer(const std::string& title, int width, int height)
@@ -37,6 +52,61 @@ Viewer::Viewer(const std::string& title, int width, int height)
     , m_width(width)
     , m_height(height)
 {
+}
+
+// Update scene rotation based on simple yaw/pitch driven by left mouse drag.
+void Viewer::handleMouseMessage(unsigned int msg, unsigned long long wParam, long long lParam)
+{
+    const int x = GET_X_LPARAM(lParam);
+    const int y = GET_Y_LPARAM(lParam);
+
+    switch (msg)
+    {
+    case WM_LBUTTONDOWN:
+        m_leftDown = true;
+        m_lastX = x;
+        m_lastY = y;
+        break;
+    case WM_LBUTTONUP:
+        m_leftDown = false;
+        break;
+    case WM_MOUSEMOVE:
+        if (m_leftDown)
+        {
+            const int dx = x - m_lastX;
+            const int dy = y - m_lastY;
+
+            m_lastX = x;
+            m_lastY = y;
+
+            // Sensitivity factor for rotation.
+            const float sensitivity = 0.25f;
+            m_yaw   += dx * sensitivity;
+            m_pitch += dy * sensitivity;
+
+            // Clamp pitch to avoid gimbal lock.
+            //if (m_pitch > 89.0f)  m_pitch = 89.0f;
+            //if (m_pitch < -89.0f) m_pitch = -89.0f;
+
+            const float degToRad = 3.1415926535f / 180.0f;
+            const float cy = cosf(m_yaw * degToRad);
+            const float sy = sinf(m_yaw * degToRad);
+            const float cp = cosf(m_pitch * degToRad);
+            const float sp = sinf(m_pitch * degToRad);
+
+            // Row-major 4x4 rotation matrix R = R_yaw * R_pitch.
+            Mat4 rot;
+            rot.m[0] = cy;  rot.m[1] = 0.0f; rot.m[2]  = sy;  rot.m[3]  = 0.0f;
+            rot.m[4] = sy*sp; rot.m[5] = cp;  rot.m[6]  = -cy*sp; rot.m[7]  = 0.0f;
+            rot.m[8] = -sy*cp; rot.m[9] = sp;  rot.m[10] = cy*cp; rot.m[11] = 0.0f;
+            rot.m[12] = 0.0f; rot.m[13] = 0.0f; rot.m[14] = 0.0f; rot.m[15] = 1.0f;
+
+            m_sceneMatrix = rot;
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void Viewer::run()
@@ -71,6 +141,9 @@ void Viewer::run()
 
     if (!hWnd)
         return;
+
+    // Associate this Viewer instance with the window for input handling.
+    SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
     // Initialize OpenGL context.
     if (!InitOpenGL(hWnd))
@@ -111,44 +184,82 @@ void Viewer::run()
 
         // Setup basic viewport and clear.
         glViewport(0, 0, width, height);
-        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+        glClearColor(0.f, 0.1f, 0.15f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Enable depth test for 3D if needed.
+
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadMatrixf(m_sceneMatrix.m);
         glEnable(GL_DEPTH_TEST);
+
+		m_render.renderScene();
+
+        glBegin(GL_QUADS);
+
+        // +X face (red)
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f( 1.0f, -1.0f, -1.0f);
+        glVertex3f( 1.0f,  1.0f, -1.0f);
+        glVertex3f( 1.0f,  1.0f,  1.0f);
+        glVertex3f( 1.0f, -1.0f,  1.0f);
+
+        // -X face (green)
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(-1.0f, -1.0f,  1.0f);
+        glVertex3f(-1.0f,  1.0f,  1.0f);
+        glVertex3f(-1.0f,  1.0f, -1.0f);
+        glVertex3f(-1.0f, -1.0f, -1.0f);
+
+        // +Y face (blue)
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(-1.0f,  1.0f, -1.0f);
+        glVertex3f( 1.0f,  1.0f, -1.0f);
+        glVertex3f( 1.0f,  1.0f,  1.0f);
+        glVertex3f(-1.0f,  1.0f,  1.0f);
+
+        // -Y face (yellow)
+        glColor3f(1.0f, 1.0f, 0.0f);
+        glVertex3f(-1.0f, -1.0f,  1.0f);
+        glVertex3f( 1.0f, -1.0f,  1.0f);
+        glVertex3f( 1.0f, -1.0f, -1.0f);
+        glVertex3f(-1.0f, -1.0f, -1.0f);
+
+        // +Z face (cyan)
+        glColor3f(0.0f, 1.0f, 1.0f);
+        glVertex3f(-1.0f, -1.0f,  1.0f);
+        glVertex3f(-1.0f,  1.0f,  1.0f);
+        glVertex3f( 1.0f,  1.0f,  1.0f);
+        glVertex3f( 1.0f, -1.0f,  1.0f);
+
+        // -Z face (magenta)
+        glColor3f(1.0f, 0.0f, 1.0f);
+        glVertex3f( 1.0f, -1.0f, -1.0f);
+        glVertex3f( 1.0f,  1.0f, -1.0f);
+        glVertex3f(-1.0f,  1.0f, -1.0f);
+        glVertex3f(-1.0f, -1.0f, -1.0f);
+
+        glEnd();
 
         // Call user render callback if set.
         if (m_renderCallback)
         {
-            m_renderCallback(width, height);
+            m_renderCallback(width, height, m_sceneMatrix);
         }
-        else
-        {
-            // Simple placeholder: draw a colored quad using fixed function.
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
 
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-
-            glBegin(GL_QUADS);
-            glColor3f(1.0f, 0.0f, 0.0f);
-            glVertex2f(-0.5f, -0.5f);
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex2f( 0.5f, -0.5f);
-            glColor3f(0.0f, 0.0f, 1.0f);
-            glVertex2f( 0.5f,  0.5f);
-            glColor3f(1.0f, 1.0f, 0.0f);
-            glVertex2f(-0.5f,  0.5f);
-            glEnd();
-        }
+        
 
         SwapBuffers(g_hDC);
     }
 
     ShutdownOpenGL();
 }
+
+void Viewer::setMesh(Mesh* mesh)
+{
+    m_render.
+}
+
 
 // --- OpenGL setup/teardown ---
 

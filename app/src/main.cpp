@@ -13,7 +13,7 @@ int main()
     Circle circle;
 
     // 2. Sample into scalar field
-    int dimx = 64;
+    int dimx = 20;
     int dimy = dimx;
     ScalarField<2> field({ dimx, dimy});
     // Fill field with 1.f inside the sphere and 0.f outside
@@ -45,38 +45,8 @@ int main()
     // Example: render callback that renders the extracted mesh using
     // legacy fixed-function OpenGL. This keeps things simple while
     // wiring data flow from marching cubes to the GPU.
-    viewer.setRenderCallback([&](int w, int h)
-        {
-            if (h == 0) h = 1;
-
-            glViewport(0, 0, w, h);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            // Projection
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(-2, 2, -2, 2, -2, 2);
-
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-
-            // Draw mesh
-            glBegin(GL_LINES);
-            for (size_t i = 0; i < mesh.indices.size(); i += 3)
-            {
-                const auto& v0 = mesh.vertices[mesh.indices[i]];
-                const auto& v1 = mesh.vertices[mesh.indices[i + 1]];
-                const auto& v2 = mesh.vertices[mesh.indices[i + 2]];
-
-                glVertex3f(v0[0], v0[1], 0.f);
-                glVertex3f(v1[0], v1[1], 0.f);
-                glVertex3f(v0[0], v0[1], 0.f);
-                glVertex3f(v2[0], v2[1], 0.f);
-                glVertex3f(v1[0], v1[1], 0.f);
-                glVertex3f(v2[0], v2[1], 0.f);
-            }
-            glEnd();
-        });
+    
+    viewer.
 
     viewer.run();
     return 0;

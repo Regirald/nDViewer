@@ -3,6 +3,21 @@
 #include <string>
 #include <functional>
 
+#include "RenderingManager.h"
+
+
+// Simple 4x4 float matrix for scene transforms.
+struct Mat4
+{
+    float m[16] = {
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+    };
+};
+class Mesh;
+
 class Viewer
 {
 public:
@@ -11,15 +26,25 @@ public:
     // Main loop – blocks until the user closes the window.
     void run();
 
-    // Set a render callback that is called every frame.
-    // The callback receives the current window width/height.
-    using RenderCallback = std::function<void(int width, int height)>;
-    void setRenderCallback(RenderCallback cb) { m_renderCallback = std::move(cb); }
+    void setMesh(Mesh* mesh);
+
+    // Handle raw mouse messages from the window procedure.
+    void handleMouseMessage(unsigned int msg, unsigned long long wParam, long long lParam);
 
 private:
     std::string m_title;
     int m_width;
     int m_height;
 
-    RenderCallback m_renderCallback;
+    // Scene rotation matrix updated from mouse input.
+    Mat4 m_sceneMatrix;
+
+    // Simple track of mouse dragging for rotation.
+    bool m_leftDown = false;
+    int  m_lastX    = 0;
+    int  m_lastY    = 0;
+    float m_yaw     = 0.0f;
+    float m_pitch   = 0.0f;
+
+    RendingManager m_render;
 };

@@ -139,11 +139,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="RenderingManager.cpp" />
+    <ClCompile Include="RenderMesh.cpp" />
+    <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\view\Camera.h" />
     <ClInclude Include="include\view\GLMeshRenderer.h" />
+    <ClInclude Include="include\view\RenderingManager.h" />
+    <ClInclude Include="include\view\RenderMesh.h" />
+    <ClInclude Include="include\view\Render.h" />
     <ClInclude Include="include\view\Viewer.h" />
     <ClInclude Include="include\view\VolumeRenderer.h" />
   </ItemGroup>
