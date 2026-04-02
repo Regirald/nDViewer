@@ -11,6 +11,7 @@ class RenderingManager
 public:
 	void renderScene();
 	void setMesh(Mesh<2>* mesh);
+	void setBackground();
 
 	std::vector<Render*> renderContainer;
 };
