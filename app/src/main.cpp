@@ -8,8 +8,10 @@
 #include <gl/GL.h>
 #include <QApplication>
 
-int main(int argc, char *argv[])
+int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 {
+    int argc = __argc;
+    char **argv = __argv;
     QApplication app(argc, argv);
 
     // 1. Create implicit model (placeholder for your computer vision source)
