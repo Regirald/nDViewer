@@ -3,16 +3,67 @@
 #include <Windows.h>
 #include <gl/GL.h>
 
-#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include <vector>
+
+#include <QOpenGLShaderProgram>
+#include <QVector2D>
+#include <QVector3D>
 
 namespace
 {
+    QOpenGLShaderProgram& BackgroundProgram()
+    {
+        static QOpenGLShaderProgram program;
+        static bool initialized = false;
+        if (initialized)
+        {
+            return program;
+        }
+
+        initialized = true;
+        const char* vertexSource =
+            "#version 120\n"
+            "void main()\n"
+            "{\n"
+            "    gl_Position = vec4(gl_Vertex.xy, 0.0, 1.0);\n"
+            "}\n";
+
+        const char* fragmentSource =
+            "#version 120\n"
+            "uniform vec3 u_axis;\n"
+            "uniform vec2 u_resolution;\n"
+            "uniform float u_base;\n"
+            "uniform float u_scale;\n"
+            "void main()\n"
+            "{\n"
+            "    vec2 uv = gl_FragCoord.xy / u_resolution;\n"
+            "    float r = clamp(u_base + u_scale * (u_axis.x * uv.x + (1.0 - u_axis.x) * uv.y), 0.0, 1.0);\n"
+            "    float g = clamp(u_base + u_scale * (u_axis.y * uv.y + (1.0 - u_axis.y) * uv.x), 0.0, 1.0);\n"
+            "    float b = clamp(u_base + u_scale * (u_axis.z * (1.0 - uv.x) + (1.0 - u_axis.z) * (1.0 - uv.y)), 0.0, 1.0);\n"
+            "    gl_FragColor = vec4(r, g, b, 1.0);\n"
+            "}\n";
+
+        program.addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
+        program.addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
+        program.link();
+
+        return program;
+    }
+
+    void DrawFullscreenQuad()
+    {
+        glBegin(GL_TRIANGLE_STRIP);
+        glVertex2f(-1.0f, -1.0f);
+        glVertex2f(1.0f, -1.0f);
+        glVertex2f(-1.0f, 1.0f);
+        glVertex2f(1.0f, 1.0f);
+        glEnd();
+    }
+
     GLuint EnsureFontListBase()
     {
         static GLuint listBase = 0;
@@ -87,61 +138,39 @@ void RenderBackground::render(const ndv::RenderContext& context)
         lastTime = now;
     }
 
-    GLfloat modelView[16] = {};
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelView);
-
-    GLint viewport[4] = {};
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    const int width = viewport[2];
-    const int height = viewport[3];
+    const int width = context.viewportWidth;
+    const int height = context.viewportHeight;
     if (width <= 0 || height <= 0)
     {
         return;
     }
 
-    const float axisX = std::fabs(modelView[2]);
-    const float axisY = std::fabs(modelView[6]);
-    const float axisZ = std::fabs(modelView[10]);
+    const float axisX = std::fabs(context.view.m[2]);
+    const float axisY = std::fabs(context.view.m[6]);
+    const float axisZ = std::fabs(context.view.m[10]);
 
     const float base = 0.1f;
     const float scale = 0.8f;
 
-    std::vector<GLubyte> pixels(static_cast<size_t>(width) * static_cast<size_t>(height) * 3u);
-    for (int y = 0; y < height; ++y)
+    QOpenGLShaderProgram& program = BackgroundProgram();
+    if (!program.isLinked())
     {
-        const float ny = static_cast<float>(y) / static_cast<float>(height - 1);
-        for (int x = 0; x < width; ++x)
-        {
-            const float nx = static_cast<float>(x) / static_cast<float>(width - 1);
-            const float r = std::clamp(base + scale * (axisX * nx + (1.0f - axisX) * ny), 0.0f, 1.0f);
-            const float g = std::clamp(base + scale * (axisY * ny + (1.0f - axisY) * nx), 0.0f, 1.0f);
-            const float b = std::clamp(base + scale * (axisZ * (1.0f - nx) + (1.0f - axisZ) * (1.0f - ny)), 0.0f, 1.0f);
-
-            const size_t index = (static_cast<size_t>(y) * static_cast<size_t>(width) + static_cast<size_t>(x)) * 3u;
-            pixels[index] = static_cast<GLubyte>(r * 255.0f);
-            pixels[index + 1] = static_cast<GLubyte>(g * 255.0f);
-            pixels[index + 2] = static_cast<GLubyte>(b * 255.0f);
-        }
+        return;
     }
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glRasterPos2f(-1.0f, -1.0f);
-    glDrawPixels(width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+    program.bind();
+    program.setUniformValue("u_axis", QVector3D(axisX, axisY, axisZ));
+    program.setUniformValue("u_resolution", QVector2D(static_cast<float>(width), static_cast<float>(height)));
+    program.setUniformValue("u_base", base);
+    program.setUniformValue("u_scale", scale);
+    DrawFullscreenQuad();
+    program.release();
     std::ostringstream fpsText;
     fpsText << "FPS: " << std::fixed << std::setprecision(1) << fps;
     DrawText2D(-0.95f, 0.9f, fpsText.str());
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
     glEnable(GL_DEPTH_TEST);
 }

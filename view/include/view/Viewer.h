@@ -5,19 +5,8 @@
 #include <QOpenGLWidget>
 #include <QTimer>
 
+#include "Camera/Camera.h"
 #include "Renderer/RenderingManager.h"
-
-
-// Simple 4x4 float matrix for scene transforms.
-struct Mat4
-{
-    float m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
-};
 
 class Viewer : public QOpenGLWidget
 {
@@ -36,8 +25,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
-    // Scene rotation matrix updated from mouse input.
-    Mat4 m_sceneMatrix;
+    void updateCameraFromOrbit();
 
     // Simple track of mouse dragging for rotation.
     bool m_leftDown = false;
@@ -47,8 +35,11 @@ private:
     float m_yaw     = 0.0f;
     float m_pitch   = 0.0f;
     float m_zoom    = 1.0f;
+    float m_baseDistance = 3.0f;
 
-    RenderingManager m_render;
+    ndv::Camera m_camera;
+
+    RenderingManager renderingManager;
 
     QTimer m_updateTimer;
 

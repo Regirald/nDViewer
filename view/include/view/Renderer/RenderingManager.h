@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 #include "Renderer.h"
 #include "Renderer/RenderContext.h"
@@ -20,8 +21,7 @@ public:
 
 	ndv::RenderContext& context();
 
-    std::vector<Renderer*> renderContainer;
-
 private:
+    std::vector<std::unique_ptr<Renderer>> renderContainer;
 	ndv::RenderContext m_context;
 };

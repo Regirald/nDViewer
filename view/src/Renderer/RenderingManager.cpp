@@ -3,23 +3,22 @@
 #include "RenderBackground.h"
 #include "Renderer/ExampleTriangleRenderer.h"
 
+#include <memory>
+
 
 void RenderingManager::setMesh(Mesh<2>* mesh)
 {
-    Renderer* render = new RenderMesh<2>(mesh);
-	renderContainer.push_back(render);
+    renderContainer.push_back(std::make_unique<RenderMesh<2>>(mesh));
 }
 
 void RenderingManager::setBackground()
 {
-    Renderer* render = new RenderBackground();
-	renderContainer.push_back(render);
+    renderContainer.push_back(std::make_unique<RenderBackground>());
 }
 
 void RenderingManager::setExampleTriangle()
 {
-    Renderer* render = new ndv::ExampleTriangleRenderer();
-	renderContainer.push_back(render);
+    renderContainer.push_back(std::make_unique<ndv::ExampleTriangleRenderer>());
 }
 
 void RenderingManager::setViewport(int width, int height)
@@ -48,8 +47,8 @@ ndv::RenderContext& RenderingManager::context()
 
 void RenderingManager::renderScene()
 {
-    for (Renderer* render : renderContainer)
+    for (const auto& render : renderContainer)
 	{
-       render->render(m_context);
+		render->render(m_context);
 	}
 }
