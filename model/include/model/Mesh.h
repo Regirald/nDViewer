@@ -5,7 +5,8 @@
 // Simple triangle mesh holding positions only. For Dim != 3 this is just
 // a generic container; for Dim == 3 we will interpret it as a 3D surface.
 template <size_t Dim>
-struct Mesh {
+class Mesh {
+public:
     void clear()
     {
         vertices.clear();

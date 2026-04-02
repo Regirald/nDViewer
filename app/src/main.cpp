@@ -6,9 +6,12 @@
 #include "view/Viewer.h"
 #include <Windows.h>
 #include <gl/GL.h>
+#include <QApplication>
 
-int main()
+int main(int argc, char *argv[])
 {
+    QApplication app(argc, argv);
+
     // 1. Create implicit model (placeholder for your computer vision source)
     Circle circle;
 
@@ -40,7 +43,7 @@ int main()
     Mesh<2> mesh = MarchingSquares::extract(field, 0.f);
 
     // 4. Open a window dedicated to computer vision visualization
-    Viewer viewer("Computer Vision Viewer", 720, 720);
+    Viewer viewer;
 
     // Example: render callback that renders the extracted mesh using
     // legacy fixed-function OpenGL. This keeps things simple while
@@ -48,6 +51,6 @@ int main()
     
 	viewer.setMesh(&mesh);
 
-    viewer.run();
-    return 0;
+    viewer.show();
+    return app.exec(); // Qt event loop
 }
