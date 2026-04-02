@@ -1,0 +1,462 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" FontFamily="Segoe UI" FontSize="12">
+  <FlowDocument.Tag><![CDATA[{
+  "timestamp": "2026-04-02 18:37:04",
+  "files": {
+    "C:\\Users\\leblo\\source\\repos\\nDViewer\\view\\view.vcxproj": {
+      "before": "7Vltb9s2EO7nAfsLgyGkSPLBViy/L7KK1smCYE4axG3yJUBBSWdbrSQKFJUma/cf9pN3lEjJ8lujdl23NvlgROQdeTzePffCv3558sR8dhf4tVtgsUfDodZsHGg1CB3qeuFsqCV8Wu9rz6yffzIvGH0LDq8dwZQkPn9F2Ax4PNReJJ7vajVcJcSvOefRr7oeO3MISNwIPIfRmE55w6GB7sIt+DQCpgexLdh04+CgpeHqtZp5yiE4YTSJamNigz/U5IYjGk69WcIIRwHjjBjJ183WTkPHT1wYakdgJ7OP117YMhQH8pSWslIaUy8PClHEn3nhEz6lLLDSRUw9/84ocCDTxzr2Twh3CT6QGD4hnqT6FgJm2rvrtr9Ud7jEV9HcNtEerLeKwpl6bqGZwaIBoCnz+5LRnvjUJn5hplcjaSdXmYdZzX7jwNRXhqVV/Q737ylzM6MTnKauhiSFXO4k8VzrQ2/aHPQN0q93XLtdb5Nuq253Ok6922q7dq/Tctuk82duqimPXOaSUn5OAogj4oB168F7Uy+PSUI0f5e+jzN3V06QH+ZAHGYriVgmlaDQlfT3IKKM1+R5htrO3tVIgsoF4fP9m7McO0ZR1JCw04hQ67FW09fdAfqi6wmYGGq7O3slz9z/uLOnpN/fHQ53FxBiV1OQU2JRxl+GjVf3EVjPo8j3nBSRlvwznZaqex1DusvYsxlhHsQWZwmY+uq4ZFACvqLUj4Fbt812p/AfNSqJR3PCiMOBTZDydeghZOPapdGNukelF9dRq6K2Enb9e4qbok/9Y5q7nlMfUAUzRoKXEfcC74/0KuX1bJz+porPMbm60iccj+dkVnj/g9orgn11xX2um38v1npaDaLL0Jwxl4Lj8R2HUOSZCFkc80sZJjGyphultIvBocQ8QbwDNwPlh3EolJvMATNVrRLOlcJDKhOGsVV9IJQzETaPPLYcsBbiTSNBMhW5FtAW7ryYx3sYqyqvs7ufB60xdYiPpnpEOFERJA+QD1LtlyhqKSA8qiqvVTakHCkSPapps5qURX1/ilJ+VsI14fpnRJTJudOKQgPzXS9Mk9mMegE2quW2ytRG/ogGkeeDHEA8uyYsRBgei7LcSn9bmM0vDmYpD5JOjsajOTjvZI6Uf+YEFwwQ/x2IY8oK2WPr+vS8ZRy+OTp+8frk8M3o5fnk5fj48OneBvp9USusXynfSmTpWJmT0IEzTHqlSMujOfmYhLOEzADToNAlWFzF3HWiyMDKZWUqY8IcaUlZ5tgL3xWKmyT25D7GW7Jw1xizSVMvhvKNTyAEbFtkRcBpJrOoTqTAG6eVEPmeWelZaHUxUH6hqShnS7scu0XJs3T+asbyWxI64qCpSYlToJHJQ6+dyjV2GnLmYYbgKDJVMq2ZyJlyW8yqq/wzJ9hkUJlpnj+a5n/TNBcqnm+MYf8v9EJffe5mfRDiy44o5qfYu6VpEwIT06x1KZJWL+uY3ogO0OHO3oT6ifBcMTWiDG7k/NKUgF1/w9yYzjxHzZn6VlEU0v1wcFvKbZZP/12C7SPMfsUMoEgI0Hakd1/CFBi+5EDxKtJo3DjCqcVP49a5w4TtrQr5BaP1od8iLrQHdr1HDAPbyn23bjv436A7bR/Ybtc2FtvKCpzVi0i+sZrYKpCfwkX6u02kloFPRf2pU2/3oFNvY6u7TgakXR+QTtPude1uv9ksOt1q588TKUjRLf3dJpLR67gAzUG91zdQrmmvWbeNHmAvvtkySMuwBx3noSKtPC6U3xrwcnKQKK7zEkIXMF+anZEQ81vWwKxW1RDbOM4gnn+aNmbOTbbDw2ivMIKUZXjIoWR8Kg61GJBuRvhCwUhjXjrVdpaTsTheJjiKU4V1RZ/VmVPVVmerJKZUdJVdrjCsB7CqlNUbqtbx49kjsLoe2SArlbd5z0++7axv4OVvVNbf",
+      "after": "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"
+    }
+  }
+}]]></FlowDocument.Tag>
+  <Section Margin="0,24" TextAlignment="Center">
+    <Paragraph FontSize="24" FontWeight="Bold" Margin="12,0">
+      <LineBreak />
+      <Span Foreground="Gray">Qt Visual Studio Tools</Span>
+    </Paragraph>
+    <Paragraph FontSize="42" Margin="12,0" FontWeight="Bold">
+      <Span TextDecorations="Underline">Project Format Conversion</Span>
+    </Paragraph>
+    <Paragraph Margin="12,8" FontSize="18">
+      <Span>Report generated on 2026-04-02 18:37:04</Span>
+    </Paragraph>
+  </Section>
+  <Section>
+    <Paragraph FontSize="32" FontWeight="Bold" Margin="12,0">
+      <Span>Files</Span>
+    </Paragraph>
+    <Paragraph Margin="24,12,0,0">
+      <Span FontFamily="Consolas" FontSize="14" Background="WhiteSmoke"><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+      <LineBreak />
+      <Hyperlink NavigateUri="file://C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj?before">[Before]</Hyperlink>
+      <Hyperlink NavigateUri="file://C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj?after">[After]</Hyperlink>
+      <Hyperlink NavigateUri="file://C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj?diff&amp;before&amp;after">
+                        [Diff before/after]
+                    </Hyperlink>
+      <Hyperlink NavigateUri="file://C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj?diff&amp;before&amp;current">
+                        [Diff before/current]
+                    </Hyperlink>
+      <Hyperlink NavigateUri="file://C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj?diff&amp;after&amp;current">
+                        [Diff after/current]
+                    </Hyperlink>
+      <LineBreak />
+    </Paragraph>
+  </Section>
+  <Section>
+    <Paragraph FontSize="32" FontWeight="Bold" Margin="12,0">
+      <Span>Changes</Span>
+    </Paragraph>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Converting custom build steps to Qt/MSBuild items]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span><![CDATA[      ]]></Span><Span Background="LightCoral"><![CDATA[<AdditionalIncludeDirectories>$]]></Span><Span><![CDATA[(ProjectDir)include\view;$(SolutionDir)Core\include;$(SolutionDir)Model\include;$(SolutionDir)Logic\include</AdditionalIncludeDirectories>]]></Span>
+            </Paragraph>
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span><![CDATA[      ]]></Span><Span Background="LightGreen"><![CDATA[<AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$]]></Span><Span><![CDATA[(ProjectDir)include\view;$(SolutionDir)Core\include;$(SolutionDir)Model\include;$(SolutionDir)Logic\include</AdditionalIncludeDirectories>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Enabling multi-processor compilation]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[      <MultiProcessorCompilation>true</MultiProcessorCompilation>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[      <MultiProcessorCompilation>true</MultiProcessorCompilation>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[      <MultiProcessorCompilation>true</MultiProcessorCompilation>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[      <MultiProcessorCompilation>true</MultiProcessorCompilation>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Project format version]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[    <Keyword>QtVS_v304</Keyword>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Fallback for QTMSBUILD environment variable]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Default Qt properties]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  <Import Project="$(QtMsBuild)\qt_defaults.props" Condition="Exists('$(QtMsBuild)\qt_defaults.props')" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Qt build settings]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Warn if Qt/MSBuild is not found]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  </Target>]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Qt property sheet]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[    <Import Project="$(QtMsBuild)\Qt.props" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[    <Import Project="$(QtMsBuild)\Qt.props" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[    <Import Project="$(QtMsBuild)\Qt.props" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[    <Import Project="$(QtMsBuild)\Qt.props" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+    <Paragraph FontSize="20" FontWeight="Bold" Margin="12">
+      <Span><![CDATA[🡺 Qt targets]]></Span>
+    </Paragraph>
+    <Table CellSpacing="0" BorderBrush="Gray" BorderThickness="0.5">
+      <Table.Columns>
+        <TableColumn />
+        <TableColumn />
+      </Table.Columns>
+      <TableRowGroup>
+        <TableRow Background="Orange">
+          <TableCell ColumnSpan="2" BorderThickness="0.5" BorderBrush="Gray">
+            <Paragraph Margin="10,5" FontWeight="Bold">
+              <Span><![CDATA[C:\Users\leblo\source\repos\nDViewer\view\view.vcxproj]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell ColumnSpan="2" Background="WhiteSmoke" BorderBrush="Gray" BorderThickness="0.5" />
+        </TableRow>
+        <TableRow>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0" />
+          </TableCell>
+          <TableCell BorderThickness="0, 0, 0.5, 0" BorderBrush="Gray">
+            <Paragraph FontFamily="Consolas" Margin="4, 0">
+              <Span Background="LightGreen"><![CDATA[  <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />]]></Span>
+            </Paragraph>
+          </TableCell>
+        </TableRow>
+      </TableRowGroup>
+    </Table>
+  </Section>
+  <Section>
+    <Paragraph />
+  </Section>
+</FlowDocument>
+<!--awnd90tl0DxqMTLix3Yc7FD+7cf/VXjqn0evRkbZRZo=-->

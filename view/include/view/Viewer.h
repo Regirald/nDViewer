@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <functional>
+
+#include <QOpenGLWidget>
 
 #include "RenderingManager.h"
 
@@ -17,24 +18,23 @@ struct Mat4
     };
 };
 
-class Viewer
+class Viewer : public QOpenGLWidget
 {
 public:
-    Viewer(const std::string& title, int width, int height);
-
-    // Main loop – blocks until the user closes the window.
-    void run();
+    explicit Viewer(QWidget* parent = nullptr);
 
     void setMesh(Mesh<2>* mesh);
 
-    // Handle raw mouse messages from the window procedure.
-    void handleMouseMessage(unsigned int msg, unsigned long long wParam, long long lParam);
+protected:
+    void initializeGL() override;
+    void resizeGL(int w, int h) override;
+    void paintGL() override;
+
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
-    std::string m_title;
-    int m_width;
-    int m_height;
-
     // Scene rotation matrix updated from mouse input.
     Mat4 m_sceneMatrix;
 
