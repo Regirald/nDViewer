@@ -40,10 +40,12 @@ private:
 
     // Simple track of mouse dragging for rotation.
     bool m_leftDown = false;
+    bool m_rightDown = false;
     int  m_lastX    = 0;
     int  m_lastY    = 0;
     float m_yaw     = 0.0f;
     float m_pitch   = 0.0f;
+    float m_zoom    = 1.0f;
 
     RenderingManager m_render;
 };

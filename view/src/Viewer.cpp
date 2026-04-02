@@ -25,6 +25,8 @@ static LRESULT CALLBACK SimpleWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
     {
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
     case WM_MOUSEMOVE:
         if (viewer)
         {
@@ -59,7 +61,7 @@ Viewer::Viewer(const std::string& title, int width, int height)
 void Viewer::handleMouseMessage(unsigned int msg, unsigned long long wParam, long long lParam)
 {
     const int x = GET_X_LPARAM(lParam);
-    const int y = GET_Y_LPARAM(lParam);
+    const int y = -GET_Y_LPARAM(lParam);
 
     switch (msg)
     {
@@ -71,8 +73,16 @@ void Viewer::handleMouseMessage(unsigned int msg, unsigned long long wParam, lon
     case WM_LBUTTONUP:
         m_leftDown = false;
         break;
+    case WM_RBUTTONDOWN:
+        m_rightDown = true;
+        m_lastX = x;
+        m_lastY = y;
+        break;
+    case WM_RBUTTONUP:
+        m_rightDown = false;
+        break;
     case WM_MOUSEMOVE:
-        if (m_leftDown)
+        if (m_leftDown || m_rightDown)
         {
             const int dx = x - m_lastX;
             const int dy = y - m_lastY;
@@ -80,10 +90,19 @@ void Viewer::handleMouseMessage(unsigned int msg, unsigned long long wParam, lon
             m_lastX = x;
             m_lastY = y;
 
-            // Sensitivity factor for rotation.
-            const float sensitivity = 0.25f;
-            m_yaw   += dx * sensitivity;
-            m_pitch += dy * sensitivity;
+            if (m_leftDown)
+            {
+                // Sensitivity factor for rotation.
+                const float sensitivity = 0.25f;
+                m_yaw   += dx * sensitivity;
+                m_pitch += dy * sensitivity;
+            }
+            else if (m_rightDown)
+            {
+                const float zoomSensitivity = 0.01f;
+                m_zoom += dy * zoomSensitivity;
+                if (m_zoom < 0.01f) m_zoom = 0.01f;
+            }
 
             // Clamp pitch to avoid gimbal lock.
             //if (m_pitch > 89.0f)  m_pitch = 89.0f;
@@ -95,11 +114,11 @@ void Viewer::handleMouseMessage(unsigned int msg, unsigned long long wParam, lon
             const float cp = cosf(m_pitch * degToRad);
             const float sp = sinf(m_pitch * degToRad);
 
-            // Row-major 4x4 rotation matrix R = R_yaw * R_pitch.
+            // Row-major 4x4 rotation matrix R = R_yaw * R_pitch * Zoom
             Mat4 rot;
-            rot.m[0] = cy;  rot.m[1] = 0.0f; rot.m[2]  = sy;  rot.m[3]  = 0.0f;
-            rot.m[4] = sy*sp; rot.m[5] = cp;  rot.m[6]  = -cy*sp; rot.m[7]  = 0.0f;
-            rot.m[8] = -sy*cp; rot.m[9] = sp;  rot.m[10] = cy*cp; rot.m[11] = 0.0f;
+            rot.m[0] = cy * m_zoom;  rot.m[1] = 0.0f; rot.m[2]  = sy * m_zoom;  rot.m[3]  = 0.0f;
+            rot.m[4] = sy*sp * m_zoom; rot.m[5] = cp * m_zoom;  rot.m[6]  = -cy*sp * m_zoom; rot.m[7]  = 0.0f;
+            rot.m[8] = -sy*cp * m_zoom; rot.m[9] = sp * m_zoom;  rot.m[10] = cy*cp * m_zoom; rot.m[11] = 0.0f;
             rot.m[12] = 0.0f; rot.m[13] = 0.0f; rot.m[14] = 0.0f; rot.m[15] = 1.0f;
 
             m_sceneMatrix = rot;
@@ -183,10 +202,9 @@ void Viewer::run()
         int height = rect.bottom - rect.top;
         if (height <= 0) height = 1;
 
-        // Setup basic viewport and clear.
+        // Setup basic viewport and clear depth (background renderer clears color).
         glViewport(0, 0, width, height);
-        glClearColor(0.f, 0.1f, 0.15f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
 
 
