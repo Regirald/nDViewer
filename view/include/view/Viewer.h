@@ -46,4 +46,7 @@ private:
     float m_pitch   = 0.0f;
 
     RenderingManager m_render;
+
+    // Cached frames-per-second counter for on-screen display.
+    float m_fps = 0.0f;
 };

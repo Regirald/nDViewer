@@ -158,6 +158,16 @@ void Viewer::run()
     // Main loop: pump messages and render when idle.
     MSG msg = {};
     bool running = true;
+
+    // High-resolution timer for FPS measurement.
+    LARGE_INTEGER perfFreq = {};
+    LARGE_INTEGER lastTime = {};
+    QueryPerformanceFrequency(&perfFreq);
+    QueryPerformanceCounter(&lastTime);
+
+    double accumTime = 0.0;
+    int    frameCount = 0;
+
     while (running)
     {
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -241,11 +251,44 @@ void Viewer::run()
 
         glEnd();
 
-
-
-        
-
         SwapBuffers(g_hDC);
+
+        // --- FPS measurement and simple on-screen text rendering ---
+        LARGE_INTEGER now;
+        QueryPerformanceCounter(&now);
+        double delta = static_cast<double>(now.QuadPart - lastTime.QuadPart) /
+                       static_cast<double>(perfFreq.QuadPart);
+        lastTime = now;
+
+        accumTime += delta;
+        ++frameCount;
+
+        // Update FPS once per second to avoid flicker.
+        if (accumTime >= 1.0)
+        {
+            m_fps = static_cast<float>(frameCount / accumTime);
+            accumTime = 0.0;
+            frameCount = 0;
+        }
+
+        // Draw FPS in the top-left corner using GDI over the backbuffer.
+        if (m_fps > 0.0f)
+        {
+            // Get a window DC; for simplicity we use a short-lived HDC here.
+            HDC hdc = GetDC(hWnd);
+            if (hdc)
+            {
+                SetBkMode(hdc, TRANSPARENT);
+                SetTextColor(hdc, RGB(255, 255, 255));
+
+                char buffer[64];
+                sprintf_s(buffer, sizeof(buffer), "FPS: %.1f", m_fps);
+
+                TextOutA(hdc, 8, 8, buffer, static_cast<int>(strlen(buffer)));
+
+                ReleaseDC(hWnd, hdc);
+            }
+        }
     }
 
     ShutdownOpenGL();
