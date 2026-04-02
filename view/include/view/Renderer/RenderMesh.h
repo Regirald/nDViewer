@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Render.h"
+#include "Renderer/Renderer.h"
 #include "model/Mesh.h"
 
 template <size_t Dim>
-class RenderMesh : public Render
+class RenderMesh : public Renderer
 {
 public:
 	RenderMesh(Mesh<Dim>* mesh) { m_mesh = mesh; }
-	void render() override;
+ void render(const ndv::RenderContext& context) override;
 
 	Mesh<Dim>* m_mesh;
 };

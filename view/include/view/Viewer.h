@@ -5,7 +5,7 @@
 #include <QOpenGLWidget>
 #include <QTimer>
 
-#include "RenderingManager.h"
+#include "Renderer/RenderingManager.h"
 
 
 // Simple 4x4 float matrix for scene transforms.

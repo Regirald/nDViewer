@@ -30,6 +30,7 @@ void Viewer::resizeGL(int w, int h)
         h = 1;
 
     glViewport(0, 0, w, h);
+    m_render.setViewport(w, h);
 }
 
 void Viewer::paintGL()

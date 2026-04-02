@@ -1,5 +1,8 @@
 #include "RenderBackground.h"
 
+#include <Windows.h>
+#include <gl/GL.h>
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -68,7 +71,7 @@ namespace
     }
 }
 
-void RenderBackground::render()
+void RenderBackground::render(const ndv::RenderContext& context)
 {
     static auto lastTime = std::chrono::steady_clock::now();
     static int frameCount = 0;

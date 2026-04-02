@@ -1,9 +1,13 @@
 #include "RenderMesh.h"
 
+#include <Windows.h>
+#include <gl/GL.h>
+
 
 template<size_t Dim>
-void RenderMesh<Dim>::render()
+void RenderMesh<Dim>::render(const ndv::RenderContext& context)
 {
+    (void)context;
     // Draw m_mesh
     glBegin(GL_LINES);
     for (size_t i = 0; i < m_mesh->indices.size(); i += 3)

@@ -123,7 +123,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)include\view;$(SolutionDir)Core\include;$(SolutionDir)Model\include;$(SolutionDir)Logic\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)include\view;$(ProjectDir)include\view\Camera;$(ProjectDir)include\view\Renderer;$(SolutionDir)Core\include;$(SolutionDir)Model\include;$(SolutionDir)Logic\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -159,21 +159,23 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\view\RenderBackground.h" />
-    <ClCompile Include="RenderingManager.cpp" />
-    <ClCompile Include="RenderMesh.cpp" />
-    <ClCompile Include="src\Render.cpp" />
-    <ClCompile Include="src\RenderBackground.cpp" />
+    <ClCompile Include="src\Camera\Camera.cpp" />
+    <ClCompile Include="src\Renderer\RenderBackground.cpp" />
+    <ClCompile Include="src\Renderer\RenderingManager.cpp" />
+    <ClCompile Include="src\Renderer\RenderMesh.cpp" />
     <ClCompile Include="src\Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\view\Camera.h" />
-    <ClInclude Include="include\view\GLMeshRenderer.h" />
-    <ClInclude Include="include\view\RenderingManager.h" />
-    <ClInclude Include="include\view\RenderMesh.h" />
-    <ClInclude Include="include\view\Render.h" />
+    <ClInclude Include="include\view\Camera\Camera.h" />
+    <ClInclude Include="include\view\Renderer\ExampleTriangleRenderer.h" />
+    <ClInclude Include="include\view\Renderer\GLMeshRenderer.h" />
+    <ClInclude Include="include\view\Renderer\RenderBackground.h" />
+    <ClInclude Include="include\view\Renderer\RenderContext.h" />
+    <ClInclude Include="include\view\Renderer\Renderer.h" />
+    <ClInclude Include="include\view\Renderer\RenderingManager.h" />
+    <ClInclude Include="include\view\Renderer\RenderMesh.h" />
+    <ClInclude Include="include\view\Renderer\VolumeRenderer.h" />
     <ClInclude Include="include\view\Viewer.h" />
-    <ClInclude Include="include\view\VolumeRenderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />
