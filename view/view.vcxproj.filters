@@ -30,9 +30,6 @@
     <ClCompile Include="include\view\RenderBackground.h">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\view\RenderBackground.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\RenderBackground.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

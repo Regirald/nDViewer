@@ -6,6 +6,11 @@ Viewer::Viewer(QWidget* parent)
     : QOpenGLWidget(parent)
 {
     setMouseTracking(true);
+    m_render.setBackground();
+    // regular update of the viewer
+    m_updateTimer.setInterval(16);
+    connect(&m_updateTimer, &QTimer::timeout, this, QOverload<>::of(&Viewer::update));
+    m_updateTimer.start();
 }
 
 void Viewer::setMesh(Mesh<2>* mesh)

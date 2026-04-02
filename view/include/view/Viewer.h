@@ -3,6 +3,7 @@
 #include <string>
 
 #include <QOpenGLWidget>
+#include <QTimer>
 
 #include "RenderingManager.h"
 
@@ -48,6 +49,8 @@ private:
     float m_zoom    = 1.0f;
 
     RenderingManager m_render;
+
+    QTimer m_updateTimer;
 
     // Cached frames-per-second counter for on-screen display.
     float m_fps = 0.0f;

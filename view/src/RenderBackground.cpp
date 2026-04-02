@@ -1,11 +1,89 @@
 #include "RenderBackground.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <iomanip>
+#include <sstream>
+#include <string>
 #include <vector>
+
+namespace
+{
+    GLuint EnsureFontListBase()
+    {
+        static GLuint listBase = 0;
+        static bool initialized = false;
+        if (initialized)
+        {
+            return listBase;
+        }
+
+        initialized = true;
+        HDC hdc = wglGetCurrentDC();
+        if (!hdc)
+        {
+            return 0;
+        }
+
+        listBase = glGenLists(96);
+        HFONT font = CreateFontA(
+            -14,
+            0,
+            0,
+            0,
+            FW_NORMAL,
+            FALSE,
+            FALSE,
+            FALSE,
+            ANSI_CHARSET,
+            OUT_TT_PRECIS,
+            CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY,
+            DEFAULT_PITCH | FF_DONTCARE,
+            "Consolas");
+
+        HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
+        wglUseFontBitmapsA(hdc, 32, 96, listBase);
+        SelectObject(hdc, oldFont);
+        DeleteObject(font);
+
+        return listBase;
+    }
+
+    void DrawText2D(float x, float y, const std::string& text)
+    {
+        const GLuint listBase = EnsureFontListBase();
+        if (!listBase || text.empty())
+        {
+            return;
+        }
+
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glRasterPos2f(x, y);
+        glPushAttrib(GL_LIST_BIT);
+        glListBase(listBase - 32);
+        glCallLists(static_cast<GLsizei>(text.size()), GL_UNSIGNED_BYTE, text.c_str());
+        glPopAttrib();
+    }
+}
 
 void RenderBackground::render()
 {
+    static auto lastTime = std::chrono::steady_clock::now();
+    static int frameCount = 0;
+    static float fps = 0.0f;
+
+    ++frameCount;
+    const auto now = std::chrono::steady_clock::now();
+    const auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTime).count();
+    if (elapsedMs >= 250)
+    {
+        fps = (static_cast<float>(frameCount) * 1000.0f) / static_cast<float>(elapsedMs);
+        frameCount = 0;
+        lastTime = now;
+    }
+
     GLfloat modelView[16] = {};
     glGetFloatv(GL_MODELVIEW_MATRIX, modelView);
 
@@ -55,6 +133,9 @@ void RenderBackground::render()
     glLoadIdentity();
     glRasterPos2f(-1.0f, -1.0f);
     glDrawPixels(width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+    std::ostringstream fpsText;
+    fpsText << "FPS: " << std::fixed << std::setprecision(1) << fps;
+    DrawText2D(-0.95f, 0.9f, fpsText.str());
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();

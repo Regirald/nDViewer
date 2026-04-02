@@ -159,7 +159,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\view\RenderBackground.cpp" />
     <ClCompile Include="include\view\RenderBackground.h" />
     <ClCompile Include="RenderingManager.cpp" />
     <ClCompile Include="RenderMesh.cpp" />
