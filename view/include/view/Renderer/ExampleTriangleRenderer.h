@@ -4,7 +4,8 @@
 #include "core/Transform/Transform.h"
 #include "core/Pipeline/TransformPipeline.h"
 
-#include <iostream>
+#include <Windows.h>
+#include <gl/GL.h>
 
 namespace ndv
 {
@@ -21,38 +22,35 @@ namespace ndv
 
         void render(const RenderContext& context) override
         {
-            if (m_logged)
+            const math::Vec4 localPositions[] =
             {
-                return;
-            }
-            m_logged = true;
-
-            const math::Vec4 localPos{ 0.5f, 0.5f, 0.0f, 1.0f };
+                { -0.5f, -0.5f, 0.0f, 1.0f },
+                {  0.5f, -0.5f, 0.0f, 1.0f },
+                {  0.0f,  0.5f, 0.0f, 1.0f }
+            };
             const math::Mat4 model = m_transform.modelMatrix();
             const math::Mat4 view = context.view;
             const math::Mat4 projection = context.projection;
 
-            // Full pipeline: clipPos = Projection * View * Model * localPos
-            const math::Vec4 worldPos = pipeline::TransformPipeline::ObjectToWorld(localPos, model);
-            const math::Vec4 viewPos = pipeline::TransformPipeline::WorldToView(worldPos, view);
-            const math::Vec4 clipPos = pipeline::TransformPipeline::ViewToClip(viewPos, projection);
-            const math::Vec3 ndcPos = pipeline::TransformPipeline::ClipToNDC(clipPos);
-            const math::Vec2 screenPos = pipeline::TransformPipeline::NDCToScreen(
-                ndcPos,
-                static_cast<float>(context.viewportWidth),
-                static_cast<float>(context.viewportHeight));
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
 
-            std::cout << "ExampleTriangleRenderer debug pipeline:\n";
-            std::cout << "  Object (local): " << localPos << "\n";
-            std::cout << "  World: " << worldPos << "\n";
-            std::cout << "  View: " << viewPos << "\n";
-            std::cout << "  Clip: " << clipPos << "\n";
-            std::cout << "  NDC: " << ndcPos << "\n";
-            std::cout << "  Screen: " << screenPos << "\n";
+            glColor3f(1.0f, 0.4f, 0.2f);
+            glBegin(GL_TRIANGLES);
+            for (const auto& localPos : localPositions)
+            {
+                const math::Vec4 worldPos = pipeline::TransformPipeline::ObjectToWorld(localPos, model);
+                const math::Vec4 viewPos = pipeline::TransformPipeline::WorldToView(worldPos, view);
+                const math::Vec4 clipPos = pipeline::TransformPipeline::ViewToClip(viewPos, projection);
+                const math::Vec3 ndcPos = pipeline::TransformPipeline::ClipToNDC(clipPos);
+                glVertex3f(ndcPos.x, ndcPos.y, ndcPos.z);
+            }
+            glEnd();
         }
 
     private:
         Transform m_transform;
-        bool m_logged = false;
     };
 }

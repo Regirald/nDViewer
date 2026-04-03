@@ -13,6 +13,10 @@
 #include <QVector2D>
 #include <QVector3D>
 
+#include "core/Math/Mat4.h"
+#include "core/Math/Vec3.h"
+#include "core/Math/Vec4.h"
+
 namespace
 {
     QOpenGLShaderProgram& BackgroundProgram()
@@ -120,6 +124,98 @@ namespace
         glCallLists(static_cast<GLsizei>(text.size()), GL_UNSIGNED_BYTE, text.c_str());
         glPopAttrib();
     }
+
+    ndv::math::Vec2 Normalize2D(const ndv::math::Vec2& value)
+    {
+        const float len = std::sqrt(value.x * value.x + value.y * value.y);
+        if (len <= 0.0001f)
+        {
+            return {};
+        }
+        return { value.x / len, value.y / len };
+    }
+
+    bool GetArrowGeometry(const ndv::math::Vec2& origin, const ndv::math::Vec2& direction, float length, float headSize,
+        ndv::math::Vec2& end, ndv::math::Vec2& base, ndv::math::Vec2& perp)
+    {
+        const ndv::math::Vec2 dir = Normalize2D(direction);
+        if (dir.x == 0.0f && dir.y == 0.0f)
+        {
+            return false;
+        }
+
+        end = origin + dir * length;
+        perp = { -dir.y, dir.x };
+        base = end - dir * headSize;
+        return true;
+    }
+
+    void DrawAxisArrows2D(const ndv::math::Mat4& view)
+    {
+        const ndv::math::Vec2 origin{ -0.85f, -0.85f };
+        const float length = 0.2f;
+        const float headSize = 0.04f;
+
+        const ndv::math::Vec4 axisX = view * ndv::math::Vec4(1.0f, 0.0f, 0.0f, 0.0f);
+        const ndv::math::Vec4 axisY = view * ndv::math::Vec4(0.0f, 1.0f, 0.0f, 0.0f);
+        const ndv::math::Vec4 axisZ = view * ndv::math::Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+        ndv::math::Vec2 end;
+        ndv::math::Vec2 base;
+        ndv::math::Vec2 perp;
+
+        glLineWidth(2.0f);
+        glBegin(GL_LINES);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        if (GetArrowGeometry(origin, { axisX.x, axisX.y }, length, headSize, end, base, perp))
+        {
+            glVertex2f(origin.x, origin.y);
+            glVertex2f(end.x, end.y);
+        }
+
+        glColor3f(0.0f, 1.0f, 0.0f);
+        if (GetArrowGeometry(origin, { axisY.x, axisY.y }, length, headSize, end, base, perp))
+        {
+            glVertex2f(origin.x, origin.y);
+            glVertex2f(end.x, end.y);
+        }
+
+        glColor3f(0.0f, 0.0f, 1.0f);
+        if (GetArrowGeometry(origin, { axisZ.x, axisZ.y }, length, headSize, end, base, perp))
+        {
+            glVertex2f(origin.x, origin.y);
+            glVertex2f(end.x, end.y);
+        }
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        if (GetArrowGeometry(origin, { axisX.x, axisX.y }, length, headSize, end, base, perp))
+        {
+            glVertex2f(end.x, end.y);
+            glVertex2f(base.x + perp.x * headSize * 0.5f, base.y + perp.y * headSize * 0.5f);
+            glVertex2f(base.x - perp.x * headSize * 0.5f, base.y - perp.y * headSize * 0.5f);
+        }
+
+        glColor3f(0.0f, 1.0f, 0.0f);
+        if (GetArrowGeometry(origin, { axisY.x, axisY.y }, length, headSize, end, base, perp))
+        {
+            glVertex2f(end.x, end.y);
+            glVertex2f(base.x + perp.x * headSize * 0.5f, base.y + perp.y * headSize * 0.5f);
+            glVertex2f(base.x - perp.x * headSize * 0.5f, base.y - perp.y * headSize * 0.5f);
+        }
+
+        glColor3f(0.0f, 0.0f, 1.0f);
+        if (GetArrowGeometry(origin, { axisZ.x, axisZ.y }, length, headSize, end, base, perp))
+        {
+            glVertex2f(end.x, end.y);
+            glVertex2f(base.x + perp.x * headSize * 0.5f, base.y + perp.y * headSize * 0.5f);
+            glVertex2f(base.x - perp.x * headSize * 0.5f, base.y - perp.y * headSize * 0.5f);
+        }
+        glEnd();
+
+        glLineWidth(1.0f);
+    }
 }
 
 void RenderBackground::render(const ndv::RenderContext& context)
@@ -169,6 +265,9 @@ void RenderBackground::render(const ndv::RenderContext& context)
     program.setUniformValue("u_scale", scale);
     DrawFullscreenQuad();
     program.release();
+
+    DrawAxisArrows2D(context.view);
+
     std::ostringstream fpsText;
     fpsText << "FPS: " << std::fixed << std::setprecision(1) << fps;
     DrawText2D(-0.95f, 0.9f, fpsText.str());
