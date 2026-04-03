@@ -38,17 +38,39 @@ namespace
 
         const char* fragmentSource =
             "#version 120\n"
-            "uniform vec3 u_axis;\n"
+            "uniform mat4 u_view;\n"
+            "uniform mat4 u_projection;\n"
+            "uniform mat4 u_invVP;\n"
             "uniform vec2 u_resolution;\n"
+            "uniform vec3 u_axis;   // encodes how much camera aligns with world axes (optional)\n"
             "uniform float u_base;\n"
             "uniform float u_scale;\n"
             "void main()\n"
             "{\n"
-            "    vec2 uv = gl_FragCoord.xy / u_resolution;\n"
-            "    float r = clamp(u_base + u_scale * (u_axis.x * uv.x + (1.0 - u_axis.x) * uv.y), 0.0, 1.0);\n"
-            "    float g = clamp(u_base + u_scale * (u_axis.y * uv.y + (1.0 - u_axis.y) * uv.x), 0.0, 1.0);\n"
-            "    float b = clamp(u_base + u_scale * (u_axis.z * (1.0 - uv.x) + (1.0 - u_axis.z) * (1.0 - uv.y)), 0.0, 1.0);\n"
-            "    gl_FragColor = vec4(r, g, b, 1.0);\n"
+            "    // Normalized device coordinates for this pixel\n"
+            "    vec2 ndc = (gl_FragCoord.xy / u_resolution) * 2.0 - 1.0;\n"
+            "    // Build clip-space position at some depth (e.g. z = -1 in clip)\n"
+            "    vec4 clipPos = vec4(ndc, -1.0, 1.0);\n"
+            "    // Inverse projection * view to get a world-space point\n"
+            "    vec4 worldPos = u_invVP * clipPos;\n"
+            "    worldPos /= worldPos.w;\n"
+            "    // Direction from camera (origin in view space) to worldPos in world space\n"
+            "    // Camera position is inverse of view applied to origin; however, to get\n"
+            "    // a camera-space direction, transform worldPos by view\n"
+            "    vec4 viewPos = u_view * worldPos;\n"
+            "    vec3 dir = normalize(viewPos.xyz);\n"
+            "\n"
+            "    // World axes in view space\n"
+            "    vec3 ax = normalize( (u_view * vec4(1.0, 0.0, 0.0, 0.0)).xyz );\n"
+            "    vec3 ay = normalize( (u_view * vec4(0.0, 1.0, 0.0, 0.0)).xyz );\n"
+            "    vec3 az = normalize( (u_view * vec4(0.0, 0.0, 1.0, 0.0)).xyz );\n"
+            "\n"
+            "    float dx = abs(dot(dir, ax));\n"
+            "    float dy = abs(dot(dir, ay));\n"
+            "    float dz = abs(dot(dir, az));\n"
+            "\n"
+            "    vec3 color = clamp(u_base + u_scale * vec3(dx, dy, dz), 0.0, 1.0);\n"
+            "    gl_FragColor = vec4(color, 1.0);\n"
             "}\n";
 
         program.addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
@@ -156,9 +178,9 @@ namespace
         const float length = 0.2f;
         const float headSize = 0.04f;
 
-        const ndv::math::Vec4 axisX = view * ndv::math::Vec4(1.0f, 0.0f, 0.0f, 0.0f);
-        const ndv::math::Vec4 axisY = view * ndv::math::Vec4(0.0f, 1.0f, 0.0f, 0.0f);
-        const ndv::math::Vec4 axisZ = view * ndv::math::Vec4(0.0f, 0.0f, 1.0f, 0.0f);
+        const ndv::math::Vec4 axisX = view * ndv::math::Vec4(1.0f, 0.0f, 0.0f, 0.0);
+        const ndv::math::Vec4 axisY = view * ndv::math::Vec4(0.0f, 1.0f, 0.0f, 0.0);
+        const ndv::math::Vec4 axisZ = view * ndv::math::Vec4(0.0f, 0.0f, 1.0f, 0.0);
 
         ndv::math::Vec2 end;
         ndv::math::Vec2 base;
@@ -259,10 +281,33 @@ void RenderBackground::render(const ndv::RenderContext& context)
 
     glDisable(GL_DEPTH_TEST);
     program.bind();
+
+
+    // Pass view/projection like RenderMesh does, so background uses same camera
+    const ndv::math::Mat4& view = context.view;
+    const ndv::math::Mat4& projection = context.projection;
+    QMatrix4x4 viewMatrix(
+        view(0, 0), view(0, 1), view(0, 2), view(0, 3),
+        view(1, 0), view(1, 1), view(1, 2), view(1, 3),
+        view(2, 0), view(2, 1), view(2, 2), view(2, 3),
+        view(3, 0), view(3, 1), view(3, 2), view(3, 3));
+    QMatrix4x4 projectionMatrix(
+        projection(0, 0), projection(0, 1), projection(0, 2), projection(0, 3),
+        projection(1, 0), projection(1, 1), projection(1, 2), projection(1, 3),
+        projection(2, 0), projection(2, 1), projection(2, 2), projection(2, 3),
+        projection(3, 0), projection(3, 1), projection(3, 2), projection(3, 3));
+
+    QMatrix4x4 invVP = (projectionMatrix * viewMatrix).inverted();
+
+
     program.setUniformValue("u_axis", QVector3D(axisX, axisY, axisZ));
     program.setUniformValue("u_resolution", QVector2D(static_cast<float>(width), static_cast<float>(height)));
+    program.setUniformValue("u_view", viewMatrix);
+    program.setUniformValue("u_projection", projectionMatrix);
+    program.setUniformValue("u_invVP", invVP);
     program.setUniformValue("u_base", base);
     program.setUniformValue("u_scale", scale);
+
     DrawFullscreenQuad();
     program.release();
 
