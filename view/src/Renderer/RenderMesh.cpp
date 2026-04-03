@@ -81,7 +81,7 @@ void RenderMesh<Dim>::initializeGLResources()
         if constexpr (Dim == 3)
             flatVertices.push_back(v[2]);
         else
-            flatVertices.push_back(0.2f);
+            flatVertices.push_back(0.0f);
     }
 
     // ---- Ensure indices are uint32 ----

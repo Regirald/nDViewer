@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     Circle circle;
 
     // 2. Sample into scalar field
-    int dimx = 20;
+    int dimx = 64;
     int dimy = dimx;
     ScalarField<2> field({ dimx, dimy});
     // Fill field with 1.f inside the sphere and 0.f outside

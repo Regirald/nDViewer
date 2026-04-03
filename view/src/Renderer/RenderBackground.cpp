@@ -172,71 +172,68 @@ namespace
         return true;
     }
 
-    void DrawAxisArrows2D(const ndv::math::Mat4& view)
+    void DrawAxisArrows3D(const ndv::math::Mat4& view, const ndv::math::Mat4& projection)
     {
-        const ndv::math::Vec2 origin{ -0.85f, -0.85f };
-        const float length = 0.2f;
-        const float headSize = 0.04f;
+        // Small 3D axis at world origin, rendered with current view/projection
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadMatrixf(projection.m);
 
-        const ndv::math::Vec4 axisX = view * ndv::math::Vec4(1.0f, 0.0f, 0.0f, 0.0);
-        const ndv::math::Vec4 axisY = view * ndv::math::Vec4(0.0f, 1.0f, 0.0f, 0.0);
-        const ndv::math::Vec4 axisZ = view * ndv::math::Vec4(0.0f, 0.0f, 1.0f, 0.0);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadMatrixf(view.m);
 
-        ndv::math::Vec2 end;
-        ndv::math::Vec2 base;
-        ndv::math::Vec2 perp;
+        const float length = 0.5f;
+        const float headSize = 0.1f;
 
+        glDisable(GL_LIGHTING);
         glLineWidth(2.0f);
-        glBegin(GL_LINES);
+
+        // X axis (red)
         glColor3f(1.0f, 0.0f, 0.0f);
-        if (GetArrowGeometry(origin, { axisX.x, axisX.y }, length, headSize, end, base, perp))
-        {
-            glVertex2f(origin.x, origin.y);
-            glVertex2f(end.x, end.y);
-        }
-
-        glColor3f(0.0f, 1.0f, 0.0f);
-        if (GetArrowGeometry(origin, { axisY.x, axisY.y }, length, headSize, end, base, perp))
-        {
-            glVertex2f(origin.x, origin.y);
-            glVertex2f(end.x, end.y);
-        }
-
-        glColor3f(0.0f, 0.0f, 1.0f);
-        if (GetArrowGeometry(origin, { axisZ.x, axisZ.y }, length, headSize, end, base, perp))
-        {
-            glVertex2f(origin.x, origin.y);
-            glVertex2f(end.x, end.y);
-        }
+        glBegin(GL_LINES);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(length, 0.0f, 0.0f);
         glEnd();
 
         glBegin(GL_TRIANGLES);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        if (GetArrowGeometry(origin, { axisX.x, axisX.y }, length, headSize, end, base, perp))
-        {
-            glVertex2f(end.x, end.y);
-            glVertex2f(base.x + perp.x * headSize * 0.5f, base.y + perp.y * headSize * 0.5f);
-            glVertex2f(base.x - perp.x * headSize * 0.5f, base.y - perp.y * headSize * 0.5f);
-        }
+        glVertex3f(length, 0.0f, 0.0f);
+        glVertex3f(length - headSize, 0.03f, 0.0f);
+        glVertex3f(length - headSize, -0.03f, 0.0f);
+        glEnd();
 
+        // Y axis (green)
         glColor3f(0.0f, 1.0f, 0.0f);
-        if (GetArrowGeometry(origin, { axisY.x, axisY.y }, length, headSize, end, base, perp))
-        {
-            glVertex2f(end.x, end.y);
-            glVertex2f(base.x + perp.x * headSize * 0.5f, base.y + perp.y * headSize * 0.5f);
-            glVertex2f(base.x - perp.x * headSize * 0.5f, base.y - perp.y * headSize * 0.5f);
-        }
+        glBegin(GL_LINES);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, length, 0.0f);
+        glEnd();
 
+        glBegin(GL_TRIANGLES);
+        glVertex3f(0.0f, length, 0.0f);
+        glVertex3f(0.03f, length - headSize, 0.0f);
+        glVertex3f(-0.03f, length - headSize, 0.0f);
+        glEnd();
+
+        // Z axis (blue)
         glColor3f(0.0f, 0.0f, 1.0f);
-        if (GetArrowGeometry(origin, { axisZ.x, axisZ.y }, length, headSize, end, base, perp))
-        {
-            glVertex2f(end.x, end.y);
-            glVertex2f(base.x + perp.x * headSize * 0.5f, base.y + perp.y * headSize * 0.5f);
-            glVertex2f(base.x - perp.x * headSize * 0.5f, base.y - perp.y * headSize * 0.5f);
-        }
+        glBegin(GL_LINES);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, length);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(0.0f, 0.0f, length);
+        glVertex3f(0.0f, 0.03f, length - headSize);
+        glVertex3f(0.0f, -0.03f, length - headSize);
         glEnd();
 
         glLineWidth(1.0f);
+
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
     }
 }
 
@@ -311,7 +308,8 @@ void RenderBackground::render(const ndv::RenderContext& context)
     DrawFullscreenQuad();
     program.release();
 
-    DrawAxisArrows2D(context.view);
+    // Draw 3D axis gizmo at world origin using same camera
+    DrawAxisArrows3D(context.view, context.projection);
 
     std::ostringstream fpsText;
     fpsText << "FPS: " << std::fixed << std::setprecision(1) << fps;

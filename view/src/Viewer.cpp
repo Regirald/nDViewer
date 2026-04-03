@@ -10,7 +10,7 @@ Viewer::Viewer(QWidget* parent)
 {
     setMouseTracking(true);
     renderingManager.setBackground();
-    renderingManager.setExampleTriangle();
+    //renderingManager.setExampleTriangle();
     updateCameraFromOrbit();
     // regular update of the viewer
     m_updateTimer.setInterval(16);
