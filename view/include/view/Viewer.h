@@ -30,6 +30,7 @@ private:
     // Simple track of mouse dragging for rotation.
     bool m_leftDown = false;
     bool m_rightDown = false;
+    bool m_middleDown = false;
     int  m_lastX    = 0;
     int  m_lastY    = 0;
     float m_yaw     = 0.0f;

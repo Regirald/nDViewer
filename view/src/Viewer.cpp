@@ -74,6 +74,12 @@ void Viewer::mousePressEvent(QMouseEvent* event)
         m_lastX = static_cast<int>(event->position().x());
         m_lastY = static_cast<int>(event->position().y());
     }
+    else if (event->button() == Qt::MiddleButton)
+    {
+        m_middleDown = true;
+        m_lastX = static_cast<int>(event->position().x());
+        m_lastY = static_cast<int>(event->position().y());
+    }
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* event)
@@ -86,11 +92,15 @@ void Viewer::mouseReleaseEvent(QMouseEvent* event)
     {
         m_rightDown = false;
     }
+    else if (event->button() == Qt::MiddleButton)
+    {
+        m_middleDown = false;
+    }
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent* event)
 {
-    if (!m_leftDown && !m_rightDown)
+    if (!m_leftDown && !m_rightDown && !m_middleDown)
         return;
 
     const int x = static_cast<int>(event->position().x());
@@ -117,9 +127,29 @@ void Viewer::mouseMoveEvent(QMouseEvent* event)
         if (m_zoom > 10.0f)
             m_zoom = 10.0f;
     }
+    else if (m_middleDown)
+    {
+        // pan in the plane parallel to the screen (UV plane)
+        const float panSpeed = 0.01f;
+
+        // view direction
+        ndv::math::Vec3 forward = (m_camera.target - m_camera.position).normalized();
+        // right = forward x up
+        ndv::math::Vec3 up = m_camera.viewMatrix() * m_camera.projectionMatrix() * m_camera.up;
+        ndv::math::Vec3 right = cross(forward, up).normalized();
+        // up is camera up
+        up = up.normalized();
+
+        // move opposite to mouse dx/dy to feel natural
+        ndv::math::Vec3 pan =
+            (-dx * panSpeed) * right +
+            ( dy * panSpeed) * up;
+
+        m_camera.position += pan;
+        m_camera.target   += pan;
+    }
 
     updateCameraFromOrbit();
-
     update();
 }
 
@@ -140,7 +170,7 @@ void Viewer::updateCameraFromOrbit()
 
 
 
-    m_camera.target = { 0.0f, 0.0f, 0.0f };
+    //m_camera.target = { 0.0f, 0.0f, 0.0f };
     m_camera.up = { 0.0f, 1.0f, 0.0f };
     m_camera.position = m_camera.target + offset;
 }

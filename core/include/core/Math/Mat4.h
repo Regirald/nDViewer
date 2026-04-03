@@ -190,6 +190,23 @@ namespace ndv::math
         }
     };
 
+    inline Vec3 operator*(const Mat4& M, const Vec3& v)
+    {
+        float x = M(0, 0) * v.x + M(0, 1) * v.y + M(0, 2) * v.z + M(0, 3);
+        float y = M(1, 0) * v.x + M(1, 1) * v.y + M(1, 2) * v.z + M(1, 3);
+        float z = M(2, 0) * v.x + M(2, 1) * v.y + M(2, 2) * v.z + M(2, 3);
+        float w = M(3, 0) * v.x + M(3, 1) * v.y + M(3, 2) * v.z + M(3, 3);
+
+        if (w != 0.0f)
+        {
+            x /= w;
+            y /= w;
+            z /= w;
+        }
+
+        return Vec3(x, y, z);
+    }
+
     inline Vec4 operator*(const Mat4& m, const Vec4& v)
     {
         Vec4 result;

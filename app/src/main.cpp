@@ -43,12 +43,7 @@ int main(int argc, char* argv[])
     Mesh<2> mesh = MarchingSquares::extract(field, 0.f);
 
     // 4. Open a window dedicated to computer vision visualization
-    Viewer viewer;
-
-    // Example: render callback that renders the extracted mesh using
-    // legacy fixed-function OpenGL. This keeps things simple while
-    // wiring data flow from marching cubes to the GPU.
-    
+    Viewer viewer;    
 	viewer.setMesh(&mesh);
 
     viewer.show();

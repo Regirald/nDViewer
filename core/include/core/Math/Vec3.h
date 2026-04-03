@@ -5,6 +5,8 @@
 
 namespace ndv::math
 {
+    struct Mat4;
+
     struct Vec2
     {
         float x = 0.0f;
@@ -15,12 +17,19 @@ namespace ndv::math
 
         float& operator[](size_t index) { return index == 0 ? x : y; }
         const float& operator[](size_t index) const { return index == 0 ? x : y; }
+        Vec2& operator+=(const Vec2& other)
+        {
+            x += other.x;
+            y += other.y;
+            return *this;
+        }
     };
 
     inline Vec2 operator+(const Vec2& a, const Vec2& b) { return { a.x + b.x, a.y + b.y }; }
     inline Vec2 operator-(const Vec2& a, const Vec2& b) { return { a.x - b.x, a.y - b.y }; }
     inline Vec2 operator*(const Vec2& v, float s) { return { v.x * s, v.y * s }; }
     inline Vec2 operator*(float s, const Vec2& v) { return v * s; }
+
 
     inline std::ostream& operator<<(std::ostream& os, const Vec2& v)
     {
@@ -60,6 +69,13 @@ namespace ndv::math
                 return {};
             }
             return { x / len, y / len, z / len };
+        }
+        Vec3& operator+=(const Vec3& other)
+        {
+            x += other.x;
+            y += other.y;
+            z += other.z;
+            return *this;
         }
     };
 
