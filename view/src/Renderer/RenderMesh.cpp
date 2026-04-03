@@ -6,9 +6,6 @@
 #include <QOpenGLShaderProgram>
 #include <QVector3D>
 
-#include "core/Math/Mat4.h"
-#include "core/Pipeline/TransformPipeline.h"
-
 // ------------------------------------------------------------
 // Shader (kept simple, but NOT tied to GL init timing)
 // ------------------------------------------------------------
@@ -149,10 +146,20 @@ void RenderMesh<Dim>::render(const ndv::RenderContext& context)
     program.bind();
 
     // ---- Set uniforms ----
-    QMatrix4x4 identity;
-    identity.setToIdentity();
-    program.setUniformValue("u_view", identity);
-    program.setUniformValue("u_projection", identity);
+    const ndv::math::Mat4& view = context.view;
+    const ndv::math::Mat4& projection = context.projection;
+    const QMatrix4x4 viewMatrix(
+        view(0, 0), view(0, 1), view(0, 2), view(0, 3),
+        view(1, 0), view(1, 1), view(1, 2), view(1, 3),
+        view(2, 0), view(2, 1), view(2, 2), view(2, 3),
+        view(3, 0), view(3, 1), view(3, 2), view(3, 3));
+    const QMatrix4x4 projectionMatrix(
+        projection(0, 0), projection(0, 1), projection(0, 2), projection(0, 3),
+        projection(1, 0), projection(1, 1), projection(1, 2), projection(1, 3),
+        projection(2, 0), projection(2, 1), projection(2, 2), projection(2, 3),
+        projection(3, 0), projection(3, 1), projection(3, 2), projection(3, 3));
+    program.setUniformValue("u_view", viewMatrix);
+    program.setUniformValue("u_projection", projectionMatrix);
     program.setUniformValue("u_color", QVector3D(0.9f, 0.9f, 0.9f));
 
     // ---- Bind vertex buffer ----
@@ -166,27 +173,6 @@ void RenderMesh<Dim>::render(const ndv::RenderContext& context)
     program.enableAttributeArray(posLoc);
 
     gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    std::vector<float> transformedVertices;
-    transformedVertices.reserve(m_mesh->vertices.size() * 3);
-    const ndv::math::Mat4 model = ndv::math::Mat4::identity();
-
-    for (const auto& v : m_mesh->vertices)
-    {
-        const float z = (Dim == 3) ? v[2] : 0.2f;
-        const ndv::math::Vec4 localPos{ v[0], v[1], z, 1.0f };
-        const ndv::math::Vec4 worldPos = ndv::pipeline::TransformPipeline::ObjectToWorld(localPos, model);
-        const ndv::math::Vec4 viewPos = ndv::pipeline::TransformPipeline::WorldToView(worldPos, context.view);
-        const ndv::math::Vec4 clipPos = ndv::pipeline::TransformPipeline::ViewToClip(viewPos, context.projection);
-        const ndv::math::Vec3 ndcPos = ndv::pipeline::TransformPipeline::ClipToNDC(clipPos);
-        transformedVertices.push_back(ndcPos.x);
-        transformedVertices.push_back(ndcPos.y);
-        transformedVertices.push_back(ndcPos.z);
-    }
-
-    gl->glBufferData(GL_ARRAY_BUFFER,
-        transformedVertices.size() * sizeof(float),
-        transformedVertices.data(),
-        GL_DYNAMIC_DRAW);
     gl->glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     // ---- Draw ----

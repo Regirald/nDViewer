@@ -4,6 +4,10 @@
 #include <gl/GL.h>
 #include <QOpenGLFunctions>
 
+#ifdef render
+#undef render
+#endif
+
 #include "Renderer/Renderer.h"
 #include "model/Mesh.h"
 
