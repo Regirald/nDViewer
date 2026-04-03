@@ -10,6 +10,7 @@ namespace ndv
         math::Mat4 view = math::Mat4::identity();
         math::Mat4 projection = math::Mat4::identity();
         math::Vec3 cameraPosition{ 0.0f, 0.0f, 0.0f };
+        math::Vec3 targetPosition{ 0.0f, 0.0f, 0.0f };
 
         int viewportWidth = 1;
         int viewportHeight = 1;

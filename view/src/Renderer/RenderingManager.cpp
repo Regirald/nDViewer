@@ -2,6 +2,7 @@
 #include "RenderMesh.h"
 #include "RenderBackground.h"
 #include "Renderer/ExampleTriangleRenderer.h"
+#include "Renderer/RenderTargetSphere.h"
 
 #include <memory>
 
@@ -14,6 +15,8 @@ void RenderingManager::setMesh(Mesh<2>* mesh)
 void RenderingManager::setBackground()
 {
     renderContainer.push_back(std::make_unique<RenderBackground>());
+	// also render a small sphere to mark the camera target/position
+	renderContainer.push_back(std::make_unique<RenderTargetSphere>());
 }
 
 void RenderingManager::setExampleTriangle()
@@ -27,11 +30,15 @@ void RenderingManager::setViewport(int width, int height)
 	m_context.viewportHeight = height > 0 ? height : 1;
 }
 
-void RenderingManager::setCamera(const ndv::math::Mat4& view, const ndv::math::Mat4& projection, const ndv::math::Vec3& cameraPosition)
+void RenderingManager::setCamera(const ndv::math::Mat4& view,
+	const ndv::math::Mat4& projection,
+	const ndv::math::Vec3& cameraPosition,
+	const ndv::math::Vec3& cameraTarget)
 {
 	m_context.view = view;
 	m_context.projection = projection;
 	m_context.cameraPosition = cameraPosition;
+   m_context.targetPosition = cameraTarget;
 }
 
 void RenderingManager::setTime(float timeSeconds)

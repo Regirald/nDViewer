@@ -16,7 +16,10 @@ public:
 	void setBackground();
 	void setExampleTriangle();
 	void setViewport(int width, int height);
-	void setCamera(const ndv::math::Mat4& view, const ndv::math::Mat4& projection, const ndv::math::Vec3& cameraPosition);
+  void setCamera(const ndv::math::Mat4& view,
+				  const ndv::math::Mat4& projection,
+				  const ndv::math::Vec3& cameraPosition,
+				  const ndv::math::Vec3& cameraTarget);
 	void setTime(float timeSeconds);
 
 	ndv::RenderContext& context();

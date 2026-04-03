@@ -52,7 +52,7 @@ void Viewer::paintGL()
     renderingManager.setViewport(viewportWidth, viewportHeight);
     m_camera.aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
 
-    renderingManager.setCamera(m_camera.viewMatrix(), m_camera.projectionMatrix(), m_camera.position);
+  renderingManager.setCamera(m_camera.viewMatrix(), m_camera.projectionMatrix(), m_camera.position, m_camera.target);
     renderingManager.setTime(static_cast<float>(timer.elapsed()) / 1000.0f);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -134,10 +134,10 @@ void Viewer::mouseMoveEvent(QMouseEvent* event)
 
         // view direction
         ndv::math::Vec3 forward = (m_camera.target - m_camera.position).normalized();
+        // derive camera up in view space
+        ndv::math::Vec3 up = m_camera.up;
         // right = forward x up
-        ndv::math::Vec3 up = m_camera.viewMatrix() * m_camera.projectionMatrix() * m_camera.up;
         ndv::math::Vec3 right = cross(forward, up).normalized();
-        // up is camera up
         up = up.normalized();
 
         // move opposite to mouse dx/dy to feel natural
@@ -147,6 +147,9 @@ void Viewer::mouseMoveEvent(QMouseEvent* event)
 
         m_camera.position += pan;
         m_camera.target   += pan;
+
+        // keep orbit angles in sync with new camera position
+        updateYawPitchFromCamera();
     }
 
     updateCameraFromOrbit();
@@ -173,4 +176,15 @@ void Viewer::updateCameraFromOrbit()
     //m_camera.target = { 0.0f, 0.0f, 0.0f };
     m_camera.up = { 0.0f, 1.0f, 0.0f };
     m_camera.position = m_camera.target + offset;
+}
+
+void Viewer::updateYawPitchFromCamera()
+{
+    // Direction from target to camera
+    ndv::math::Vec3 dir = (m_camera.position - m_camera.target).normalized();
+
+    // Yaw around world Y, pitch up/down
+    const float radToDeg = 180.0f / 3.1415926535f;
+    m_yaw   = std::atan2f(dir.x, dir.z) * radToDeg;
+    m_pitch = std::asinf(std::clamp(dir.y, -1.0f, 1.0f)) * radToDeg;
 }
