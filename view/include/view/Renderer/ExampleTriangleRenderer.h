@@ -4,6 +4,8 @@
 #include "core/Transform/Transform.h"
 #include "core/Pipeline/TransformPipeline.h"
 
+#include <QVector4D>
+
 #include <Windows.h>
 #include <gl/GL.h>
 
@@ -22,15 +24,15 @@ namespace ndv
 
         void render(const RenderContext& context) override
         {
-            const math::Vec4 localPositions[] =
+            const QVector4D localPositions[] =
             {
                 { -0.5f, -0.5f, 0.0f, 1.0f },
                 {  0.5f, -0.5f, 0.0f, 1.0f },
                 {  0.0f,  0.5f, 0.0f, 1.0f }
             };
-            const math::Mat4 model = m_transform.modelMatrix();
-            const math::Mat4 view = context.view;
-            const math::Mat4 projection = context.projection;
+            const QMatrix4x4 model = m_transform.modelMatrix();
+            const QMatrix4x4 view = context.view;
+            const QMatrix4x4 projection = context.projection;
 
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
@@ -41,11 +43,11 @@ namespace ndv
             glBegin(GL_TRIANGLES);
             for (const auto& localPos : localPositions)
             {
-                const math::Vec4 worldPos = pipeline::TransformPipeline::ObjectToWorld(localPos, model);
-                const math::Vec4 viewPos = pipeline::TransformPipeline::WorldToView(worldPos, view);
-                const math::Vec4 clipPos = pipeline::TransformPipeline::ViewToClip(viewPos, projection);
-                const math::Vec3 ndcPos = pipeline::TransformPipeline::ClipToNDC(clipPos);
-                glVertex3f(ndcPos.x, ndcPos.y, ndcPos.z);
+                const QVector4D worldPos = pipeline::TransformPipeline::ObjectToWorld(localPos, model);
+                const QVector4D viewPos = pipeline::TransformPipeline::WorldToView(worldPos, view);
+                const QVector4D clipPos = pipeline::TransformPipeline::ViewToClip(viewPos, projection);
+                const QVector3D ndcPos = pipeline::TransformPipeline::ClipToNDC(clipPos);
+                glVertex3f(ndcPos.x(), ndcPos.y(), ndcPos.z());
             }
             glEnd();
         }

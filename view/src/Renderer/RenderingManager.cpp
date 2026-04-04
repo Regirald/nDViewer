@@ -30,10 +30,10 @@ void RenderingManager::setViewport(int width, int height)
 	m_context.viewportHeight = height > 0 ? height : 1;
 }
 
-void RenderingManager::setCamera(const ndv::math::Mat4& view,
-	const ndv::math::Mat4& projection,
-	const ndv::math::Vec3& cameraPosition,
-	const ndv::math::Vec3& cameraTarget)
+void RenderingManager::setCamera(const QMatrix4x4& view,
+	const QMatrix4x4& projection,
+	const QVector3D& cameraPosition,
+	const QVector3D& cameraTarget)
 {
 	m_context.view = view;
 	m_context.projection = projection;

@@ -1,25 +1,27 @@
 #pragma once
 
-#include "core/Math/Mat4.h"
+#include <QMatrix4x4>
+#include <QVector3D>
+#include <QtMath>
 
 namespace ndv
 {
     struct Transform
     {
-        math::Vec3 position{ 0.0f, 0.0f, 0.0f };
-        math::Vec3 rotationRadians{ 0.0f, 0.0f, 0.0f };
-        math::Vec3 scale{ 1.0f, 1.0f, 1.0f };
+        QVector3D position{ 0.0f, 0.0f, 0.0f };
+        QVector3D rotationRadians{ 0.0f, 0.0f, 0.0f };
+        QVector3D scale{ 1.0f, 1.0f, 1.0f };
 
-        math::Mat4 modelMatrix() const
+        QMatrix4x4 modelMatrix() const
         {
-            const math::Mat4 translate = math::Mat4::translation(position);
-            const math::Mat4 rotateX = math::Mat4::rotationX(rotationRadians.x);
-            const math::Mat4 rotateY = math::Mat4::rotationY(rotationRadians.y);
-            const math::Mat4 rotateZ = math::Mat4::rotationZ(rotationRadians.z);
-            const math::Mat4 scaleMatrix = math::Mat4::scale(scale);
-
-            // Model = T * Rz * Ry * Rx * S (column-major, column vectors).
-            return translate * rotateZ * rotateY * rotateX * scaleMatrix;
+            QMatrix4x4 model;
+            model.setToIdentity();
+            model.translate(position);
+            model.rotate(qRadiansToDegrees(rotationRadians.z()), 0.0f, 0.0f, 1.0f);
+            model.rotate(qRadiansToDegrees(rotationRadians.y()), 0.0f, 1.0f, 0.0f);
+            model.rotate(qRadiansToDegrees(rotationRadians.x()), 1.0f, 0.0f, 0.0f);
+            model.scale(scale);
+            return model;
         }
     };
 }

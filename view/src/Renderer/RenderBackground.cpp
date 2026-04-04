@@ -9,13 +9,12 @@
 #include <sstream>
 #include <string>
 
+#include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 #include <QVector2D>
 #include <QVector3D>
 
-#include "core/Math/Mat4.h"
 #include "core/Math/Vec3.h"
-#include "core/Math/Vec4.h"
 
 namespace
 {
@@ -172,16 +171,16 @@ namespace
         return true;
     }
 
-    void DrawAxisArrows3D(const ndv::math::Mat4& view, const ndv::math::Mat4& projection)
+    void DrawAxisArrows3D(const QMatrix4x4& view, const QMatrix4x4& projection)
     {
         // Small 3D axis at world origin, rendered with current view/projection
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
-        glLoadMatrixf(projection.m);
+        glLoadMatrixf(projection.constData());
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
-        glLoadMatrixf(view.m);
+        glLoadMatrixf(view.constData());
 
         const float length = 0.5f;
         const float headSize = 0.1f;
@@ -260,9 +259,10 @@ void RenderBackground::render(const ndv::RenderContext& context)
         return;
     }
 
-    const float axisX = std::fabs(context.view.m[2]);
-    const float axisY = std::fabs(context.view.m[6]);
-    const float axisZ = std::fabs(context.view.m[10]);
+    const float* viewData = context.view.constData();
+    const float axisX = std::fabs(viewData[2]);
+    const float axisY = std::fabs(viewData[6]);
+    const float axisZ = std::fabs(viewData[10]);
 
     const float base = 0.1f;
     const float scale = 0.8f;
@@ -281,18 +281,8 @@ void RenderBackground::render(const ndv::RenderContext& context)
 
 
     // Pass view/projection like RenderMesh does, so background uses same camera
-    const ndv::math::Mat4& view = context.view;
-    const ndv::math::Mat4& projection = context.projection;
-    QMatrix4x4 viewMatrix(
-        view(0, 0), view(0, 1), view(0, 2), view(0, 3),
-        view(1, 0), view(1, 1), view(1, 2), view(1, 3),
-        view(2, 0), view(2, 1), view(2, 2), view(2, 3),
-        view(3, 0), view(3, 1), view(3, 2), view(3, 3));
-    QMatrix4x4 projectionMatrix(
-        projection(0, 0), projection(0, 1), projection(0, 2), projection(0, 3),
-        projection(1, 0), projection(1, 1), projection(1, 2), projection(1, 3),
-        projection(2, 0), projection(2, 1), projection(2, 2), projection(2, 3),
-        projection(3, 0), projection(3, 1), projection(3, 2), projection(3, 3));
+    const QMatrix4x4& viewMatrix = context.view;
+    const QMatrix4x4& projectionMatrix = context.projection;
 
     QMatrix4x4 invVP = (projectionMatrix * viewMatrix).inverted();
 

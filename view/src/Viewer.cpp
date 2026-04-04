@@ -133,23 +133,19 @@ void Viewer::mouseMoveEvent(QMouseEvent* event)
         const float panSpeed = 0.01f;
 
         // view direction
-        ndv::math::Vec3 forward = (m_camera.target - m_camera.position).normalized();
+        QVector3D forward = (m_camera.target - m_camera.position).normalized();
         // derive camera up in view space
-        ndv::math::Vec3 up = m_camera.up;
+        QVector3D up = m_camera.up;
         // right = forward x up
-        ndv::math::Vec3 right = cross(forward, up).normalized();
+        QVector3D right = QVector3D::crossProduct(forward, up).normalized();
         up = up.normalized();
 
         // move opposite to mouse dx/dy to feel natural
-        ndv::math::Vec3 pan =
-            (-dx * panSpeed) * right +
-            ( dy * panSpeed) * up;
+        QVector3D pan =
+            right * (-dx * panSpeed) +
+            up * (dy * panSpeed);
 
-        m_camera.position += pan;
         m_camera.target   += pan;
-
-        // keep orbit angles in sync with new camera position
-        updateYawPitchFromCamera();
     }
 
     updateCameraFromOrbit();
@@ -166,25 +162,15 @@ void Viewer::updateCameraFromOrbit()
 
     const float distance = m_baseDistance / m_zoom;
     const float cosPitch = cosf(pitchRad);
-    ndv::math::Vec3 offset;
-    offset.x = distance * cosPitch * sinf(yawRad);
-    offset.y = distance * sinf(pitchRad);
-    offset.z = distance * cosPitch * cosf(yawRad);
+    QVector3D offset(
+        distance * cosPitch * sinf(yawRad),
+        distance * sinf(pitchRad),
+        distance * cosPitch * cosf(yawRad));
 
 
 
     //m_camera.target = { 0.0f, 0.0f, 0.0f };
-    m_camera.up = { 0.0f, 1.0f, 0.0f };
+    m_camera.up = QVector3D(0.0f, 1.0f, 0.0f);
     m_camera.position = m_camera.target + offset;
 }
 
-void Viewer::updateYawPitchFromCamera()
-{
-    // Direction from target to camera
-    ndv::math::Vec3 dir = (m_camera.position - m_camera.target).normalized();
-
-    // Yaw around world Y, pitch up/down
-    const float radToDeg = 180.0f / 3.1415926535f;
-    m_yaw   = std::atan2f(dir.x, dir.z) * radToDeg;
-    m_pitch = std::asinf(std::clamp(dir.y, -1.0f, 1.0f)) * radToDeg;
-}

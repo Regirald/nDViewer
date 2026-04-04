@@ -146,18 +146,8 @@ void RenderMesh<Dim>::render(const ndv::RenderContext& context)
     program.bind();
 
     // ---- Set uniforms ----
-    const ndv::math::Mat4& view = context.view;
-    const ndv::math::Mat4& projection = context.projection;
-    const QMatrix4x4 viewMatrix(
-        view(0, 0), view(0, 1), view(0, 2), view(0, 3),
-        view(1, 0), view(1, 1), view(1, 2), view(1, 3),
-        view(2, 0), view(2, 1), view(2, 2), view(2, 3),
-        view(3, 0), view(3, 1), view(3, 2), view(3, 3));
-    const QMatrix4x4 projectionMatrix(
-        projection(0, 0), projection(0, 1), projection(0, 2), projection(0, 3),
-        projection(1, 0), projection(1, 1), projection(1, 2), projection(1, 3),
-        projection(2, 0), projection(2, 1), projection(2, 2), projection(2, 3),
-        projection(3, 0), projection(3, 1), projection(3, 2), projection(3, 3));
+    const QMatrix4x4& viewMatrix = context.view;
+    const QMatrix4x4& projectionMatrix = context.projection;
     program.setUniformValue("u_view", viewMatrix);
     program.setUniformValue("u_projection", projectionMatrix);
     program.setUniformValue("u_color", QVector3D(0.9f, 0.9f, 0.9f));

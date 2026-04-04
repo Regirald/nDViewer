@@ -1,16 +1,16 @@
 #pragma once
 
-#include "core/Math/Mat4.h"
-#include "core/Math/Vec3.h"
+#include <QMatrix4x4>
+#include <QVector3D>
 
 namespace ndv
 {
     struct RenderContext
     {
-        math::Mat4 view = math::Mat4::identity();
-        math::Mat4 projection = math::Mat4::identity();
-        math::Vec3 cameraPosition{ 0.0f, 0.0f, 0.0f };
-        math::Vec3 targetPosition{ 0.0f, 0.0f, 0.0f };
+        QMatrix4x4 view;
+        QMatrix4x4 projection;
+        QVector3D cameraPosition{ 0.0f, 0.0f, 0.0f };
+        QVector3D targetPosition{ 0.0f, 0.0f, 0.0f };
 
         int viewportWidth = 1;
         int viewportHeight = 1;

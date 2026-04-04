@@ -26,7 +26,6 @@ protected:
 
 private:
     void updateCameraFromOrbit();
-    void updateYawPitchFromCamera();
 
     // Simple track of mouse dragging for rotation.
     bool m_leftDown = false;
