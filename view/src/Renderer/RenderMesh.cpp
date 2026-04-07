@@ -71,7 +71,7 @@ void RenderMesh<Dim>::initializeGLResources()
 
     // ---- Flatten vertices safely (supports Dim=2 or 3) ----
     std::vector<float> flatVertices;
-    flatVertices.reserve(m_mesh->vertices.size() * 3);
+    flatVertices.reserve(m_mesh->vertices.size() * Dim);
 
     for (const auto& v : m_mesh->vertices)
     {

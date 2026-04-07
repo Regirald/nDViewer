@@ -2,6 +2,7 @@
 #include <array>
 #include "model/Mesh.h"
 #include "core/Field.h"
+#include "core/Resolution.h"
 
 class MarchingSquares {
 public:
@@ -20,12 +21,12 @@ public:
         return a[0] * b[1] - a[1] * b[0];
     }
 
-    static Mesh<2> extract(const ScalarField<2>& field, float iso)
+    static Mesh<2> extract(const ImplicitFunction<2>& impFunction, float iso, Resolution<2>& resolution)
     {
         Mesh<2> mesh;
 
-        int dimx = field.getSize()[0];
-        int dimy = field.getSize()[1];
+        int dimx = resolution.size[0];
+        int dimy = resolution.size[1];
 
         // Local triangle edges
         static const Edge edges[3] = {
@@ -39,41 +40,130 @@ public:
         };
 
         auto emitTriangle = [&](Vec2 a, Vec2 b, Vec2 c)
+        {
+            if (cross(b - a, c - a) < 0.0f)
+                std::swap(b, c);
+
+            // Record starting index of this triangle's vertices
+            int baseIndex = static_cast<int>(mesh.vertices.size());
+
+            mesh.vertices.push_back(a);
+            mesh.vertices.push_back(b);
+            mesh.vertices.push_back(c);
+
+            // Push back triangle indices (counter-clockwise order ensured above)
+            mesh.indices.push_back(baseIndex);
+            mesh.indices.push_back(baseIndex + 1);
+            mesh.indices.push_back(baseIndex + 2);
+        };
+
+        auto processTriangle = [&](std::array<Vec2, 3> triPos, std::array<float, 3> triVal, std::array<int, 3> triIdx)
+        {
+
+            // Polygon (max 4 vertices)
+            Vec2 poly[4];
+            int count = 0;
+
+            for (int e = 0; e < 3; ++e)
             {
-                if (cross(b - a, c - a) < 0.0f)
-                    std::swap(b, c);
+                int i0 = edges[e].a;
+                int i1 = edges[e].b;
 
-                // Record starting index of this triangle's vertices
-                int baseIndex = static_cast<int>(mesh.vertices.size());
+                bool in0 = triVal[i0] > iso;
+                bool in1 = triVal[i1] > iso;
 
-                mesh.vertices.push_back(a);
-                mesh.vertices.push_back(b);
-                mesh.vertices.push_back(c);
+                if (in0)
+                    poly[count++] = triPos[i0];
 
-                // Push back triangle indices (counter-clockwise order ensured above)
-                mesh.indices.push_back(baseIndex);
-                mesh.indices.push_back(baseIndex + 1);
-                mesh.indices.push_back(baseIndex + 2);
-            };
+                if (in0 != in1)
+                    poly[count++] = interp(
+                        triPos[i0], triPos[i1],
+                        triVal[i0], triVal[i1],
+                        iso
+                    );
+            }
 
-        auto emitEdge = [&](Vec2 a, Vec2 b)
+            // Fan triangulation
+            for (int i = 1; i + 1 < count; ++i)
             {
-                // Record starting index of this triangle's vertices
-                int baseIndex = static_cast<int>(mesh.vertices.size());
+                emitTriangle(poly[0], poly[i], poly[i + 1]);
+            }
+        };
 
-                mesh.vertices.push_back(a);
-                mesh.vertices.push_back(b);
-
-                // Push back triangle indices (counter-clockwise order ensured above)
-                mesh.indices.push_back(baseIndex);
-                mesh.indices.push_back(baseIndex + 1);
-            };
 
         for (int y = 0; y < dimy - 1; ++y)
         {
             for (int x = 0; x < dimx - 1; ++x)
             {
+
+                std::array<Vec2, 3> tri0 = {
+                    Vec2{float(x), float(y)},
+                    Vec2{float(x) + 0.5f, float(y) + 1.f},
+                    Vec2{float(x) + 1.f, float(y)} };
+                
+                std::array<Vec2, 3> tri1 = {
+                    tri0[2],
+                    tri0[1],
+                    Vec2{float(x) + 1.5f, float(y) + 1.f} };
+
+                std::array<float, 3> val0 = {
+                   impFunction.evaluate(tri0[0]),
+                   impFunction.evaluate(tri0[1]),
+                   impFunction.evaluate(tri0[2])
+                };
+
+                std::array<float, 3> val1 = {
+                   impFunction.evaluate(tri1[0]),
+                   impFunction.evaluate(tri1[1]),
+                   impFunction.evaluate(tri1[2])
+                };
+
+                std::array<int, 3> idx0 = {
+                   x + y * dimx,
+                   x + (y + 1) * dimx,
+                   (x + 1) + y * dimx
+                };
+
+                std::array<int, 3> idx1 = {
+                   idx0[2],
+                   idx0[1],
+                   (x + 1) + (y + 1) * dimx
+                };
+
+
+                // Polygon (max 4 vertices)
+                Vec2 poly[4];
+                int count = 0;
+
+                for (int e = 0; e < 3; ++e)
+                {
+                    int i0 = edges[e].a;
+                    int i1 = edges[e].b;
+
+                    bool in0 = triVal[i0] > iso;
+                    bool in1 = triVal[i1] > iso;
+
+                    if (in0)
+                        poly[count++] = triPos[i0];
+
+                    if (in0 != in1)
+                        poly[count++] = interp(
+                            triPos[i0], triPos[i1],
+                            triVal[i0], triVal[i1],
+                            iso
+                        );
+                }
+
+                // Fan triangulation
+                for (int i = 1; i + 1 < count; ++i)
+                {
+                    emitTriangle(poly[0], poly[i], poly[i + 1]);
+                }
+
+
+
                 // Quad positions
+
                 std::array<Vec2, 4> pos = {
                     Vec2{(float(x) / (dimx - 1)) * 2.0f - 1.0f,     (static_cast<float>(y) / (dimy - 1)) * 2.0f - 1.0f },     // 0
                     Vec2{(float(x + 1) / (dimx - 1)) * 2.0f - 1.0f, (static_cast<float>(y) / (dimy - 1)) * 2.0f - 1.0f },     // 1
