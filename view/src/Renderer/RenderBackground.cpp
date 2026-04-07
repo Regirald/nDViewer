@@ -14,7 +14,7 @@
 #include <QVector2D>
 #include <QVector3D>
 
-#include "core/Math/Vec3.h"
+#include <QVector2D>
 
 namespace
 {
@@ -144,31 +144,6 @@ namespace
         glListBase(listBase - 32);
         glCallLists(static_cast<GLsizei>(text.size()), GL_UNSIGNED_BYTE, text.c_str());
         glPopAttrib();
-    }
-
-    ndv::math::Vec2 Normalize2D(const ndv::math::Vec2& value)
-    {
-        const float len = std::sqrt(value.x * value.x + value.y * value.y);
-        if (len <= 0.0001f)
-        {
-            return {};
-        }
-        return { value.x / len, value.y / len };
-    }
-
-    bool GetArrowGeometry(const ndv::math::Vec2& origin, const ndv::math::Vec2& direction, float length, float headSize,
-        ndv::math::Vec2& end, ndv::math::Vec2& base, ndv::math::Vec2& perp)
-    {
-        const ndv::math::Vec2 dir = Normalize2D(direction);
-        if (dir.x == 0.0f && dir.y == 0.0f)
-        {
-            return false;
-        }
-
-        end = origin + dir * length;
-        perp = { -dir.y, dir.x };
-        base = end - dir * headSize;
-        return true;
     }
 
     void DrawAxisArrows3D(const QMatrix4x4& view, const QMatrix4x4& projection)

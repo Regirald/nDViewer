@@ -32,15 +32,6 @@
     <ClInclude Include="include\core\Vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\core\Math\Vec3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\core\Math\Vec4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\core\Math\Mat4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\core\Transform\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>

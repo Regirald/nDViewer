@@ -134,9 +134,6 @@
     <ClInclude Include="include\core\Concepts.h" />
     <ClInclude Include="include\core\Field.h" />
     <ClInclude Include="include\core\Grid.h" />
-    <ClInclude Include="include\core\Math\Mat4.h" />
-    <ClInclude Include="include\core\Math\Vec3.h" />
-    <ClInclude Include="include\core\Math\Vec4.h" />
     <ClInclude Include="include\core\Pipeline\CoordinateSpaces.h" />
     <ClInclude Include="include\core\Pipeline\TransformPipeline.h" />
     <ClInclude Include="include\core\Transform\Transform.h" />

@@ -4,7 +4,6 @@
 #include <QVector3D>
 #include <QVector4D>
 
-#include "core/Math/Vec3.h"
 
 namespace ndv::pipeline
 {
@@ -42,7 +41,7 @@ namespace ndv::pipeline
 
         // NDC -> Screen: map from [-1,1] to pixel coordinates.
         // Common pitfall: Y origin differs between OpenGL (bottom-left) and UI toolkits (top-left).
-        static math::Vec2 NDCToScreen(const QVector3D& ndcPos, float width, float height)
+        static QVector2D NDCToScreen(const QVector3D& ndcPos, float width, float height)
         {
             const float x = (ndcPos.x() + 1.0f) * 0.5f * width;
             const float y = (1.0f - (ndcPos.y() + 1.0f) * 0.5f) * height;
