@@ -38,5 +38,14 @@
     <ClInclude Include="include\core\Resolution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\core\SimplexGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\Basis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\SimplexBasis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

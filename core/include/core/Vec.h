@@ -43,3 +43,36 @@ inline Vec<Dim, T> operator*(T s, const Vec<Dim, T>& v)
 {
     return v * s;
 }
+
+// Compound assignment operators
+template <size_t Dim, typename T>
+inline Vec<Dim, T>& operator+=(Vec<Dim, T>& a, const Vec<Dim, T>& b)
+{
+    for (size_t i = 0; i < Dim; ++i)
+        a[i] += b[i];
+    return a;
+}
+
+template <size_t Dim, typename T>
+inline Vec<Dim, T>& operator-=(Vec<Dim, T>& a, const Vec<Dim, T>& b)
+{
+    for (size_t i = 0; i < Dim; ++i)
+        a[i] -= b[i];
+    return a;
+}
+
+template <size_t Dim, typename T>
+inline Vec<Dim, T>& operator*=(Vec<Dim, T>& v, T s)
+{
+    for (size_t i = 0; i < Dim; ++i)
+        v[i] *= s;
+    return v;
+}
+
+template <size_t Dim, typename T>
+inline Vec<Dim, T>& operator/=(Vec<Dim, T>& v, T s)
+{
+    for (size_t i = 0; i < Dim; ++i)
+        v[i] /= s;
+    return v;
+}
