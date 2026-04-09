@@ -1,5 +1,6 @@
 #include <QElapsedTimer>
 #include <QMouseEvent>
+#include <QClipboard>
 
 #include <algorithm>
 
@@ -8,6 +9,7 @@
 Viewer::Viewer(QWidget* parent)
     : QOpenGLWidget(parent)
 {
+    setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
     renderingManager.setBackground();
     //renderingManager.setExampleTriangle();
@@ -59,6 +61,23 @@ void Viewer::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderingManager.renderScene();
 
+}
+
+void Viewer::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_C &&
+        event->modifiers() & Qt::ControlModifier)
+    {
+        // grab OpenGL framebuffer
+        QImage screenshot = grabFramebuffer();
+
+        // copy to clipboard
+        QGuiApplication::clipboard()->setImage(screenshot);
+        screenshot.save("../snapshots/snapshot.png");
+        return; // consume event
+    }
+
+    QOpenGLWidget::keyPressEvent(event);
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event)
