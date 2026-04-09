@@ -10,15 +10,14 @@ class Grid {
 public:
     using Index = Vec<Dim, int>;
 
-    Grid(const Resolution<Dim>& resolution, Basis<Dim> basis) 
-        : m_size(resolution.size)
+    Grid(const Resolution<Dim>& resolution, Basis<Dim>& basis) 
+        : m_resolution(resolution)
         , m_basis(basis) 
     {
         size_t total = 1;
         for (size_t i = 0; i < Dim; ++i)
-            total *= m_size[i];
+            total *= m_resolution.size[i];
         m_data.resize(total);
-		m_basis.build();
     }
 
     T& operator()(const Index& idx) {
@@ -29,11 +28,11 @@ public:
         return m_data[flatten(idx)];
     }
 
-    const Index& getSize() const { return m_size; }
+    const Index& getSize() const { return m_resolution.size; }
     const int getNbPoints() const { 
         int total = 1;
         for (size_t i = 0; i < Dim; ++i)
-            total *= m_size[i];
+            total *= m_resolution.size[i];
         return total;
 	}
     // Default position uses the underlying basis scaled by integer coords
@@ -41,7 +40,10 @@ public:
     {
         Vec<Dim, T> p = {};
         for (int i = 0; i < static_cast<int>(Dim); ++i)
-            p += this->m_basis[i] * static_cast<T>(coords[i]);
+        {
+            T scale = (static_cast<T>(coords[i]) / (m_resolution.size[i] - 1)) * 2.f - 1.f;
+            p += this->m_basis[i] * scale;
+        }
         return p;
     }
 
@@ -49,14 +51,14 @@ public:
         size_t offset = 0, stride = 1;
         for (size_t i = 0; i < Dim; ++i) {
             offset += idx[i] * stride;
-            stride *= m_size[i];
+            stride *= m_resolution.size[i];
         }
         return offset;
     }
 
-protected:
+public:
     std::vector<T> m_data;
-    Index m_size;
+    Resolution<Dim> m_resolution;
     Basis<Dim> m_basis;
 
 };

@@ -8,7 +8,7 @@ template<size_t Dim>
 class SimplexBasis : public Basis<Dim>
 {
 public:
-	void build() override
+	SimplexBasis() 
 	{
 		// Construct an orthogonal-ish simplex basis in R^Dim
      for (int i = 0; i < static_cast<int>(Dim); ++i)

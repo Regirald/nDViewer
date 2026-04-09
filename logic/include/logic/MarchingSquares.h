@@ -2,7 +2,7 @@
 #include <array>
 #include "model/Mesh.h"
 #include "core/Field.h"
-#include "core/Resolution.h"
+#include "core/Grid.h"
 
 class MarchingSquares {
 public:
@@ -23,31 +23,25 @@ public:
 
     static Mesh<2> extractContour(const ImplicitFunction<2>& impFunction,
         float iso,
-        Resolution<2>& resolution)
+        Grid<2, float> grid)
     {
         Mesh<2> mesh;
 
-        int dimx = resolution.size[0];
-        int dimy = resolution.size[1];
+        int dimx = grid.m_resolution.size[0];
+        int dimy = grid.m_resolution.size[1];
 
         auto index = [&](int x, int y) {
             return x + y * dimx;
             };
 
-        // --- 1. Grid geometry (equilateral triangular lattice) ---
-        auto gridPos = [&](int x, int y) -> Vec2 {
-            float dy = std::sqrt(3.0f) * 0.5f;
-            return Vec2{
-                (x + 0.5f * (y & 1)) / (dimx - 1) * 2.0f - 1.0f,
-                (y * dy) / (dimy - 1) * 2.0f - 1.0f
-            };
-            };
 
         // --- 2. Precompute scalar field ---
         std::vector<float> field(dimx * dimy);
         for (int y = 0; y < dimy; ++y)
             for (int x = 0; x < dimx; ++x)
-                field[index(x, y)] = impFunction.evaluate(gridPos(x, y));
+                field[index(x, y)] = impFunction.evaluate({ 
+                (float)x / (grid.m_resolution.size[0] - 1) * 2.f - 1.f, 
+                (float)y / (grid.m_resolution.size[1] - 1) * 2.f - 1.f });
 
         // --- 3. Edge cache (critical: no duplicates) ---
         enum EdgeType { E0 = 0, E1 = 1, E2 = 2 };
@@ -94,8 +88,8 @@ public:
                 if (slot != -1)
                     return slot;
 
-                Vec2 p0 = gridPos(xa, ya);
-                Vec2 p1 = gridPos(xb, yb);
+                Vec2 p0 = grid.getPosition({ xa, ya });
+                Vec2 p1 = grid.getPosition({ xb, yb });
 
                 float v0 = field[index(xa, ya)];
                 float v1 = field[index(xb, yb)];

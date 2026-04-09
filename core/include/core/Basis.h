@@ -8,7 +8,7 @@ class Basis : public std::array<Vec<Dim, float>, Dim>
 {
 public:
 
-	virtual void build()
+	Basis()
 	{
 		for (size_t i = 0; i < Dim; ++i) {
 			Vec<Dim, float> vec;

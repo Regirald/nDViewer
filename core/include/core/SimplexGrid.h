@@ -10,17 +10,13 @@ class SimplexGrid : public Grid<Dim, T> {
 public:
     SimplexGrid(const Resolution<Dim>& size, SimplexBasis<Dim> basis)
         : Grid<Dim, T>(size, basis) 
-        , m_simplexBasis(basis)
     {
-        m_simplexBasis.build();
     }
 
     Vec<Dim, T> getPosition(Vec<Dim, int> coords) const override;
 
-    SimplexBasis<Dim> m_simplexBasis;
 };
 
-// inline/template definition must be in header
 template <size_t Dim, typename T>
 inline Vec<Dim, T> SimplexGrid<Dim, T>::getPosition(Vec<Dim, int> coords) const
 {
@@ -28,7 +24,9 @@ inline Vec<Dim, T> SimplexGrid<Dim, T>::getPosition(Vec<Dim, int> coords) const
 
     // simple default: use basis vectors scaled by integer coords
     for (int i = 0; i < Dim; ++i)
-        p += m_simplexBasis[i] * static_cast<T>(coords[i]);
-
+    {
+        T scale = (static_cast<T>(coords[i]) / (this->m_resolution.size[i] - 1)) * 2.f - 1.f;
+        p += this->m_basis[i] * scale;
+    }
     return p;
 }
