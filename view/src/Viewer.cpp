@@ -11,6 +11,7 @@ Viewer::Viewer(QWidget* parent)
     setMouseTracking(true);
     renderingManager.setBackground();
     //renderingManager.setExampleTriangle();
+    setYawPitchFromInitialPosition();
     updateCameraFromOrbit();
     // regular update of the viewer
     m_updateTimer.setInterval(16);
@@ -174,3 +175,25 @@ void Viewer::updateCameraFromOrbit()
     m_camera.position = m_camera.target + offset;
 }
 
+void Viewer::setYawPitchFromInitialPosition()
+{
+    QVector3D dir = m_camera.position - m_camera.target;
+
+    m_baseDistance = dir.length();
+    if (m_baseDistance < 1e-6f)
+        return; // avoid division by zero
+
+    // normalize direction
+    QVector3D n = dir / m_baseDistance;
+
+    const float radToDeg = 180.0f / 3.1415926535f;
+
+    // pitch = asin(y)
+    m_pitch = asinf(n.y()) * radToDeg;
+
+    // yaw = atan2(x, z)
+    m_yaw = atan2f(n.x(), n.z()) * radToDeg;
+
+    // optional: keep pitch in your expected range
+    m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
+}

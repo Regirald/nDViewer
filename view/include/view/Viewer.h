@@ -26,8 +26,11 @@ protected:
 
 private:
     void updateCameraFromOrbit();
+    void setYawPitchFromInitialPosition();
 
     // Simple track of mouse dragging for rotation.
+    ndv::Camera m_camera;
+
     bool m_leftDown = false;
     bool m_rightDown = false;
     bool m_middleDown = false;
@@ -38,7 +41,6 @@ private:
     float m_zoom    = 1.0f;
     float m_baseDistance = 3.0f;
 
-    ndv::Camera m_camera;
 
     RenderingManager renderingManager;
 
