@@ -14,7 +14,11 @@ class Viewer : public QOpenGLWidget
 public:
     explicit Viewer(QWidget* parent = nullptr);
 
-    void setMesh(Mesh<2>* mesh);
+    template <size_t Dim>
+    inline void setMesh(Mesh<Dim>* mesh)
+    {
+        renderingManager.setMesh(mesh);
+    }
 
 protected:
     void initializeGL() override;
@@ -29,6 +33,7 @@ protected:
 private:
     void updateCameraFromOrbit();
     void setYawPitchFromInitialPosition();
+    void captureHighRes();
 
     // Simple track of mouse dragging for rotation.
     ndv::Camera m_camera;

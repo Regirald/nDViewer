@@ -1,16 +1,9 @@
 #include "RenderingManager.h"
-#include "RenderMesh.h"
 #include "RenderBackground.h"
 #include "Renderer/ExampleTriangleRenderer.h"
 #include "Renderer/RenderTargetSphere.h"
 
 #include <memory>
-
-
-void RenderingManager::setMesh(Mesh<2>* mesh)
-{
-    renderContainer.push_back(std::make_unique<RenderMesh<2>>(mesh));
-}
 
 void RenderingManager::setBackground()
 {

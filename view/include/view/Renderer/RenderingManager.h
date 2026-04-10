@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "Renderer/RenderContext.h"
 #include "model/Mesh.h"
+#include "RenderMesh.h"
 
 template <size_t Dim>
 class Mesh;
@@ -12,7 +13,11 @@ class RenderingManager
 {
 public:
 	void renderScene();
-	void setMesh(Mesh<2>* mesh);
+template <size_t Dim>
+	inline void setMesh(Mesh<Dim>* mesh)
+	{
+		renderContainer.push_back(std::make_unique<RenderMesh<Dim>>(mesh));
+	}
 	void setBackground();
 	void setExampleTriangle();
 	void setViewport(int width, int height);
