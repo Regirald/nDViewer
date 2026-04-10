@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "Viewer.h"
+#include "fileInfo.h"
 
 Viewer::Viewer(QWidget* parent)
     : QOpenGLWidget(parent)
@@ -65,15 +66,23 @@ void Viewer::paintGL()
 
 void Viewer::keyPressEvent(QKeyEvent* event)
 {
-    if (event->key() == Qt::Key_C &&
-        event->modifiers() & Qt::ControlModifier)
+    if (event->modifiers() & Qt::ControlModifier)
     {
-        // grab OpenGL framebuffer
-        QImage screenshot = grabFramebuffer();
+        if (event->key() == Qt::Key_C) 
+        {
+            // copy to clipboard
+            QImage screenshot = grabFramebuffer();
+            QGuiApplication::clipboard()->setImage(screenshot);
+        }
+        else if (event->key() == Qt::Key_S)
+        {
+		    //save to file as well
+            QImage screenshot = grabFramebuffer();
+            QString filename = QString("%1snapshot.png").arg(getSnapShotDirectory());
+            filename = getAvailableFilename(filename);        
 
-        // copy to clipboard
-        QGuiApplication::clipboard()->setImage(screenshot);
-        screenshot.save("../snapshots/snapshot.png");
+            screenshot.save(filename);
+        }
         return; // consume event
     }
 

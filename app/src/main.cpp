@@ -21,7 +21,6 @@ int main(int argc, char* argv[])
     // 2. Sample into scalar field
 	Resolution<2> resolution({ 10, 10 });
 
-
     // 3. Extract topology
 	SimplexGrid<2, float> simplexGrid(resolution, SimplexBasis<2>());
     Mesh<2> mesh = MarchingSquares::extractContour(circle, 0.f, simplexGrid);

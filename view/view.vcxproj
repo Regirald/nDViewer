@@ -120,10 +120,10 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;SOLUTION_DIR=R"($(SolutionDir))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)include\view;$(ProjectDir)include\view\Camera;$(ProjectDir)include\view\Renderer;$(SolutionDir)Core\include;$(SolutionDir)Model\include;$(SolutionDir)Logic\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)include\view;$(ProjectDir)include\view\Camera;$(ProjectDir)include\view\Renderer;$(SolutionDir)Core\include;$(SolutionDir)Model\include;$(SolutionDir)Logic\include;$(SolutionDir)Database\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -150,6 +150,9 @@
   <ItemGroup>
     <ProjectReference Include="..\core\core.vcxproj">
       <Project>{83ade49b-7a22-4a8d-bc22-96f40bd6b2a5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\database\database.vcxproj">
+      <Project>{e9bed675-4c3b-4817-94bf-e1445e68cba0}</Project>
     </ProjectReference>
     <ProjectReference Include="..\logic\logic.vcxproj">
       <Project>{322008fc-47e5-44a6-a9a4-9a51b76b6811}</Project>
