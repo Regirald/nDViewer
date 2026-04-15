@@ -3,63 +3,170 @@
 #include "model/Mesh.h"
 #include "core/Field.h"
 
-// NOTE: This is currently a placeholder implementation. Instead of a full
-// marching cubes lookup-table based extraction, we synthesize a simple
-// UV-sphere mesh so that the rest of the rendering pipeline can be tested.
-// The signature stays compatible so it can be replaced with a real
-// marching cubes implementation later without touching callers.
+
 class MarchingCubes {
 public:
-    static Mesh<3> extract(const ScalarField<3>& /*field*/, float /*iso*/)
+    using Vec3 = Vec<3, float>;
+
+    static Vec3 interp(const Vec3& a, const Vec3& b, float va, float vb, float iso)
+    {
+        float t = (iso - va) / (vb - va);
+        return a + t * (b - a);
+    }
+
+    static Mesh<3> extractContour(const ImplicitFunction<3>& impFunction,
+        float iso,
+        Grid<3, float> grid)
     {
         Mesh<3> mesh;
 
-        const int stacks = 16;
-        const int slices = 32;
-        const float radius = 1.0f;
-        const float pi = 3.14159265358979323846f;
+        int dimx = grid.m_resolution.size[0];
+        int dimy = grid.m_resolution.size[1];
+        int dimz = grid.m_resolution.size[2];
 
-        // Generate vertices on a unit sphere.
-        for (int i = 0; i <= stacks; ++i)
-        {
-           float v = static_cast<float>(i) / static_cast<float>(stacks);
-            float phi = v * pi;
-            float y = radius * std::cos(phi - pi * 0.5f);
-            float r = radius * std::cos(phi - pi * 0.5f);
+        auto index = [&](int x, int y, int z) {
+            return x + dimx * (y + dimy * z);
+            };
 
-            for (int j = 0; j <= slices; ++j)
+        // --- 1. Precompute scalar field ---
+        std::vector<float> field(dimx * dimy * dimz);
+
+        for (int z = 0; z < dimz; ++z)
+            for (int y = 0; y < dimy; ++y)
+                for (int x = 0; x < dimx; ++x)
+                {
+                    field[index(x, y, z)] = impFunction.evaluate({
+                        (float)x / (dimx - 1) * 2.f - 1.f,
+                        (float)y / (dimy - 1) * 2.f - 1.f,
+                        (float)z / (dimz - 1) * 2.f - 1.f
+                        });
+                }
+
+        // --- 2. Edge cache ---
+        enum EdgeType { EX = 0, EY = 1, EZ = 2 };
+
+        std::vector<int> edgeVertex[3];
+        for (int e = 0;e < 3;++e)
+            edgeVertex[e].assign(dimx * dimy * dimz, -1);
+
+        auto getEdgeVertex = [&](int xa, int ya, int za,
+            int xb, int yb, int zb)->int
             {
-               float u = static_cast<float>(j) / static_cast<float>(slices);
-                float theta = u * 2.0f * pi;
+                EdgeType e;
+                int x, y, z;
 
-                Vec<3, float> p;
-                p[0] = radius * std::cos(theta) * std::cos(phi);
-                p[1] = radius * std::sin(phi) - 0.0f;
-                p[2] = radius * std::sin(theta) * std::cos(phi);
+                if (ya == yb && za == zb) { e = EX; x = std::min(xa, xb); y = ya; z = za; }
+                else if (xa == xb && za == zb) { e = EY; x = xa; y = std::min(ya, yb); z = za; }
+                else { e = EZ; x = xa; y = ya; z = std::min(za, zb); }
+
+                int idx = index(x, y, z);
+                int& slot = edgeVertex[e][idx];
+
+                if (slot != -1) return slot;
+
+                Vec3 p0 = grid.getPosition({ xa,ya,za });
+                Vec3 p1 = grid.getPosition({ xb,yb,zb });
+
+                float v0 = field[index(xa, ya, za)];
+                float v1 = field[index(xb, yb, zb)];
+
+                Vec3 p = interp(p0, p1, v0, v1, iso);
+
+                int vid = (int)mesh.vertices.size();
                 mesh.vertices.push_back(p);
-            }
-        }
 
-    // Generate triangle indices.
-    for (int i = 0; i < stacks; ++i)
-    {
-        for (int j = 0; j < slices; ++j)
+                slot = vid;
+                return vid;
+            };
+
+        // --- 3. Process tetrahedron ---
+        auto processTet = [&](int v[4][3])
+            {
+                float val[4];
+                bool inside[4];
+
+                for (int i = 0;i < 4;++i)
+                {
+                    val[i] = field[index(v[i][0], v[i][1], v[i][2])];
+                    inside[i] = val[i] > iso;
+                }
+
+                int vids[6];
+                int count = 0;
+
+                auto edge = [&](int a, int b)
+                    {
+                        vids[count++] = getEdgeVertex(
+                            v[a][0], v[a][1], v[a][2],
+                            v[b][0], v[b][1], v[b][2]);
+                    };
+
+                if (inside[0] != inside[1]) edge(0, 1);
+                if (inside[0] != inside[2]) edge(0, 2);
+                if (inside[0] != inside[3]) edge(0, 3);
+                if (inside[1] != inside[2]) edge(1, 2);
+                if (inside[1] != inside[3]) edge(1, 3);
+                if (inside[2] != inside[3]) edge(2, 3);
+
+                if (count == 3)
+                {
+                    mesh.indices.push_back(vids[0]);
+                    mesh.indices.push_back(vids[1]);
+                    mesh.indices.push_back(vids[2]);
+                }
+                else if (count == 4)
+                {
+                    mesh.indices.push_back(vids[0]);
+                    mesh.indices.push_back(vids[1]);
+                    mesh.indices.push_back(vids[2]);
+
+                    mesh.indices.push_back(vids[0]);
+                    mesh.indices.push_back(vids[2]);
+                    mesh.indices.push_back(vids[3]);
+                }
+            };
+
+        // --- 4. Cube traversal ---
+        const int tet[6][4] =
         {
-            unsigned int i0 = static_cast<unsigned int>(i * (slices + 1) + j);
-            unsigned int i1 = static_cast<unsigned int>(i0 + 1);
-            unsigned int i2 = static_cast<unsigned int>((i + 1) * (slices + 1) + j);
-            unsigned int i3 = static_cast<unsigned int>(i2 + 1);
+            {0,5,1,6},
+            {0,1,2,6},
+            {0,2,3,6},
+            {0,3,7,6},
+            {0,7,4,6},
+            {0,4,5,6}
+        };
 
-            mesh.indices.push_back(i0);
-            mesh.indices.push_back(i2);
-            mesh.indices.push_back(i1);
+        int cubeVerts[8][3];
 
-            mesh.indices.push_back(i1);
-            mesh.indices.push_back(i2);
-            mesh.indices.push_back(i3);
-        }
-    }
+        for (int z = 0;z < dimz - 1;++z)
+            for (int y = 0;y < dimy - 1;++y)
+                for (int x = 0;x < dimx - 1;++x)
+                {
+                    cubeVerts[0][0] = x;   cubeVerts[0][1] = y;   cubeVerts[0][2] = z;
+                    cubeVerts[1][0] = x + 1; cubeVerts[1][1] = y;   cubeVerts[1][2] = z;
+                    cubeVerts[2][0] = x + 1; cubeVerts[2][1] = y + 1; cubeVerts[2][2] = z;
+                    cubeVerts[3][0] = x;   cubeVerts[3][1] = y + 1; cubeVerts[3][2] = z;
+                    cubeVerts[4][0] = x;   cubeVerts[4][1] = y;   cubeVerts[4][2] = z + 1;
+                    cubeVerts[5][0] = x + 1; cubeVerts[5][1] = y;   cubeVerts[5][2] = z + 1;
+                    cubeVerts[6][0] = x + 1; cubeVerts[6][1] = y + 1; cubeVerts[6][2] = z + 1;
+                    cubeVerts[7][0] = x;   cubeVerts[7][1] = y + 1; cubeVerts[7][2] = z + 1;
 
-    return mesh;
+                    for (int t = 0;t < 6;++t)
+                    {
+                        int v[4][3];
+                        for (int i = 0;i < 4;++i)
+                        {
+                            int id = tet[t][i];
+                            v[i][0] = cubeVerts[id][0];
+                            v[i][1] = cubeVerts[id][1];
+                            v[i][2] = cubeVerts[id][2];
+                        }
+
+                        processTet(v);
+                    }
+                }
+
+        return mesh;
     }
 };

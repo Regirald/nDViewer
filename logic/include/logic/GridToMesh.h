@@ -2,6 +2,7 @@
 
 #include "model/Mesh.h"
 #include "core/Grid.h"
+#include "core/BinomialCoefficient.h"
 
 template <size_t Dim, typename T>
 class GridToMesh
@@ -66,6 +67,9 @@ inline void GridToMesh<Dim, T>::process(const Vec<Dim, int>& index,
 
     const auto& size = grid.getSize();
 
+    std::vector<Vec<Dim, int>> neighbors;
+    neighbors.reserve(Dim);
+    // add current to neighbor connections
     for (size_t d = 0; d < Dim; ++d)
     {
         Vec<Dim, int> neighbor = index;
@@ -75,7 +79,17 @@ inline void GridToMesh<Dim, T>::process(const Vec<Dim, int>& index,
         {
             mesh.indices.push_back(currentIdx);
             mesh.indices.push_back(grid.flatten(neighbor));
+            neighbors.push_back(neighbor);
         }
     }
+        // add neighbor to neighbor connections
+    if (neighbors.size() >= 2)
+    {
 
+        std::vector<std::vector<int>> combos = generateCombinations(static_cast<int>(neighbors.size()), 2);
+        for (const auto& combo : combos) {
+            mesh.indices.push_back(grid.flatten(neighbors[combo[1]]));
+            mesh.indices.push_back(grid.flatten(neighbors[combo[0]]));
+        }
+    }
 }

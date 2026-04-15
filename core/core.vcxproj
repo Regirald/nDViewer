@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\core\Basis.h" />
+    <ClInclude Include="include\core\BinomialCoefficient.h" />
     <ClInclude Include="include\core\Field.h" />
     <ClInclude Include="include\core\Grid.h" />
     <ClInclude Include="include\core\Pipeline\TransformPipeline.h" />
