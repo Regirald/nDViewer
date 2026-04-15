@@ -2,7 +2,8 @@
 
 #include <Windows.h>
 #include <gl/GL.h>
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#include <QOpenGLShaderProgram>
 
 #ifdef render
 #undef render
@@ -24,8 +25,10 @@ public:
 
     GLuint vbo = 0;
     GLuint ebo = 0;
+	GLuint vao = 0;
 	int m_indexCount = 0;
 	bool m_initialized = false;
-	QOpenGLFunctions* gl = nullptr;
+	QOpenGLExtraFunctions* gl = nullptr;
+	QOpenGLShaderProgram m_program;
 	Mesh<Dim>* m_mesh;
 };

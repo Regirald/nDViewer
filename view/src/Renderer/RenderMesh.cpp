@@ -3,49 +3,8 @@
 #include <QMatrix4x4>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
-#include <QOpenGLShaderProgram>
 #include <QVector3D>
-
-// ------------------------------------------------------------
-// Shader (kept simple, but NOT tied to GL init timing)
-// ------------------------------------------------------------
-namespace
-{
-    QOpenGLShaderProgram& MeshProgram()
-    {
-        static QOpenGLShaderProgram program;
-        static bool initialized = false;
-
-        if (!initialized)
-        {
-            initialized = true;
-
-            const char* vertexSource =
-                "#version 120\n"
-                "uniform mat4 u_view;\n"
-                "uniform mat4 u_projection;\n"
-                "attribute vec3 a_position;\n"
-                "void main()\n"
-                "{\n"
-                "    gl_Position = u_projection * u_view * vec4(a_position, 1.0);\n"
-                "}\n";
-
-            const char* fragmentSource =
-                "#version 120\n"
-                "uniform vec3 u_color;\n"
-                "void main()\n"
-                "{\n"
-                "    gl_FragColor = vec4(u_color, 1.0);\n"
-                "}\n";
-
-            program.addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
-            program.addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
-            program.link();
-        }
-
-        return program;
-    }
-}
+    
 
 // ------------------------------------------------------------
 // Constructor (NO OpenGL here)
@@ -66,34 +25,71 @@ RenderMesh<Dim>::RenderMesh(Mesh<Dim>* mesh)
 template<size_t Dim>
 void RenderMesh<Dim>::initializeGLResources()
 {
-    if (!gl || !m_mesh)
+    if (!m_mesh)
         return;
 
-    // ---- Flatten vertices safely (supports Dim=2 or 3) ----
+    QOpenGLContext* ctx = QOpenGLContext::currentContext();
+    gl = ctx->extraFunctions();
+    gl->initializeOpenGLFunctions();
+
+    // -------------------------
+    // 1. Compile shader
+    // -------------------------
+    if (!m_program.isLinked())
+    {
+        const char* vs =
+            "#version 330 core\n"
+            "layout(location = 0) in vec3 a_position;\n"
+            "uniform mat4 u_view;\n"
+            "uniform mat4 u_projection;\n"
+            "void main()\n"
+            "{\n"
+            "    gl_Position = u_projection * u_view * vec4(a_position, 1.0);\n"
+            "}\n";
+
+        const char* fs =
+            "#version 330 core\n"
+            "out vec4 FragColor;\n"
+            "uniform vec3 u_color;\n"
+            "void main()\n"
+            "{\n"
+            "    FragColor = vec4(u_color, 1.0);\n"
+            "}\n";
+
+        m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
+        m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs);
+        m_program.link();
+    }
+
+    // -------------------------
+    // 2. Flatten vertex data
+    // -------------------------
     std::vector<float> flatVertices;
-    flatVertices.reserve(m_mesh->vertices.size() * Dim);
+    flatVertices.reserve(m_mesh->vertices.size() * 3);
 
     for (const auto& v : m_mesh->vertices)
     {
         flatVertices.push_back(v[0]);
         flatVertices.push_back(v[1]);
-
         if constexpr (Dim == 3)
             flatVertices.push_back(v[2]);
         else
             flatVertices.push_back(0.0f);
     }
 
-    // ---- Ensure indices are uint32 ----
-    std::vector<uint32_t> indices32;
-    indices32.reserve(m_mesh->indices.size());
+    std::vector<uint32_t> indices32(m_mesh->indices.begin(), m_mesh->indices.end());
 
-    for (auto idx : m_mesh->indices)
-    {
-        indices32.push_back(static_cast<uint32_t>(idx));
-    }
+    m_indexCount = static_cast<int>(indices32.size());
 
-    // ---- Create buffers ----
+    // -------------------------
+    // 3. Create VAO FIRST
+    // -------------------------
+    gl->glGenVertexArrays(1, &vao);
+    gl->glBindVertexArray(vao);
+
+    // -------------------------
+    // 4. Create & fill VBO
+    // -------------------------
     gl->glGenBuffers(1, &vbo);
     gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
     gl->glBufferData(GL_ARRAY_BUFFER,
@@ -101,6 +97,9 @@ void RenderMesh<Dim>::initializeGLResources()
         flatVertices.data(),
         GL_STATIC_DRAW);
 
+    // -------------------------
+    // 5. Create & fill EBO
+    // -------------------------
     gl->glGenBuffers(1, &ebo);
     gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -108,7 +107,24 @@ void RenderMesh<Dim>::initializeGLResources()
         indices32.data(),
         GL_STATIC_DRAW);
 
-    m_indexCount = static_cast<int>(indices32.size());
+    // -------------------------
+    // 6. Define vertex layout
+    // -------------------------
+    gl->glEnableVertexAttribArray(0);
+    gl->glVertexAttribPointer(
+        0,              // location = 0
+        3,              // vec3
+        GL_FLOAT,
+        GL_FALSE,
+        3 * sizeof(float),
+        (void*)0
+    );
+
+    // -------------------------
+    // 7. Unbind VAO (important)
+    // -------------------------
+    gl->glBindVertexArray(0);
+
     m_initialized = true;
 }
 
@@ -118,59 +134,26 @@ void RenderMesh<Dim>::initializeGLResources()
 template<size_t Dim>
 void RenderMesh<Dim>::render(const ndv::RenderContext& context)
 {
-    if (!m_mesh)
-        return;
-
-    // ---- Ensure GL context ----
-    if (!gl)
-    {
-        QOpenGLContext* ctx = QOpenGLContext::currentContext();
-        if (!ctx)
-            return;
-
-        gl = ctx->functions();
-    }
-
-    // ---- Lazy init ----
     if (!m_initialized)
-    {
         initializeGLResources();
-        if (!m_initialized)
-            return;
-    }
 
-    QOpenGLShaderProgram& program = MeshProgram();
-    if (!program.isLinked())
+    if (!m_initialized)
         return;
 
-    program.bind();
+    gl->glEnable(GL_DEPTH_TEST);
+    gl->glDepthFunc(GL_LESS);
 
-    // ---- Set uniforms ----
-    const QMatrix4x4& viewMatrix = context.view;
-    const QMatrix4x4& projectionMatrix = context.projection;
-    program.setUniformValue("u_view", viewMatrix);
-    program.setUniformValue("u_projection", projectionMatrix);
-    program.setUniformValue("u_color", QVector3D(0.9f, 0.9f, 0.9f));
+    m_program.bind();
 
-    // ---- Bind vertex buffer ----
-    int posLoc = program.attributeLocation("a_position");
-    if (posLoc < 0)
-    {
-        program.release();
-        return;
-    }
+    m_program.setUniformValue("u_view", context.view);
+    m_program.setUniformValue("u_projection", context.projection);
+    m_program.setUniformValue("u_color", QVector3D(0.9f, 0.9f, 0.9f));
 
-    program.enableAttributeArray(posLoc);
-
-    gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    gl->glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    // ---- Draw ----
-    gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    gl->glBindVertexArray(vao);
     gl->glDrawElements(GL_LINES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+    gl->glBindVertexArray(0);
 
-    program.disableAttributeArray(posLoc);
-    program.release();
+    m_program.release();
 }
 
 // ------------------------------------------------------------
@@ -179,18 +162,12 @@ void RenderMesh<Dim>::render(const ndv::RenderContext& context)
 template<size_t Dim>
 RenderMesh<Dim>::~RenderMesh()
 {
-    QOpenGLContext* ctx = QOpenGLContext::currentContext();
-    if (!ctx)
+    if (!gl)
         return;
 
-    QOpenGLFunctions* f = ctx->functions();
-    if (!f)
-        return;
-
-    if (vbo)
-        f->glDeleteBuffers(1, &vbo);
-    if (ebo)
-        f->glDeleteBuffers(1, &ebo);
+    if (vbo) gl->glDeleteBuffers(1, &vbo);
+    if (ebo) gl->glDeleteBuffers(1, &ebo);
+    if (vao) gl->glDeleteVertexArrays(1, &vao);
 }
 
 // ------------------------------------------------------------

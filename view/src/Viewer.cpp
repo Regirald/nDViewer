@@ -1,6 +1,7 @@
 #include <QElapsedTimer>
 #include <QMouseEvent>
 #include <QClipboard>
+#include <QOpenGLFramebufferObject>
 
 #include <algorithm>
 
@@ -20,11 +21,6 @@ Viewer::Viewer(QWidget* parent)
     m_updateTimer.setInterval(16);
     connect(&m_updateTimer, &QTimer::timeout, this, QOverload<>::of(&Viewer::update));
     m_updateTimer.start();
-}
-
-void Viewer::setMesh(Mesh<2>* mesh)
-{
-    renderingManager.setMesh(mesh);
 }
 
 void Viewer::initializeGL()
@@ -56,11 +52,12 @@ void Viewer::paintGL()
     renderingManager.setViewport(viewportWidth, viewportHeight);
     m_camera.aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
 
-  renderingManager.setCamera(m_camera.viewMatrix(), m_camera.projectionMatrix(), m_camera.position, m_camera.target);
+    renderingManager.setCamera(m_camera.viewMatrix(), m_camera.projectionMatrix(), m_camera.position, m_camera.target);
     renderingManager.setTime(static_cast<float>(timer.elapsed()) / 1000.0f);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderingManager.renderScene();
+    qDebug() << "CTX:" << QOpenGLContext::currentContext();
 
 }
 
@@ -75,13 +72,8 @@ void Viewer::keyPressEvent(QKeyEvent* event)
             QGuiApplication::clipboard()->setImage(screenshot);
         }
         else if (event->key() == Qt::Key_S)
-        {
-		    //save to file as well
-            QImage screenshot = grabFramebuffer();
-            QString filename = QString("%1snapshot.png").arg(getSnapShotDirectory());
-            filename = getAvailableFilename(filename);        
-
-            screenshot.save(filename);
+        { 
+            captureHighRes(); // 2x supersampling
         }
         return; // consume event
     }
@@ -224,4 +216,61 @@ void Viewer::setYawPitchFromInitialPosition()
 
     // optional: keep pitch in your expected range
     m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
+}
+
+void Viewer::captureHighRes()
+{
+    makeCurrent();  // CRITICAL
+    int width = 1920;
+    int height = 1080;
+
+    // Create FBO
+    QOpenGLFramebufferObjectFormat format;
+    format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    QOpenGLFramebufferObject fbo(width, height, format);
+
+    // Bind FBO
+    fbo.bind(); 
+
+    // Save current viewport
+    GLint prevViewport[4];
+    glGetIntegerv(GL_VIEWPORT, prevViewport);
+
+    // Set new viewport
+    glViewport(0, 0, width, height);
+
+    // Update camera aspect ratio
+    float oldAspect = m_camera.aspectRatio;
+    m_camera.aspectRatio = float(width) / float(height);
+
+    // Render scene (same as paintGL, but without swapbuffers)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    renderingManager.setViewport(width, height);
+    renderingManager.setCamera(
+        m_camera.viewMatrix(),
+        m_camera.projectionMatrix(),
+        m_camera.position,
+        m_camera.target
+    );
+
+    renderingManager.renderScene();
+
+    // Restore state
+    m_camera.aspectRatio = oldAspect;
+    glViewport(prevViewport[0], prevViewport[1],
+        prevViewport[2], prevViewport[3]);
+
+    fbo.release();
+
+    // Read image
+    QImage image = fbo.toImage();
+
+
+    // Save
+    QString filename = QString("%1snapshot.png").arg(getSnapShotDirectory());
+    filename = getAvailableFilename(filename);
+
+    image.save(filename);
 }
