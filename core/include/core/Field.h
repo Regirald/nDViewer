@@ -16,11 +16,11 @@ public:
 		m_data.resize(total);
 	}
 
-	float& operator()(const Index& idx) {
+	float& operator[](const Index& idx) {
 		return m_data[this->flatten(idx)];
 	}
 
-	const float& operator()(const Index& idx) const {
+	const float& operator[](const Index& idx) const {
 		return m_data[this->flatten(idx)];
 	}
 

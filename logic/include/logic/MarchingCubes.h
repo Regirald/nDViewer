@@ -50,7 +50,7 @@ public:
             edgeVertex[e].assign(dimx * dimy * dimz, -1);
 
         auto getEdgeVertex = [&](int xa, int ya, int za,
-            int xb, int yb, int zb)->int
+            int xb, int yb, int zb)
             {
                 EdgeType e;
                 int x, y, z;

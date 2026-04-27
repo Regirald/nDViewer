@@ -142,8 +142,10 @@
   <ItemGroup>
     <ClInclude Include="include\logic\ContourExtraction.h" />
     <ClInclude Include="include\logic\DistanceTransform.h" />
+    <ClInclude Include="include\logic\GridLooper.h" />
     <ClInclude Include="include\logic\GridToMesh.h" />
     <ClInclude Include="include\logic\MarchingCubes.h" />
+    <ClInclude Include="include\logic\MarchingHyperCubes.h" />
     <ClInclude Include="include\logic\MarchingSquares.h" />
     <ClInclude Include="include\logic\TopologyAnalysis.h" />
   </ItemGroup>

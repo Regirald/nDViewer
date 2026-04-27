@@ -3,6 +3,8 @@
 #include "model/Mesh.h"
 #include "core/Grid.h"
 #include "core/BinomialCoefficient.h"
+#include "GridLooper.h"
+
 
 template <size_t Dim, typename T>
 class GridToMesh
@@ -13,33 +15,6 @@ public:
 };
 
 
-template <size_t Dim, size_t CurrentDim>
-struct GridLooper {
-    template <typename Func>
-    static void loop(const Vec<Dim, int>& size,
-        Vec<Dim, int>& index,
-        Func&& f)
-    {
-        for (index[CurrentDim - 1] = 0;
-            index[CurrentDim - 1] < size[CurrentDim - 1];
-            ++index[CurrentDim - 1])
-        {
-            GridLooper<Dim, CurrentDim - 1>::loop(size, index, f);
-        }
-    }
-};
-
-template <size_t Dim>
-struct GridLooper<Dim, 0> {
-    template <typename Func>
-    static void loop(const Vec<Dim, int>&,
-        Vec<Dim, int>&,
-        Func&& f)
-    {
-        f();
-    }
-};
-
 template <size_t Dim, typename T>
 inline Mesh<Dim> GridToMesh<Dim, T>::convert(const Grid<Dim, T>& grid)
 {
@@ -47,9 +22,7 @@ inline Mesh<Dim> GridToMesh<Dim, T>::convert(const Grid<Dim, T>& grid)
     Vec<Dim, int> size = grid.getSize();
     int nbPoints = grid.getNbPoints();
     mesh.vertices.resize(nbPoints);
-    Vec<Dim, int> index;
-
-    GridLooper<Dim, Dim>::loop(size, index, [&]() {
+    GridLooper<Dim>::loop(size, [&](Vec<Dim, int>& index) {
         process(index, grid, mesh);
         });
 

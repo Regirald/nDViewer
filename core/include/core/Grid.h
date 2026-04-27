@@ -24,6 +24,7 @@ public:
         return total;
 	}
     // Default position uses the underlying basis scaled by integer coords
+
     virtual Vec<Dim, T> getPosition(Vec<Dim, int> coords) const
     {
         Vec<Dim, T> p = {};
