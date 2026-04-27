@@ -3,4 +3,27 @@
 #include "Basis.h"
 
 template <size_t Dim>
-using ScalarField = Grid<Dim, float>;
+class ScalarField : public Grid<Dim, float>
+{
+	using Index = Vec<Dim, int>;
+public:
+	ScalarField(const Resolution<Dim>& size, Basis<Dim> basis)
+		: Grid<Dim, float>(size, basis) 
+	{
+		size_t total = 1;
+		for (size_t i = 0; i < Dim; ++i)
+			total *= this->m_resolution.size[i];
+		m_data.resize(total);
+	}
+
+	float& operator()(const Index& idx) {
+		return m_data[this->flatten(idx)];
+	}
+
+	const float& operator()(const Index& idx) const {
+		return m_data[this->flatten(idx)];
+	}
+
+protected:
+	std::vector<float> m_data;
+};
