@@ -159,12 +159,13 @@ void Viewer::mouseMoveEvent(QMouseEvent* event)
         QVector3D up = m_camera.up;
         // right = forward x up
         QVector3D right = QVector3D::crossProduct(forward, up).normalized();
-        up = up.normalized();
+        QVector3D newUp = QVector3D::crossProduct(forward, right).normalized();
+        up = newUp;
 
         // move opposite to mouse dx/dy to feel natural
         QVector3D pan =
             right * (-dx * panSpeed) +
-            up * (dy * panSpeed);
+            up * (-dy * panSpeed);
 
         m_camera.target   += pan;
     }
@@ -191,7 +192,7 @@ void Viewer::updateCameraFromOrbit()
 
 
     //m_camera.target = { 0.0f, 0.0f, 0.0f };
-    m_camera.up = QVector3D(0.0f, 1.0f, 0.0f);
+    //m_camera.up = QVector3D(0.0f, 1.0f, 0.0f);
     m_camera.position = m_camera.target + offset;
 }
 
