@@ -8,7 +8,7 @@ template <size_t Dim, typename T>
 class SimplexGrid : public Grid<Dim, T> {
 
 public:
-    SimplexGrid(const Resolution<Dim>& size, SimplexBasis<Dim> basis)
+    SimplexGrid(const Resolution<Dim>& size, Basis<Dim> basis)
         : Grid<Dim, T>(size, basis) 
     {
     }

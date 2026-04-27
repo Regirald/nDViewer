@@ -83,13 +83,13 @@ inline void GridToMesh<Dim, T>::process(const Vec<Dim, int>& index,
         }
     }
         // add neighbor to neighbor connections
-    if (neighbors.size() >= 2)
-    {
+    //if (neighbors.size() >= 2)
+    //{
 
-        std::vector<std::vector<int>> combos = generateCombinations(static_cast<int>(neighbors.size()), 2);
-        for (const auto& combo : combos) {
-            mesh.indices.push_back(grid.flatten(neighbors[combo[1]]));
-            mesh.indices.push_back(grid.flatten(neighbors[combo[0]]));
-        }
-    }
+    //    std::vector<std::vector<int>> combos = generateCombinations(static_cast<int>(neighbors.size()), 2);
+    //    for (const auto& combo : combos) {
+    //        mesh.indices.push_back(grid.flatten(neighbors[combo[1]]));
+    //        mesh.indices.push_back(grid.flatten(neighbors[combo[0]]));
+    //    }
+    //}
 }

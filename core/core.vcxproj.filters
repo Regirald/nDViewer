@@ -18,6 +18,9 @@
     <ClCompile Include="src\blabla.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="include\core\OrthonormalGrid.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\core\Field.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\core\BinomialCoefficient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\OrthonormalBasis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
