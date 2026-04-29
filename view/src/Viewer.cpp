@@ -57,7 +57,6 @@ void Viewer::paintGL()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderingManager.renderScene();
-    qDebug() << "CTX:" << QOpenGLContext::currentContext();
 
 }
 

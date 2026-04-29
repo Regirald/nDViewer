@@ -150,7 +150,28 @@ void RenderMesh<Dim>::render(const ndv::RenderContext& context)
     m_program.setUniformValue("u_color", QVector3D(0.9f, 0.9f, 0.9f));
 
     gl->glBindVertexArray(vao);
-    gl->glDrawElements(GL_LINES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+    if (Dim == 2)
+    {
+        // 2D: draw edges as lines
+        gl->glDrawElements(GL_LINES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+    }
+    if (Dim == 3)
+    {
+        glEnable(GL_POINT_SMOOTH);
+        ::glPointSize(10.0f);
+        gl->glLineWidth(2.0f);
+
+        ::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+
+        ::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+
+        ::glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+
+        ::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // restore
+    }
     gl->glBindVertexArray(0);
 
     m_program.release();

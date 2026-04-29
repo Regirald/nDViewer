@@ -53,12 +53,15 @@ Mesh<Dim> MarchingHyperCubes<Dim>::extractIsosurface(const ImplicitFunction<Dim>
 
 
 	// --- 3. Process hypercube ---
+    int nbProcessedMax = 100;
     std::vector<typename MarchingHyperCubes<Dim>::Simplex> simplices = generateFreudenthalSimplices();
-	auto processHyperCube = [&iso, &mesh, &field, simplices](const Index& idxCube) //simplices passed by copy!
+	auto processHyperCube = [&iso, &mesh,&nbProcessedMax, &field, simplices](const Index& idxCube) //simplices passed by copy!
 		{
             std::ostringstream oss;
             oss << idxCube;
-
+            if (nbProcessedMax == 0)
+                return;
+            nbProcessedMax--;
             qDebug() << QString::fromStdString(oss.str());
 			for (auto simplice : simplices)
             {
@@ -71,11 +74,10 @@ Mesh<Dim> MarchingHyperCubes<Dim>::extractIsosurface(const ImplicitFunction<Dim>
                 std::vector<PatchSimplex> patchs = triangulateIntersectionPatchConvexHull(intersections);
 				for (auto patch : patchs)
                 {
-                    for (const auto& vertex : patch)
-                        mesh.vertices.push_back(vertex);
-                    size_t baseIndex = mesh.vertices.size() - Dim;
-                    for (size_t i = 1; i < Dim - 1; ++i)
-                        mesh.indices.push_back(baseIndex + i);
+                    for (const auto& vertex : patch) {
+                            mesh.vertices.push_back(field.getPosition(vertex));
+                            mesh.indices.push_back(mesh.vertices.size() - 1);
+                    }
                 }
             }
 
