@@ -7,6 +7,7 @@
 class MarchingSquares {
 public:
     using Vec2 = Vec<2, float>;
+    using Index = Vec<2, int>;
 
     struct Edge { int a, b; };
 
@@ -23,7 +24,7 @@ public:
 
     static Mesh<2> extractContour(const ImplicitFunction<2>& impFunction,
         float iso,
-        Grid<2, float> grid)
+        Grid<2> grid)
     {
         Mesh<2> mesh;
 
@@ -88,8 +89,8 @@ public:
                 if (slot != -1)
                     return slot;
 
-                Vec2 p0 = grid.getPosition({ xa, ya });
-                Vec2 p1 = grid.getPosition({ xb, yb });
+                Vec2 p0 = grid.getPosition(Index({ xa, ya }));
+                Vec2 p1 = grid.getPosition(Index({ xb, yb }));
 
                 float v0 = field[index(xa, ya)];
                 float v1 = field[index(xb, yb)];

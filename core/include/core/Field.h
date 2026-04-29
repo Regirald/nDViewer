@@ -3,12 +3,12 @@
 #include "Basis.h"
 
 template <size_t Dim>
-class ScalarField : public Grid<Dim, float>
+class ScalarField : public Grid<Dim>
 {
 	using Index = Vec<Dim, int>;
 public:
 	ScalarField(const Resolution<Dim>& size, Basis<Dim> basis)
-		: Grid<Dim, float>(size, basis) 
+		: Grid<Dim>(size, basis) 
 	{
 		size_t total = 1;
 		for (size_t i = 0; i < Dim; ++i)

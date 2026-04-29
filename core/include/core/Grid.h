@@ -5,10 +5,11 @@
 #include "Basis.h"
 
 
-template <size_t Dim, typename T>
+template <size_t Dim>
 class Grid {
 public:
     using Index = Vec<Dim, int>;
+    using Point = Vec<Dim, float>;
 
     Grid(const Resolution<Dim>& resolution, Basis<Dim>& basis) 
         : m_resolution(resolution)
@@ -25,18 +26,30 @@ public:
 	}
     // Default position uses the underlying basis scaled by integer coords
 
-    virtual Vec<Dim, T> getPosition(Vec<Dim, int> coords) const
+    virtual Vec<Dim, float> getPosition(const Index& coords) const
     {
-        Vec<Dim, T> p = {};
-        for (int i = 0; i < static_cast<int>(Dim); ++i)
+        Vec<Dim, float> p = {};
+        for (size_t i = 0; i < Dim; ++i)
         {
-            T scale = (static_cast<T>(coords[i]) / (m_resolution.size[i] - 1)) * 2.f - 1.f;
+            float scale = (static_cast<float>(coords[i]) / (m_resolution.size[i] - 1)) * 2.f - 1.f;
             p += this->m_basis[i] * scale;
         }
         return p;
     }
 
-    size_t flatten(const Index& idx) const {
+    virtual Vec<Dim, float> getPosition(const Point& pointBloc) const
+    {
+        Vec<Dim, float> p = {};
+        for (size_t i = 0; i < Dim; ++i)
+        {
+            float scale = (static_cast<float>(pointBloc[i]) / (m_resolution.size[i] - 1)) * 2.f - 1.f;
+            p += this->m_basis[i] * scale;
+        }
+        return p;
+    }
+
+    size_t flatten(const Index& idx) const 
+    {
         size_t offset = 0, stride = 1;
         for (size_t i = 0; i < Dim; ++i) {
             offset += idx[i] * stride;

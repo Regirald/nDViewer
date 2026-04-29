@@ -23,13 +23,13 @@ int main(int argc, char* argv[])
     Sphere sphere;
 
     // 2. Sample into scalar field
-    int res = 4;
+    int res = 10;
 	Resolution<2> resolution({ res, res});
 	Resolution<3> resolution3({ res, res, res});
 
     // 3. Extract topology
-	SimplexGrid<2, float> orthoGrid(resolution, OrthonormalBasis<2>());
-	SimplexGrid<3, float> orthoGrid3(resolution3, OrthonormalBasis<3>());
+	SimplexGrid<2> orthoGrid(resolution, OrthonormalBasis<2>());
+	SimplexGrid<3> orthoGrid3(resolution3, OrthonormalBasis<3>());
     Mesh<3> mesh = MarchingHyperCubes<3>::extractIsosurface(sphere, 0.f, orthoGrid3);
 	//Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid);
 	Mesh<3> gridMesh3 = GridToMesh<3, float>::convert(orthoGrid3);

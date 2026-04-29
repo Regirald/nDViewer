@@ -10,19 +10,19 @@ template <size_t Dim, typename T>
 class GridToMesh
 {
 public:
-	static Mesh<Dim> convert(const Grid<Dim, T>& grid);
-	static void process(const Vec<Dim, int>& index, const Grid<Dim, T>& grid, Mesh<Dim>& mesh);
+	static Mesh<Dim> convert(const Grid<Dim>& grid);
+	static void process(const typename Grid<Dim>::Index& index, const Grid<Dim>& grid, Mesh<Dim>& mesh);
 };
 
 
 template <size_t Dim, typename T>
-inline Mesh<Dim> GridToMesh<Dim, T>::convert(const Grid<Dim, T>& grid)
+inline Mesh<Dim> GridToMesh<Dim, T>::convert(const Grid<Dim>& grid)
 {
     Mesh<Dim> mesh;
     Vec<Dim, int> size = grid.getSize();
     int nbPoints = grid.getNbPoints();
     mesh.vertices.resize(nbPoints);
-    GridLooper<Dim>::loop(size, [&](Vec<Dim, int>& index) {
+    GridLooper<Dim>::loop(size, [&](typename Grid<Dim>::Index& index) {
         process(index, grid, mesh);
         });
 
@@ -31,8 +31,8 @@ inline Mesh<Dim> GridToMesh<Dim, T>::convert(const Grid<Dim, T>& grid)
 }
 
 template <size_t Dim, typename T>
-inline void GridToMesh<Dim, T>::process(const Vec<Dim, int>& index,
-    const Grid<Dim, T>& grid,
+inline void GridToMesh<Dim, T>::process(const typename Grid<Dim>::Index& index,
+    const Grid<Dim>& grid,
     Mesh<Dim>& mesh)
 {
     const auto currentIdx = grid.flatten(index);
@@ -40,12 +40,12 @@ inline void GridToMesh<Dim, T>::process(const Vec<Dim, int>& index,
 
     const auto& size = grid.getSize();
 
-    std::vector<Vec<Dim, int>> neighbors;
+    std::vector<typename Grid<Dim>::Index> neighbors;
     neighbors.reserve(Dim);
     // add current to neighbor connections
     for (size_t d = 0; d < Dim; ++d)
     {
-        Vec<Dim, int> neighbor = index;
+        typename Grid<Dim>::Index neighbor = index;
         neighbor[d] += 1;
 
         if (neighbor[d] < size[d])

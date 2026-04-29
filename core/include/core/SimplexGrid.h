@@ -4,28 +4,28 @@
 #include "Vec.h"
 #include "SimplexBasis.h"
 
-template <size_t Dim, typename T>
-class SimplexGrid : public Grid<Dim, T> {
+template <size_t Dim>
+class SimplexGrid : public Grid<Dim> {
 
 public:
     SimplexGrid(const Resolution<Dim>& size, Basis<Dim> basis)
-        : Grid<Dim, T>(size, basis) 
+        : Grid<Dim>(size, basis) 
     {
     }
 
-    Vec<Dim, T> getPosition(Vec<Dim, int> coords) const override;
+    Vec<Dim, float> getPosition(const typename Grid<Dim>::Index& coords) const override;
 
 };
 
-template <size_t Dim, typename T>
-inline Vec<Dim, T> SimplexGrid<Dim, T>::getPosition(Vec<Dim, int> coords) const
+template <size_t Dim>
+inline Vec<Dim, float> SimplexGrid<Dim>::getPosition(const typename Grid<Dim>::Index& coords) const
 {
-    Vec<Dim, T> p = {};
+    Vec<Dim, float> p = {};
 
     // simple default: use basis vectors scaled by integer coords
-    for (int i = 0; i < Dim; ++i)
+    for (size_t i = 0; i < Dim; ++i)
     {
-        T scale = (static_cast<T>(coords[i]) / (this->m_resolution.size[i] - 1)) * 2.f - 1.f;
+        float scale = (static_cast<float>(coords[i]) / (this->m_resolution.size[i] - 1)) * 2.f - 1.f;
         p += this->m_basis[i] * scale;
     }
     return p;

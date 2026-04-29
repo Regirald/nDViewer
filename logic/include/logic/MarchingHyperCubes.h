@@ -15,8 +15,8 @@ class MarchingHyperCubes
 {
 public:
     using Index = Vec<Dim, int>;
-    using Point = std::array<int, Dim>;
-    using Simplex = std::array<Point, Dim + 1>;
+    using Point = Vec<Dim, float>;
+    using Simplex = std::array<Index, Dim + 1>;
     using PatchSimplex = std::array<Point, Dim>;
 
     struct EdgeIntersection
@@ -25,13 +25,12 @@ public:
         size_t v1;
         Point position;
     };
+    static std::vector<Simplex> generateFreudenthalSimplices();
+    static std::vector<EdgeIntersection> processSimplex(const Simplex& simplex, ScalarField<Dim>& field, double isoValue);
+    static std::vector<PatchSimplex> triangulateIntersectionPatchConvexHull(const std::vector<EdgeIntersection>& intersections);
+    static Mesh<Dim> extractIsosurface(const ImplicitFunction<Dim>& impFunction, float iso, Grid<Dim> grid);
 
-    std::vector<PatchSimplex> triangulateIntersectionPatchConvexHull(const std::vector<EdgeIntersection>& intersections);
-    std::vector<Simplex> generateFreudenthalSimplices();
-    std::vector<EdgeIntersection> processSimplex(const Simplex& simplex, double isoValue);
-    static Mesh<Dim> extractIsosurface(const ImplicitFunction<Dim>& impFunction, float iso, Grid<Dim, float> grid);
-
-    static Vec<Dim, float> interp(const Vec<Dim, float>& a, const Vec<Dim, float>& b, float va, float vb, float iso)
+    static Point interpolate(const Point& a, const Point& b, float va, float vb, float iso)
     {
         float t = (iso - va) / (vb - va);
         return a + t * (b - a);
@@ -41,49 +40,54 @@ public:
 template <size_t Dim>
 Mesh<Dim> MarchingHyperCubes<Dim>::extractIsosurface(const ImplicitFunction<Dim>& impFunction,
 	float iso,
-	Grid<Dim, float> grid) 
+	Grid<Dim> grid) 
 {
 	Mesh<Dim> mesh;
 
 	// --- 1. Precompute scalar field ---
 	ScalarField<Dim> field(grid.m_resolution, grid.m_basis);
-	GridLooper<Dim, Dim>::loop(grid.getSize(), [&](const Vec<Dim, int>& index) {
+	GridLooper<Dim, Dim>::loop(grid.getSize(), [&](const Index& index) {
 		field[index] = impFunction.evaluate(grid.getPosition(index));
 		});
 
-	// --- 2. Edge cache ---
-	auto getEdgeVertex = [&](Index& idxA,Index& idxB)
-		{
-			Index idxV;
 
-			Vec<Dim, float> p0 = grid.getPosition(idxA);
-			Vec<Dim, float> p1 = grid.getPosition(idxB);
-
-			float& v0 = field[idxA];
-			float& v1 = field[idxB];
-
-			Vec<Dim, float> p = interp(p0, p1, v0, v1, iso);
-
-			int vid = (int)mesh.vertices.size();
-			mesh.vertices.push_back(p);
-
-			return vid;
-		};
 
 	// --- 3. Process hypercube ---
-	auto processHyperCube = [&](Index& idxCube)
+    std::vector<typename MarchingHyperCubes<Dim>::Simplex> simplices = generateFreudenthalSimplices();
+	auto processHyperCube = [&iso, &mesh, &field, simplices](const Index& idxCube) //simplices passed by copy!
 		{
+            std::ostringstream oss;
+            oss << idxCube;
 
-			//consider a hypercube as a 2^Dim set of vertices, loop over them to determine inside/outside
+            qDebug() << QString::fromStdString(oss.str());
+			for (auto simplice : simplices)
+            {
+                for (size_t i = 0; i < Dim + 1; ++i)
+                {
+					for (size_t d = 0; d < Dim; ++d)
+					    simplice[i][d] += idxCube[d]; // translate simplex to current cube position
+                }
+                std::vector<typename MarchingHyperCubes<Dim>::EdgeIntersection> intersections = processSimplex(simplice, field, iso);
+                std::vector<PatchSimplex> patchs = triangulateIntersectionPatchConvexHull(intersections);
+				for (auto patch : patchs)
+                {
+                    for (const auto& vertex : patch)
+                        mesh.vertices.push_back(vertex);
+                    size_t baseIndex = mesh.vertices.size() - Dim;
+                    for (size_t i = 1; i < Dim - 1; ++i)
+                        mesh.indices.push_back(baseIndex + i);
+                }
+            }
 
 		};
+			
+	Index maxIndex = grid.getSize() - Index(1); // max cube index is one less than grid size
+    GridLooper<Dim, Dim>::loop(maxIndex, [&](const Index& index) {
+        processHyperCube(index);
+        });
+
 	return mesh;
 }
-
-	
-
-
-
 
 
 
@@ -103,7 +107,7 @@ std::vector<typename MarchingHyperCubes<Dim>::Simplex> MarchingHyperCubes<Dim>::
 
 		// v0 = origin already zero-initialized
 
-        typename MarchingHyperCubes<Dim>::Point current{};
+        typename MarchingHyperCubes<Dim>::Index current{};
         simplex[0] = current;
 
 		// progressively add unit vectors
@@ -122,18 +126,58 @@ std::vector<typename MarchingHyperCubes<Dim>::Simplex> MarchingHyperCubes<Dim>::
 
 
 
-
-
 template <size_t Dim>
 std::vector<typename MarchingHyperCubes<Dim>::EdgeIntersection>
-MarchingHyperCubes<Dim>::processSimplex(
-    const typename MarchingHyperCubes<Dim>::Simplex& simplex,
-    double isoValue)
+MarchingHyperCubes<Dim>::processSimplex(const typename MarchingHyperCubes<Dim>::Simplex& simplex, ScalarField<Dim>& field, double isoValue)
 {
-    // TODO: implement processing of a simplex using scalar field access.
-    // Provide an empty implementation for now to allow compilation.
-    return {};
+    std::vector<EdgeIntersection> intersections;
+
+    // scalar values at simplex vertices
+    std::array<double, Dim + 1> values{};
+
+    for (size_t i = 0; i < Dim + 1; ++i)
+        values[i] = field[simplex[i]];
+
+    // test all simplex edges
+    for (size_t i = 0; i < Dim + 1; ++i)
+    {
+        for (size_t j = i + 1; j < Dim + 1; ++j)
+        {
+            bool side0 = values[i] < isoValue;
+            bool side1 = values[j] < isoValue;
+
+            // edge crosses isosurface
+            if (side0 != side1)
+            {
+                EdgeIntersection inter;
+
+                inter.v0 = i;
+                inter.v1 = j;
+
+                // Convert integer index vertices to float points for interpolation
+                Point p0; Point p1;
+                for (size_t d = 0; d < Dim; ++d) {
+                    p0[d] = static_cast<float>(simplex[i][d]);
+                    p1[d] = static_cast<float>(simplex[j][d]);
+                }
+
+                inter.position = interpolate(
+                    p0, 
+                    p1,
+                    values[i],
+                    values[j],
+                    isoValue);
+
+                intersections.push_back(inter);
+            }
+        }
+    }
+
+    return intersections;
 }
+
+
+
 
 // -----------------------------------------------------------------------------
 // Exact triangulation of the convex intersection patch of a simplex.

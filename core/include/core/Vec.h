@@ -1,13 +1,32 @@
 #pragma once
 
 #include <array>
+#include <iostream>
 
 template <size_t Dim, typename T>
 struct Vec {
-    std::array<T, Dim> data;
 
+    Vec() {
+        data.fill(T(0));
+	}
+	Vec(T v) {
+        data.fill(v);
+    }
+	Vec(std::initializer_list<T> list) {
+        size_t i = 0;
+        for (T v : list) {
+            if (i < Dim) {
+                data[i++] = v;
+            }
+        }
+        for (; i < Dim; ++i) {
+            data[i] = T(0);
+        }
+    }
     T& operator[](size_t i) { return data[i]; }
     const T& operator[](size_t i) const { return data[i]; }
+
+    std::array<T, Dim> data;
 };
 
 // Basic arithmetic operators for Vec to support simple geometry code.
@@ -90,4 +109,17 @@ inline Vec<Dim, T>& operator/=(Vec<Dim, T>& v, T s)
     for (size_t i = 0; i < Dim; ++i)
         v[i] /= s;
     return v;
+}
+
+// Stream output for debugging Vec values, prints as "(v0, v1, ..., vN)".
+template <size_t Dim, typename T>
+inline std::ostream& operator<<(std::ostream& os, const Vec<Dim, T>& v)
+{
+    os << "(";
+    for (size_t i = 0; i < Dim; ++i) {
+        if (i) os << ", ";
+        os << v[i];
+    }
+    os << ")";
+    return os;
 }

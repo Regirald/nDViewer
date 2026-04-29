@@ -7,6 +7,7 @@
 class MarchingCubes {
 public:
     using Vec3 = Vec<3, float>;
+    using Index = Vec<3, int>;
 
     static Vec3 interp(const Vec3& a, const Vec3& b, float va, float vb, float iso)
     {
@@ -16,7 +17,7 @@ public:
 
     static Mesh<3> extractContour(const ImplicitFunction<3>& impFunction,
         float iso,
-        Grid<3, float> grid)
+        Grid<3> grid)
     {
         Mesh<3> mesh;
 
@@ -64,8 +65,8 @@ public:
 
                 if (slot != -1) return slot;
 
-                Vec3 p0 = grid.getPosition({ xa,ya,za });
-                Vec3 p1 = grid.getPosition({ xb,yb,zb });
+                Vec3 p0 = grid.getPosition(Index({ xa,ya,za }));
+                Vec3 p1 = grid.getPosition(Index({ xb,yb,zb }));
 
                 float v0 = field[index(xa, ya, za)];
                 float v1 = field[index(xb, yb, zb)];
