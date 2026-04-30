@@ -25,24 +25,25 @@ int main(int argc, char* argv[])
     Circle circle;
 
     // 2. Sample into scalar field
-    int res = 3;
+    int res = 5;
 	Resolution<2> resolution2({ res, res});
 	Resolution<3> resolution3({ res, res, res});
 
     // 3. Extract topology
 	SimplexGrid<2> orthoGrid2(resolution2, OrthonormalBasis<2>());
 	SimplexGrid<3> orthoGrid3(resolution3, OrthonormalBasis<3>());
-    Mesh<2> mesh2 = MarchingHyperCubes<2>::extractIsosurface(circle, 0.f, orthoGrid2);
-    //Mesh<3> mesh3 = MarchingHyperCubes<3>::extractIsosurface(sphere, 0.f, orthoGrid3);
+    //Mesh<2> mesh2 = MarchingHyperCubes<2>::extractIsosurface(circle, 0.f, orthoGrid2);
+    Mesh<3> mesh3 = MarchingHyperCubes<3>::extractIsosurface(sphere, 0.f, orthoGrid3);
 	//Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid);
 	Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid2);
 	Mesh<3> gridMesh3 = GridToMesh<3, float>::convert(orthoGrid3);
 
     // 4. Open a window dedicated to computer vision visualization
     Viewer viewer;    
-	viewer.setMesh(&mesh2);
-	//viewer.setMesh(&mesh3);
-	viewer.setMesh(&gridMesh2);
+	//viewer.setMesh(&mesh2);
+	viewer.setMesh(&mesh3);
+	viewer.setImplicitFunction(&sphere);
+	//viewer.setMesh(&gridMesh2);
 	//viewer.setMesh(&gridMesh3);
 
     viewer.show();

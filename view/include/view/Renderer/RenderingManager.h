@@ -5,6 +5,7 @@
 #include "Renderer/RenderContext.h"
 #include "model/Mesh.h"
 #include "RenderMesh.h"
+#include "RenderImplicitFunction.h"
 
 template <size_t Dim>
 class Mesh;
@@ -17,6 +18,11 @@ template <size_t Dim>
 	inline void setMesh(Mesh<Dim>* mesh)
 	{
 		renderContainer.push_back(std::make_unique<RenderMesh<Dim>>(mesh));
+	}
+template <size_t Dim>
+	inline void setImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
+	{
+		renderContainer.push_back(std::make_unique<RenderImplicitFunction<Dim>>(implicitFunction));
 	}
 	void setBackground();
 	void setExampleTriangle();

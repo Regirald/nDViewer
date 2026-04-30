@@ -20,6 +20,12 @@ public:
         renderingManager.setMesh(mesh);
     }
 
+    template <size_t Dim>
+    inline void setImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
+    {
+        renderingManager.setImplicitFunction(implicitFunction);
+    }
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

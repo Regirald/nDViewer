@@ -5,9 +5,7 @@
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 
-#ifdef render
-#undef render
-#endif
+
 
 #include "Renderer/Renderer.h"
 #include "model/Mesh.h"
