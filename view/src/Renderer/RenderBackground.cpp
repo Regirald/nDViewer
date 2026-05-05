@@ -253,6 +253,7 @@ void RenderBackground::render(const ndv::RenderContext& context)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);
+
     program.bind();
 
 
@@ -275,10 +276,10 @@ void RenderBackground::render(const ndv::RenderContext& context)
     program.release();
 
     // Draw 3D axis gizmo at world origin using same camera
+    glEnable(GL_DEPTH_TEST);
     DrawAxisArrows3D(context.view, context.projection);
 
     std::ostringstream fpsText;
     fpsText << "FPS: " << std::fixed << std::setprecision(1) << fps;
     DrawText2D(-0.95f, 0.9f, fpsText.str());
-    glEnable(GL_DEPTH_TEST);
 }
