@@ -134,7 +134,8 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
                     vec3 lightDir = normalize(vec3(1,1,1));
 
                     float diff = max(dot(n, lightDir), 0.0);
-                    FragColor = vec4(vec3(diff), 1.0);
+                    float alpha = 0.3;
+                    FragColor = vec4(vec3(diff), alpha);
 
                     // ---- Depth write ----
                     vec4 clip = u_projection * u_view * vec4(p, 1.0);

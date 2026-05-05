@@ -124,6 +124,8 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
 
     // Draw fullscreen
     gl->glEnable(GL_DEPTH_TEST);
+    gl->glEnable(GL_BLEND);
+    gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     gl->glBindVertexArray(m_fullscreenVAO);
     gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     gl->glBindVertexArray(0);
