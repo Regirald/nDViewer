@@ -130,12 +130,10 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
 
                 if (abs(d) < u_epsilon)
                 {
-                    vec3 n = estimateNormal(p);
-                    vec3 lightDir = normalize(vec3(1,1,1));
-
-                    float diff = max(dot(n, lightDir), 0.0);
-                    float alpha = 0.3;
-                    FragColor = vec4(vec3(diff), alpha);
+                    vec3 n = estimateNormal(p);            
+                    vec3 color = 0.5 + 0.5 * abs(n);                   
+                    float alpha = 0.9;
+                    FragColor = vec4(color, alpha);
 
                     // ---- Depth write ----
                     vec4 clip = u_projection * u_view * vec4(p, 1.0);

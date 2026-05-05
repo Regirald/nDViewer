@@ -29,48 +29,49 @@ namespace
 
         initialized = true;
         const char* vertexSource =
-            "#version 120\n"
-            "void main()\n"
-            "{\n"
-            "    gl_Position = vec4(gl_Vertex.xy, 0.0, 1.0);\n"
-            "}\n";
+            R"(
+            #version 120
+            void main()
+            {
+                gl_Position = vec4(gl_Vertex.xy, 0.0, 1.0);
+            };)";
 
         const char* fragmentSource =
-            "#version 120\n"
-            "uniform mat4 u_view;\n"
-            "uniform mat4 u_projection;\n"
-            "uniform mat4 u_invVP;\n"
-            "uniform vec2 u_resolution;\n"
-            "uniform vec3 u_axis;   // encodes how much camera aligns with world axes (optional)\n"
-            "uniform float u_base;\n"
-            "uniform float u_scale;\n"
-            "void main()\n"
-            "{\n"
-            "    // Normalized device coordinates for this pixel\n"
-            "    vec2 ndc = (gl_FragCoord.xy / u_resolution) * 2.0 - 1.0;\n"
-            "    // Build clip-space position at some depth (e.g. z = -1 in clip)\n"
-            "    vec4 clipPos = vec4(ndc, -1.0, 1.0);\n"
-            "    // Inverse projection * view to get a world-space point\n"
-            "    vec4 worldPos = u_invVP * clipPos;\n"
-            "    worldPos /= worldPos.w;\n"
-            "    // Direction from camera (origin in view space) to worldPos in world space\n"
-            "    // Camera position is inverse of view applied to origin; however, to get\n"
-            "    // a camera-space direction, transform worldPos by view\n"
-            "    vec4 viewPos = u_view * worldPos;\n"
-            "    vec3 dir = normalize(viewPos.xyz);\n"
-            "\n"
-            "    // World axes in view space\n"
-            "    vec3 ax = normalize( (u_view * vec4(1.0, 0.0, 0.0, 0.0)).xyz );\n"
-            "    vec3 ay = normalize( (u_view * vec4(0.0, 1.0, 0.0, 0.0)).xyz );\n"
-            "    vec3 az = normalize( (u_view * vec4(0.0, 0.0, 1.0, 0.0)).xyz );\n"
-            "\n"
-            "    float dx = abs(dot(dir, ax));\n"
-            "    float dy = abs(dot(dir, ay));\n"
-            "    float dz = abs(dot(dir, az));\n"
-            "\n"
-            "    vec3 color = clamp(u_base + u_scale * vec3(dx, dy, dz), 0.0, 1.0);\n"
-            "    gl_FragColor = vec4(color, 1.0);\n"
-            "}\n";
+            R"( #version 120
+            uniform mat4 u_view;
+            uniform mat4 u_projection;
+            uniform mat4 u_invVP;
+            uniform vec2 u_resolution;
+            uniform vec3 u_axis;   // encodes how much camera aligns with world axes (optional)
+            uniform float u_base;
+            uniform float u_scale;
+            void main()
+            {
+                // Normalized device coordinates for this pixel
+                vec2 ndc = (gl_FragCoord.xy / u_resolution) * 2.0 - 1.0;
+                // Build clip-space position at some depth (e.g. z = -1 in clip)
+                vec4 clipPos = vec4(ndc, -1.0, 1.0);
+                // Inverse projection * view to get a world-space point
+                vec4 worldPos = u_invVP * clipPos;
+                worldPos /= worldPos.w;
+                // Direction from camera (origin in view space) to worldPos in world space
+                // Camera position is inverse of view applied to origin; however, to get
+                // a camera-space direction, transform worldPos by view
+                vec4 viewPos = u_view * worldPos;
+                vec3 dir = normalize(viewPos.xyz);
+            
+                // World axes in view space
+                vec3 ax = normalize( (u_view * vec4(1.0, 0.0, 0.0, 0.0)).xyz );
+                vec3 ay = normalize( (u_view * vec4(0.0, 1.0, 0.0, 0.0)).xyz );
+                vec3 az = normalize( (u_view * vec4(0.0, 0.0, 1.0, 0.0)).xyz );
+            
+                float dx = abs(dot(dir, ax));
+                float dy = abs(dot(dir, ay));
+                float dz = abs(dot(dir, az));
+            
+                vec3 color = clamp(u_base + u_scale * vec3(dx, dy, dz), 0.0, 1.0);
+                gl_FragColor = vec4(color, 1.0);
+            };)";
 
         program.addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
         program.addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
