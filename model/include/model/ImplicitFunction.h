@@ -11,17 +11,10 @@ public:
     using Point = Vec<Dim, float>;
 
     virtual float evaluateSDF(const Point& p) const = 0;
+
     virtual const std::string getFragmentShader() const;
     virtual const std::string getGLSL_SDF() const;
-
-    // Optional GLSL parameter declarations (e.g. uniforms) that will be
-    // inserted into the generated fragment shader. Default is empty.
     virtual const std::string getGLSL_parameters() const;
-
-    // Called by the renderer after the shader program is bound to allow
-    // the implicit function to upload its uniforms into the program.
-    // Default implementation is a no-op. The parameter type is forward-
-    // declared above so this header doesn't require including Qt headers.
     virtual void setGLUniforms(QOpenGLShaderProgram& program) const;
 };
 
@@ -58,9 +51,11 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
         in vec2 v_uv;
         out vec4 FragColor;
 
-        uniform mat4 u_invView;
-        uniform mat4 u_invProjection;
         uniform vec3 u_cameraPos;
+        uniform mat4 u_view;
+        uniform mat4 u_invView;
+        uniform mat4 u_projection;
+        uniform mat4 u_invProjection;
 
         uniform vec3 u_boundsMin;
         uniform vec3 u_boundsMax;
@@ -123,8 +118,7 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
             float tmin, tmax;
             if (!intersectAABB(rayOrigin, rayDir, tmin, tmax))
             {
-                FragColor = vec4(0.0);
-                return;
+                discard;
             }
 
             float t = max(tmin, 0.0);
@@ -141,6 +135,11 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
 
                     float diff = max(dot(n, lightDir), 0.0);
                     FragColor = vec4(vec3(diff), 1.0);
+
+                    // ---- Depth write ----
+                    vec4 clip = u_projection * u_view * vec4(p, 1.0);
+                    float ndcDepth = clip.z / clip.w;
+                    gl_FragDepth = ndcDepth * 0.5 + 0.5;
                     return;
                 }
 
@@ -150,7 +149,8 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
                     break;
             }
 
-            FragColor = vec4(0.0);
+            discard;
+
         }
 )";
 

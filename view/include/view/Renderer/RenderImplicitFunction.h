@@ -26,10 +26,8 @@ public:
 
 	GLuint m_fullscreenVAO = 0;
     GLuint m_fullscreenVBO = 0;
-	GLuint m_sdfTexture = 0;
 	QVector3D m_boundsMin = QVector3D(-2, -2, -2);
 	QVector3D m_boundsMax = QVector3D(2, 2, 2);
-	int m_resolution = 128;
 
 
 };

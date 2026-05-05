@@ -22,11 +22,6 @@ void RenderImplicitFunction<Dim>::initializeGLResources()
     gl->initializeOpenGLFunctions();
 
     // -------------------------
-    // Generate SDF texture
-    // -------------------------
-    generateSDF();
-
-    // -------------------------
     // Compile shaders
     // -------------------------
     if (!m_program.isLinked())
@@ -96,71 +91,6 @@ void RenderImplicitFunction<Dim>::initializeGLResources()
 }
 
 template<size_t Dim>
-void RenderImplicitFunction<Dim>::generateSDF()
-{
-    const int N = m_resolution;
-    std::vector<float> data(N * N * N);
-
-    QVector3D size = m_boundsMax - m_boundsMin;
-
-    for (int z = 0; z < N; ++z)
-        for (int y = 0; y < N; ++y)
-            for (int x = 0; x < N; ++x)
-            {
-                QVector3D uvw(
-                    float(x) / (N - 1),
-                    float(y) / (N - 1),
-                    float(z) / (N - 1)
-                );
-
-                QVector3D p = m_boundsMin + QVector3D(
-                    uvw.x() * size.x(),
-                    uvw.y() * size.y(),
-                    uvw.z() * size.z()
-                );
-
-                float d = 0.f;
-
-                if constexpr (Dim == 2)
-                    d = m_implicitFunction->evaluateSDF({ p.x(), p.y() });
-                else
-                    d = m_implicitFunction->evaluateSDF({ p.x(), p.y(), p.z() });
-
-                data[x + y * N + z * N * N] = d;
-            }
-
-    uploadSDF(data);
-}
-
-template<size_t Dim>
-void RenderImplicitFunction<Dim>::uploadSDF(const std::vector<float>& data)
-{
-    if (!m_sdfTexture)
-        gl->glGenTextures(1, &m_sdfTexture);
-
-    gl->glBindTexture(GL_TEXTURE_3D, m_sdfTexture);
-
-    gl->glTexImage3D(
-        GL_TEXTURE_3D,
-        0,
-        GL_R32F,
-        m_resolution,
-        m_resolution,
-        m_resolution,
-        0,
-        GL_RED,
-        GL_FLOAT,
-        data.data()
-    );
-
-    gl->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-}
-
-template<size_t Dim>
 void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
 {
     if (!m_initialized)
@@ -171,10 +101,6 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
 
     m_program.bind();
 
-    // Texture
-    gl->glActiveTexture(GL_TEXTURE0);
-    gl->glBindTexture(GL_TEXTURE_3D, m_sdfTexture);
-    m_program.setUniformValue("u_sdf", 0);
 
     // Let implicit function upload its uniforms
     if (m_implicitFunction)
@@ -185,9 +111,11 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
     m_program.setUniformValue("u_boundsMax", m_boundsMax);
 
     // Camera
-    m_program.setUniformValue("u_invView", context.view.inverted());
-    m_program.setUniformValue("u_invProjection", context.projection.inverted());
     m_program.setUniformValue("u_cameraPos", context.cameraPosition);
+    m_program.setUniformValue("u_view", context.view);
+    m_program.setUniformValue("u_invView", context.view.inverted());
+    m_program.setUniformValue("u_projection", context.projection);
+    m_program.setUniformValue("u_invProjection", context.projection.inverted());
 
     // Parameters
     m_program.setUniformValue("u_maxDistance", 100.0f);
@@ -195,7 +123,7 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
     m_program.setUniformValue("u_epsilon", 0.001f);
 
     // Draw fullscreen
-    gl->glDisable(GL_DEPTH_TEST);
+    gl->glEnable(GL_DEPTH_TEST);
     gl->glBindVertexArray(m_fullscreenVAO);
     gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     gl->glBindVertexArray(0);
