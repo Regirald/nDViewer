@@ -128,7 +128,7 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
                 vec3 p = rayOrigin + t * rayDir;
                 float d = sampleSDF(p);
 
-                if (d < u_epsilon)
+                if (abs(d) < u_epsilon)
                 {
                     vec3 n = estimateNormal(p);
                     vec3 lightDir = normalize(vec3(1,1,1));
@@ -143,7 +143,7 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
                     return;
                 }
 
-                t += max(d * 0.7, 0.001);
+                t += max(abs(d) * 0.7, 0.001);
 
                 if (t > tmax || t > u_maxDistance)
                     break;
