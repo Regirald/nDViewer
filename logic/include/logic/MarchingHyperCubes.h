@@ -47,7 +47,7 @@ Mesh<Dim> MarchingHyperCubes<Dim>::extractIsosurface(const ImplicitFunction<Dim>
 	// --- 1. Precompute scalar field ---
 	ScalarField<Dim> field(grid.m_resolution, grid.m_basis);
 	GridLooper<Dim, Dim>::loop(grid.getSize(), [&](const Index& index) {
-		field[index] = impFunction.evaluate(grid.getPosition(index));
+		field[index] = impFunction.evaluateSDF(grid.getPosition(index));
 		});
 
 

@@ -4,7 +4,7 @@
 
 class Circle : public ImplicitFunction<2> {
 public:
-    float evaluate(const Point& p) const override {
+    float evaluateSDF(const Point& p) const override {
         return sqrt(p[0] * p[0] + p[1] * p[1]) - 1.0f;
     }
 };

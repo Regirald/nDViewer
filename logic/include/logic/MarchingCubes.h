@@ -36,7 +36,7 @@ public:
             for (int y = 0; y < dimy; ++y)
                 for (int x = 0; x < dimx; ++x)
                 {
-                    field[index(x, y, z)] = impFunction.evaluate({
+                    field[index(x, y, z)] = impFunction.evaluateSDF({
                         (float)x / (dimx - 1) * 2.f - 1.f,
                         (float)y / (dimy - 1) * 2.f - 1.f,
                         (float)z / (dimz - 1) * 2.f - 1.f

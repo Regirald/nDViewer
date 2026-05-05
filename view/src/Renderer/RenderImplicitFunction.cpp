@@ -3,6 +3,7 @@
 #include <QOpenGLShaderProgram>
 #include <vector>
 #include "renderer/RenderImplicitFunction.h"
+#include "model/ImplicitFunction.h"
 
 template<size_t Dim>
 RenderImplicitFunction<Dim>::RenderImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
@@ -31,135 +32,39 @@ void RenderImplicitFunction<Dim>::initializeGLResources()
     if (!m_program.isLinked())
     {
         const char* vs = R"(
-#version 330 core
+            #version 330 core
 
-layout(location = 0) in vec2 a_position;
-out vec2 v_uv;
+            layout(location = 0) in vec2 a_position;
+            out vec2 v_uv;
 
-void main()
-{
-    v_uv = a_position * 0.5 + 0.5;
-    gl_Position = vec4(a_position, 0.0, 1.0);
-}
-)";
-
-        const char* fs = R"(
-#version 330 core
-
-in vec2 v_uv;
-out vec4 FragColor;
-
-uniform sampler3D u_sdf;
-
-uniform mat4 u_invView;
-uniform mat4 u_invProjection;
-uniform vec3 u_cameraPos;
-
-uniform vec3 u_boundsMin;
-uniform vec3 u_boundsMax;
-
-uniform float u_maxDistance;
-uniform int u_maxSteps;
-uniform float u_epsilon;
-
-// -------------------------
-// AABB intersection
-// -------------------------
-bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
-{
-    vec3 invDir = 1.0 / rd;
-    vec3 t0 = (u_boundsMin - ro) * invDir;
-    vec3 t1 = (u_boundsMax - ro) * invDir;
-
-    vec3 tsmaller = min(t0, t1);
-    vec3 tbigger  = max(t0, t1);
-
-    tmin = max(max(tsmaller.x, tsmaller.y), tsmaller.z);
-    tmax = min(min(tbigger.x, tbigger.y), tbigger.z);
-
-    return tmax > max(tmin, 0.0);
-}
-
-// -------------------------
-vec3 worldToTex(vec3 p)
-{
-    return (p - u_boundsMin) / (u_boundsMax - u_boundsMin);
-}
-
-float sampleSDF(vec3 p)
-{
-    vec3 uvw = worldToTex(p);
-
-    if (any(lessThan(uvw, vec3(0.0))) || any(greaterThan(uvw, vec3(1.0))))
-        return 1e6;
-
-    return texture(u_sdf, uvw).r;
-}
-
-vec3 estimateNormal(vec3 p)
-{
-    float e = 0.002;
-
-    return normalize(vec3(
-        sampleSDF(p + vec3(e,0,0)) - sampleSDF(p - vec3(e,0,0)),
-        sampleSDF(p + vec3(0,e,0)) - sampleSDF(p - vec3(0,e,0)),
-        sampleSDF(p + vec3(0,0,e)) - sampleSDF(p - vec3(0,0,e))
-    ));
-}
-
-// -------------------------
-void main()
-{
-    // Reconstruct ray
-    vec2 ndc = v_uv * 2.0 - 1.0;
-
-    vec4 rayClip = vec4(ndc, -1.0, 1.0);
-    vec4 rayView = u_invProjection * rayClip;
-    rayView = vec4(rayView.xyz, 0.0);
-
-    vec3 rayDir = normalize((u_invView * rayView).xyz);
-    vec3 rayOrigin = u_cameraPos;
-
-    // Intersect bounding box
-    float tmin, tmax;
-    if (!intersectAABB(rayOrigin, rayDir, tmin, tmax))
-    {
-        FragColor = vec4(0.0);
-        return;
-    }
-
-    float t = max(tmin, 0.0);
-
-    // Raymarch
-    for (int i = 0; i < u_maxSteps; ++i)
-    {
-        vec3 p = rayOrigin + t * rayDir;
-        float d = sampleSDF(p);
-
-        if (d < u_epsilon)
+            void main()
+            {
+                v_uv = a_position * 0.5 + 0.5;
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+           )";
+        // Build fragment shader by inserting parameter declarations right
+        // after the #version directive provided by the fragment template.
+        std::string fs = m_implicitFunction->getFragmentShader();
+        const std::string params = m_implicitFunction->getGLSL_parameters();
+        const std::string versionStr = "#version 330 core";
+        size_t vpos = fs.find(versionStr);
+        if (vpos != std::string::npos)
         {
-            vec3 n = estimateNormal(p);
-            vec3 lightDir = normalize(vec3(1,1,1));
-
-            float diff = max(dot(n, lightDir), 0.0);
-            FragColor = vec4(vec3(diff), 1.0);
-            return;
+            size_t newline = fs.find('\n', vpos);
+            size_t insertPos = (newline != std::string::npos) ? newline + 1 : vpos + versionStr.size();
+            fs.insert(insertPos, params);
         }
+        else
+        {
+            // Fallback: prefix version and params
+            fs = versionStr + std::string("\n") + params + fs;
+        }
+        
 
-        // Robust stepping (handles non-perfect SDF)
-        t += max(d * 0.7, 0.001);
-
-        if (t > tmax || t > u_maxDistance)
-            break;
-    }
-
-    FragColor = vec4(0.0);
-}
-)";
-
-        m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
-        m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs);
-        m_program.link();
+        bool truc0 = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
+        bool truc1 = m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs.c_str());
+        bool truc2 = m_program.link();
     }
 
     // -------------------------
@@ -217,9 +122,9 @@ void RenderImplicitFunction<Dim>::generateSDF()
                 float d = 0.f;
 
                 if constexpr (Dim == 2)
-                    d = m_implicitFunction->evaluate({ p.x(), p.y() });
+                    d = m_implicitFunction->evaluateSDF({ p.x(), p.y() });
                 else
-                    d = m_implicitFunction->evaluate({ p.x(), p.y(), p.z() });
+                    d = m_implicitFunction->evaluateSDF({ p.x(), p.y(), p.z() });
 
                 data[x + y * N + z * N * N] = d;
             }
@@ -270,6 +175,10 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
     gl->glActiveTexture(GL_TEXTURE0);
     gl->glBindTexture(GL_TEXTURE_3D, m_sdfTexture);
     m_program.setUniformValue("u_sdf", 0);
+
+    // Let implicit function upload its uniforms
+    if (m_implicitFunction)
+        m_implicitFunction->setGLUniforms(m_program);
 
     // Bounds
     m_program.setUniformValue("u_boundsMin", m_boundsMin);

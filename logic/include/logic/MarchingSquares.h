@@ -40,7 +40,7 @@ public:
         std::vector<float> field(dimx * dimy);
         for (int y = 0; y < dimy; ++y)
             for (int x = 0; x < dimx; ++x)
-                field[index(x, y)] = impFunction.evaluate({ 
+                field[index(x, y)] = impFunction.evaluateSDF({ 
                 (float)x / (grid.m_resolution.size[0] - 1) * 2.f - 1.f, 
                 (float)y / (grid.m_resolution.size[1] - 1) * 2.f - 1.f });
 
