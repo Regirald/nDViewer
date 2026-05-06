@@ -1,6 +1,4 @@
 #pragma once
-#include <Windows.h>
-#include <gl/GL.h>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 

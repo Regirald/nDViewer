@@ -1,4 +1,7 @@
 #pragma once
+#define NOMINMAX
+#include <Windows.h>
+#include <gl/GL.h>
 
 #include "Renderer/RenderContext.h"
 

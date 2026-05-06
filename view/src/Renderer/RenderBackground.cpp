@@ -1,7 +1,5 @@
 #include "RenderBackground.h"
 
-#include <Windows.h>
-#include <gl/GL.h>
 
 #include <chrono>
 #include <cmath>

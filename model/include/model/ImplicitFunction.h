@@ -1,7 +1,33 @@
 #pragma once
 #include "core/Vec.h"
 #include <string>
+#include <algorithm>
 
+struct GLSLContext
+{
+    int counter = 0;
+    std::string code;
+    std::string uniforms;
+
+    std::unordered_map<std::string, std::string> uniformMap;
+
+    std::string makeName(const std::string& base)
+    {
+        return base + "_" + std::to_string(counter++);
+    }
+
+    std::string makeUniform(const std::string& base, const std::string& type)
+    {
+        std::string name = base + "_" + std::to_string(counter++);
+        uniforms += "uniform " + type + " " + name + ";\n";
+        return name;
+    }
+
+    void append(const std::string& s)
+    {
+        code += s + "\n";
+    }
+};
 // forward-declare Qt class to avoid forcing a Qt dependency here
 class QOpenGLShaderProgram;
 
@@ -13,13 +39,15 @@ public:
     virtual float evaluateSDF(const Point& p) const = 0;
 
     virtual const std::string getFragmentShader() const;
-    virtual const std::string getGLSL_SDF() const;
+    virtual std::string buildGLSL(GLSLContext& ctx) const;
     virtual const std::string getGLSL_parameters() const;
     virtual void setGLUniforms(QOpenGLShaderProgram& program) const;
 };
 
+
+
 template <size_t Dim>
-inline const std::string ImplicitFunction<Dim>::getGLSL_SDF() const
+inline std::string ImplicitFunction<Dim>::buildGLSL(GLSLContext& ctx) const
 {
     const char* sdf = R"(
         float sampleSDF(vec3 p)
@@ -29,6 +57,7 @@ inline const std::string ImplicitFunction<Dim>::getGLSL_SDF() const
         )";
     return std::string(sdf);
 };
+
 
 template <size_t Dim>
 inline const std::string ImplicitFunction<Dim>::getGLSL_parameters() const
@@ -41,10 +70,68 @@ inline void ImplicitFunction<Dim>::setGLUniforms(QOpenGLShaderProgram& /*program
 {
     // no-op default
 }
+template <size_t Dim>
+class UnionImplicitFunction : public ImplicitFunction<Dim>
+{
+public:
+    using Point = typename ImplicitFunction<Dim>::Point;
+
+    UnionImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> a,
+        std::shared_ptr<ImplicitFunction<Dim>> b)
+        : m_a(a), m_b(b) {
+    }
+
+    float evaluateSDF(const Point& p) const override
+    {
+        return std::min(m_a->evaluateSDF(p), m_b->evaluateSDF(p));
+    }
+
+    std::string buildGLSL(GLSLContext& ctx) const override
+    {
+        std::string fA = m_a->buildGLSL(ctx);
+        std::string fB = m_b->buildGLSL(ctx);
+
+        std::string fname = ctx.makeName("sdf_union");
+
+        ctx.append("float " + fname + "(vec3 p) {");
+        ctx.append("    float d1 = " + fA + "(p);");
+        ctx.append("    float d2 = " + fB + "(p);");
+        ctx.append("    return min(d1, d2);");
+        ctx.append("}");
+
+        return fname;
+    }
+    void setGLUniforms(QOpenGLShaderProgram& program) const override
+    {
+        m_a->setGLUniforms(program);
+        m_b->setGLUniforms(program);
+    }
+
+private:
+    std::shared_ptr<ImplicitFunction<Dim>> m_a, m_b;
+};
+
+template <size_t Dim>
+inline std::shared_ptr<ImplicitFunction<Dim>>
+operator+(std::shared_ptr<ImplicitFunction<Dim>> lhs,
+    std::shared_ptr<ImplicitFunction<Dim>> rhs)
+{
+    return std::make_shared<UnionImplicitFunction<Dim>>(lhs, rhs);
+}
 
 template <size_t Dim>
 inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
 {
+    GLSLContext ctx;
+
+    std::string rootFunc = buildGLSL(ctx);
+
+    std::string sdfEntry =
+        "float sampleSDF(vec3 p)\n"
+        "{\n"
+        "    return " + rootFunc + "(p);\n"
+        "}\n";
+
     const char* part1 = R"(
         #version 330 core
 
@@ -153,5 +240,10 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
         }
 )";
 
-    return std::string(part1) + getGLSL_SDF() + std::string(part2);
+    return 
+        std::string(part1) 
+        + ctx.uniforms
+        + ctx.code
+        + sdfEntry 
+        + std::string(part2);
 }

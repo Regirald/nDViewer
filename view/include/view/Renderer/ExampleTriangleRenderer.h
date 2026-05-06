@@ -6,8 +6,6 @@
 
 #include <QVector4D>
 
-#include <Windows.h>
-#include <gl/GL.h>
 
 namespace ndv
 {
