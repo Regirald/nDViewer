@@ -106,10 +106,6 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
     if (m_implicitFunction)
         m_implicitFunction->setGLUniforms(m_program);
 
-    // Bounds
-    m_program.setUniformValue("u_boundsMin", m_boundsMin);
-    m_program.setUniformValue("u_boundsMax", m_boundsMax);
-
     // Camera
     m_program.setUniformValue("u_cameraPos", context.cameraPosition);
     m_program.setUniformValue("u_view", context.view);

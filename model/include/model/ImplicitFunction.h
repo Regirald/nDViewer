@@ -2,6 +2,7 @@
 #include "core/Vec.h"
 #include <string>
 #include <algorithm>
+#include <QOpenGLShaderProgram>
 
 struct GLSLContext
 {
@@ -42,6 +43,9 @@ public:
     virtual std::string buildGLSL(GLSLContext& ctx) const;
     virtual const std::string getGLSL_parameters() const;
     virtual void setGLUniforms(QOpenGLShaderProgram& program) const;
+
+    QVector3D m_boundsMin;
+    QVector3D m_boundsMax;
 };
 
 
@@ -66,9 +70,10 @@ inline const std::string ImplicitFunction<Dim>::getGLSL_parameters() const
 }
 
 template <size_t Dim>
-inline void ImplicitFunction<Dim>::setGLUniforms(QOpenGLShaderProgram& /*program*/) const
+inline void ImplicitFunction<Dim>::setGLUniforms(QOpenGLShaderProgram& m_program) const
 {
-    // no-op default
+    m_program.setUniformValue("u_boundsMin", m_boundsMin);
+    m_program.setUniformValue("u_boundsMax", m_boundsMax);
 }
 template <size_t Dim>
 class UnionImplicitFunction : public ImplicitFunction<Dim>
@@ -79,6 +84,14 @@ public:
     UnionImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> a,
         std::shared_ptr<ImplicitFunction<Dim>> b)
         : m_a(a), m_b(b) {
+        this->m_boundsMin = QVector3D(
+            std::min(a->m_boundsMin.x(), b->m_boundsMin.x()),
+            std::min(a->m_boundsMin.y(), b->m_boundsMin.y()),
+            std::min(a->m_boundsMin.z(), b->m_boundsMin.z()));
+        this->m_boundsMax = QVector3D(
+            std::max(a->m_boundsMax.x(), b->m_boundsMax.x()),
+            std::max(a->m_boundsMax.y(), b->m_boundsMax.y()),
+            std::max(a->m_boundsMax.z(), b->m_boundsMax.z()));
     }
 
     float evaluateSDF(const Point& p) const override
@@ -105,6 +118,8 @@ public:
     {
         m_a->setGLUniforms(program);
         m_b->setGLUniforms(program);
+        ImplicitFunction<3>::setGLUniforms(program); //overwrite the boundaries
+
     }
 
 private:
@@ -168,13 +183,6 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
 
             return tmax > max(tmin, 0.0);
         }
-
-        vec3 worldToTex(vec3 p)
-        {
-            return (p - u_boundsMin) / (u_boundsMax - u_boundsMin);
-        }
-
-
 )";
 
     const char* part2 = R"(
