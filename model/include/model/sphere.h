@@ -1,5 +1,6 @@
 #pragma once
 #include "ImplicitFunction.h"
+#include "ImplicitFunctionOperator.h"
 #include <QVector3D>
 
 

@@ -75,64 +75,9 @@ inline void ImplicitFunction<Dim>::setGLUniforms(QOpenGLShaderProgram& m_program
     m_program.setUniformValue("u_boundsMin", m_boundsMin);
     m_program.setUniformValue("u_boundsMax", m_boundsMax);
 }
-template <size_t Dim>
-class UnionImplicitFunction : public ImplicitFunction<Dim>
-{
-public:
-    using Point = typename ImplicitFunction<Dim>::Point;
 
-    UnionImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> a,
-        std::shared_ptr<ImplicitFunction<Dim>> b)
-        : m_a(a), m_b(b) {
-        this->m_boundsMin = QVector3D(
-            std::min(a->m_boundsMin.x(), b->m_boundsMin.x()),
-            std::min(a->m_boundsMin.y(), b->m_boundsMin.y()),
-            std::min(a->m_boundsMin.z(), b->m_boundsMin.z()));
-        this->m_boundsMax = QVector3D(
-            std::max(a->m_boundsMax.x(), b->m_boundsMax.x()),
-            std::max(a->m_boundsMax.y(), b->m_boundsMax.y()),
-            std::max(a->m_boundsMax.z(), b->m_boundsMax.z()));
-    }
 
-    float evaluateSDF(const Point& p) const override
-    {
-        return std::min(m_a->evaluateSDF(p), m_b->evaluateSDF(p));
-    }
 
-    std::string buildGLSL(GLSLContext& ctx) const override
-    {
-        std::string fA = m_a->buildGLSL(ctx);
-        std::string fB = m_b->buildGLSL(ctx);
-
-        std::string fname = ctx.makeName("sdf_union");
-
-        ctx.append("float " + fname + "(vec3 p) {");
-        ctx.append("    float d1 = " + fA + "(p);");
-        ctx.append("    float d2 = " + fB + "(p);");
-        ctx.append("    return min(d1, d2);");
-        ctx.append("}");
-
-        return fname;
-    }
-    void setGLUniforms(QOpenGLShaderProgram& program) const override
-    {
-        m_a->setGLUniforms(program);
-        m_b->setGLUniforms(program);
-        ImplicitFunction<3>::setGLUniforms(program); //overwrite the boundaries
-
-    }
-
-private:
-    std::shared_ptr<ImplicitFunction<Dim>> m_a, m_b;
-};
-
-template <size_t Dim>
-inline std::shared_ptr<ImplicitFunction<Dim>>
-operator+(std::shared_ptr<ImplicitFunction<Dim>> lhs,
-    std::shared_ptr<ImplicitFunction<Dim>> rhs)
-{
-    return std::make_shared<UnionImplicitFunction<Dim>>(lhs, rhs);
-}
 
 template <size_t Dim>
 inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
