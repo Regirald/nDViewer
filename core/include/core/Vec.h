@@ -123,3 +123,31 @@ inline std::ostream& operator<<(std::ostream& os, const Vec<Dim, T>& v)
     os << ")";
     return os;
 }
+
+template <size_t Dim, typename T>
+double dot(const Vec<Dim, T>& a, const Vec<Dim, T>& b)
+{
+    double r = 0.0;
+    for (int i = 0; i < Dim; ++i)
+        r += a[i] * b[i];
+    return r;
+}
+
+template <size_t Dim, typename T>
+double norm(const Vec<Dim, T>& v)
+{
+    return std::sqrt(dot(v, v));
+}
+
+template <size_t Dim, typename T>
+Vec<Dim, T> normalize(const Vec<Dim, T>& v)
+{
+    double n = norm(v);
+
+    Vec<Dim, T> r;
+
+    for (int i = 0; i < Dim; ++i)
+        r[i] = v[i] / n;
+
+    return r;
+}
