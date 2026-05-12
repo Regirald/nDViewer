@@ -137,11 +137,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\blabla.cpp" />
+    <ClCompile Include="src\GenerateRegularPolytope.cpp" />
     <ClCompile Include="src\GridToMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\logic\ContourExtraction.h" />
     <ClInclude Include="include\logic\DistanceTransform.h" />
+    <ClInclude Include="include\logic\GenerateRegularPolytope.h" />
     <ClInclude Include="include\logic\GridLooper.h" />
     <ClInclude Include="include\logic\GridToMesh.h" />
     <ClInclude Include="include\logic\MarchingCubes.h" />

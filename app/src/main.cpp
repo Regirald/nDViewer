@@ -15,6 +15,7 @@
 #include "logic/MarchingCubes.h"
 #include "logic/MarchingHyperCubes.h"
 #include "logic/MarchingSquares.h"
+#include "logic/GenerateRegularPolytope.h"
 
 #include "view/Viewer.h"
 
@@ -48,11 +49,13 @@ int main(int argc, char* argv[])
     Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid2);
     Mesh<3> gridMesh3 = GridToMesh<3, float>::convert(orthoGrid3);
 
+    auto polygon = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
+
     // 4. Open a window dedicated to computer vision visualization
     Viewer viewer;    
-    //viewer.setMesh(&mesh2);
+    viewer.setMesh(&polygon);
     //viewer.setMesh(&mesh3);
-    viewer.setImplicitFunction(sphere3.get());
+    //viewer.setImplicitFunction(sphere3.get());
     //viewer.setImplicitFunction(&sphere1);
     // To use the union implicit function instead, pass sphere2.get()
     // viewer.setImplicitFunction(sphere2.get());

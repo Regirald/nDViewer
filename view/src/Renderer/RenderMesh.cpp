@@ -152,8 +152,19 @@ void RenderMesh<Dim>::render(const ndv::RenderContext& context)
     gl->glBindVertexArray(vao);
     if (Dim == 2)
     {
-        // 2D: draw edges as lines
-        gl->glDrawElements(GL_LINES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+        gl->glLineWidth(2.0f);
+
+        ::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glEnable(GL_POINT_SMOOTH);
+        glPointSize(8.0f);
+
+        gl->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(m_mesh->vertices.size()));
+
+        ::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // restore
+
     }
     if (Dim == 3)
     {
@@ -161,14 +172,17 @@ void RenderMesh<Dim>::render(const ndv::RenderContext& context)
         ::glPointSize(10.0f);
         gl->glLineWidth(2.0f);
 
-        ::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
 
         ::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
 
-        ::glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-        gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        gl->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(m_mesh->vertices.size()));
+
+        //::glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        //gl->glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
 
         ::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // restore
     }

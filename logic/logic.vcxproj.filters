@@ -21,6 +21,9 @@
     <ClCompile Include="src\GridToMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\GenerateRegularPolytope.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\logic\ContourExtraction.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\logic\GridLooper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\logic\GenerateRegularPolytope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
