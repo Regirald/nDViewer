@@ -53,5 +53,8 @@
     <ClInclude Include="include\logic\GenerateRegularPolytope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\logic\CoxeterCoset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

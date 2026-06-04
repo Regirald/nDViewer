@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\logic\ContourExtraction.h" />
+    <ClInclude Include="include\logic\CoxeterCoset.h" />
     <ClInclude Include="include\logic\DistanceTransform.h" />
     <ClInclude Include="include\logic\GenerateRegularPolytope.h" />
     <ClInclude Include="include\logic\GridLooper.h" />

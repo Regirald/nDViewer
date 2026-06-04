@@ -1,4 +1,4 @@
-#define NOMINMAX
+﻿#define NOMINMAX
 #include <Windows.h>
 #include <gl/GL.h>
 #include <QApplication>
@@ -7,6 +7,7 @@
 #include "model/Sphere.h"
 #include "model/Circle.h"
 #include "model/Mesh.h"
+#include "model/CoxeterGroup.h"
 #include "core/SimplexGrid.h"
 #include "core/Resolution.h"
 #include "core/OrthonormalBasis.h"
@@ -44,16 +45,44 @@ int main(int argc, char* argv[])
     SimplexGrid<2> orthoGrid2(resolution2, OrthonormalBasis<2>());
     SimplexGrid<3> orthoGrid3(resolution3, OrthonormalBasis<3>());
     //Mesh<2> mesh2 = MarchingHyperCubes<2>::extractIsosurface(circle, 0.f, orthoGrid2);
-    Mesh<3> mesh3 = MarchingHyperCubes<3>::extractIsosurface(sphere0, 0.f, orthoGrid3);
+    //Mesh<3> mesh3 = MarchingHyperCubes<3>::extractIsosurface(sphere0, 0.f, orthoGrid3);
     //Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid);
     Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid2);
     Mesh<3> gridMesh3 = GridToMesh<3, float>::convert(orthoGrid3);
 
-    auto polygon = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
+
+    /*
+    Schläfli symbol
+        ↓
+        Coxeter matrix
+        ↓
+        Coxeter group presentation
+        ↓
+        Word reduction engine
+        ↓
+        Group enumeration(Todd–Coxeter or equivalent)
+        ↓
+        Parabolic subgroup generation
+        ↓
+        Coset enumeration
+        ↓
+        Incidence extraction
+        ↓
+        Vertices / edges / faces / cells
+     */
+    auto C =   buildCoxeterMatrix({ 3,3 });
+
+    auto group = enumerateGroup(C);
+
+    std::cout
+        << group.size()
+        << std::endl;
+
+    //auto polygon = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
 
     // 4. Open a window dedicated to computer vision visualization
     Viewer viewer;    
-    viewer.setMesh(&polygon);
+    //viewer.setMesh(&polygon);
     //viewer.setMesh(&mesh3);
     //viewer.setImplicitFunction(sphere3.get());
     //viewer.setImplicitFunction(&sphere1);
