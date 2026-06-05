@@ -50,5 +50,8 @@
     <ClInclude Include="include\model\ToddCoxeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\TestFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

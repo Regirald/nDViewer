@@ -9,6 +9,8 @@
 #include "model/Mesh.h"
 
 #include "model/CoxeterPresentation.h"
+#include "model/ToddCoxeter.h"
+#include "model/TestFile.h"
 
 #include "core/SimplexGrid.h"
 #include "core/Resolution.h"
@@ -90,6 +92,8 @@ int main(int argc, char* argv[])
         << "Relators = "
         << relators.size()
         << std::endl;
+
+    test();
 
 
     //auto polygon = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });

@@ -62,7 +62,7 @@ namespace Coxeter
             {
                 const int m = P.M[i][j];
 
-                if (m <= 2)
+                if (m <= 1)
                     continue;
 
                 Relator r;

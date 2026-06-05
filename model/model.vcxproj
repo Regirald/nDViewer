@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="Circle.h" />
     <ClInclude Include="include\model\CoxeterPresentation.h" />
+    <ClInclude Include="include\model\TestFile.h" />
     <ClInclude Include="include\model\ToddCoxeter.h" />
     <ClInclude Include="include\model\ImplicitFunction.h" />
     <ClInclude Include="include\model\ImplicitFunctionOperator.h" />

@@ -33,8 +33,9 @@ namespace Coxeter
 
     struct Deduction
     {
-        int coset;
-        int generator;
+        int source = -1;
+        uint8_t generator = 0;
+        int target = -1;
     };
 
     CosetTable enumerateCosets(
