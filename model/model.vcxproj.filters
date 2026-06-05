@@ -15,7 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\test_polytope_core.cpp">
+    <ClCompile Include="src\CoxeterPresentation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ToddCoxeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,10 +44,10 @@
     <ClInclude Include="include\model\ImplicitFunctionOperator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\ToddCoxeter.h">
+    <ClInclude Include="include\model\CoxeterPresentation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\CosetStabilizer.h">
+    <ClInclude Include="include\model\ToddCoxeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

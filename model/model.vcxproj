@@ -133,12 +133,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\test_polytope_core.cpp" />
+    <ClCompile Include="src\CoxeterPresentation.cpp" />
+    <ClCompile Include="src\ToddCoxeter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Circle.h" />
+    <ClInclude Include="include\model\CoxeterPresentation.h" />
     <ClInclude Include="include\model\ToddCoxeter.h" />
-    <ClInclude Include="include\model\CosetStabilizer.h" />
     <ClInclude Include="include\model\ImplicitFunction.h" />
     <ClInclude Include="include\model\ImplicitFunctionOperator.h" />
     <ClInclude Include="include\model\LevelSet.h" />

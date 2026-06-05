@@ -7,7 +7,9 @@
 #include "model/Sphere.h"
 #include "model/Circle.h"
 #include "model/Mesh.h"
-#include "model/CoxeterGroup.h"
+
+#include "model/CoxeterPresentation.h"
+
 #include "core/SimplexGrid.h"
 #include "core/Resolution.h"
 #include "core/OrthonormalBasis.h"
@@ -70,13 +72,25 @@ int main(int argc, char* argv[])
         ↓
         Vertices / edges / faces / cells
      */
-    auto C =   buildCoxeterMatrix({ 3,3 });
 
-    auto group = enumerateGroup(C);
+
+    auto P =
+        Coxeter::buildPresentation(
+            { 4,3 });
+
+    auto relators =
+        Coxeter::buildRelators(P);
 
     std::cout
-        << group.size()
+        << "Rank = "
+        << P.rank
         << std::endl;
+
+    std::cout
+        << "Relators = "
+        << relators.size()
+        << std::endl;
+
 
     //auto polygon = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
 
