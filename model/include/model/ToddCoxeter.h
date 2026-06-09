@@ -41,7 +41,16 @@ namespace Coxeter
     CosetTable enumerateCosets(
         const Presentation& presentation,
         const std::vector<Relator>& relators,
-        const std::vector<uint8_t>& subgroupGenerators);
+        const Subgroup& subgroupGenerators);
+
+    void defineFirstUndefinedEntry(
+        CosetTable& table,
+        UnionFind& uf,
+        std::queue<Deduction>& deductions);
+
+    int firstUndefinedCoset(
+        const CosetTable& table,
+        int& generator);
 
     void coincidence(
         CosetTable& table,
@@ -49,4 +58,26 @@ namespace Coxeter
         int a,
         int b);
 
+
+    struct ScanResult
+    {
+        int forwardPos;
+        int backwardPos;
+
+        int forwardCoset;
+        int backwardCoset;
+    };
+
+    ScanResult scanWord(
+        CosetTable& table,
+        UnionFind& uf,
+        const Relator& relator,
+        int startCoset);
+
+    bool scanRelator(
+        CosetTable& table,
+        UnionFind& uf,
+        const Relator& relator,
+        int startCoset,
+        std::queue<Deduction>& deductions);
 }

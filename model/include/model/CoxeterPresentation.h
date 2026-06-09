@@ -19,6 +19,10 @@ namespace Coxeter
     {
         std::vector<uint8_t> word;
     };
+    struct Subgroup
+    {
+        std::vector<int> generators;
+    };
 
     Presentation buildPresentation(
         const std::vector<int>& schlafli);
@@ -26,12 +30,14 @@ namespace Coxeter
     std::vector<Relator> buildRelators(
         const Presentation& presentation);
 
+    Subgroup buildVertexStabilizer(
+		int rank);
 }
 
 
-std::vector<uint8_t>
-makeVertexStabilizer(
-    int rank);
+//std::vector<uint8_t>
+//makeVertexStabilizer(
+//    int rank);
 
 std::vector<uint8_t>
 makeEdgeStabilizer(

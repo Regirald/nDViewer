@@ -9,7 +9,7 @@ namespace Coxeter
     CosetTable enumerateCosets(
         const Presentation& presentation,
         const std::vector<Relator>& relators,
-        const std::vector<uint8_t>& subgroupGenerators);
+        const Subgroup& subgroupGenerators);
 }
 
 #include <iostream>
@@ -31,6 +31,11 @@ std::vector<Relator> makeRelators(const Presentation& P)
     return buildRelators(P);
 }
 
+
+Subgroup makeVertexStabilizer(int rank)
+{
+    return buildVertexStabilizer(rank);
+}
 // ----------------------------
 // Tests
 // ----------------------------
@@ -92,9 +97,10 @@ void test_B3()
 {
     Presentation P = makeCoxeter({ 4,3 });
     auto R = makeRelators(P);
+    Subgroup Hv = makeVertexStabilizer(P.rank);
 
     CosetTable T =
-        enumerateCosets(P, R, {});
+        enumerateCosets(P, R, Hv);
 
     std::cout << "[B3] cosets = " << T.table.size() << "\n";
 

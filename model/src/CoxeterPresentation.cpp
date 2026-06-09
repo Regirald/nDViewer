@@ -84,4 +84,20 @@ namespace Coxeter
         return relators;
     }
 
+    Subgroup buildVertexStabilizer(int rank)
+    {
+        Subgroup H;
+
+        for (int i = 1; i < rank; ++i)
+        {
+            H.generators.push_back(i);
+        }
+
+        return H;
+    }
+
+
+
+
+
 }
