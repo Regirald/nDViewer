@@ -102,6 +102,8 @@ void test_B3()
     CosetTable T =
         enumerateCosets(P, R, Hv);
 
+    CosetBFSData bfsData = buildCosetBFSData(T);
+
     std::cout << "[B3] cosets = " << T.table.size() << "\n";
 
     assert(T.table.size() == 48);

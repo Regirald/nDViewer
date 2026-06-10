@@ -1,4 +1,5 @@
 ﻿#define NOMINMAX
+#define QT_NO_DEPRECATED_WARNINGS
 #include <Windows.h>
 #include <gl/GL.h>
 #include <QApplication>

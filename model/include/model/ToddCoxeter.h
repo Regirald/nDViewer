@@ -38,6 +38,7 @@ namespace Coxeter
         int target = -1;
     };
 
+
     CosetTable enumerateCosets(
         const Presentation& presentation,
         const std::vector<Relator>& relators,
@@ -80,4 +81,22 @@ namespace Coxeter
         const Relator& relator,
         int startCoset,
         std::queue<Deduction>& deductions);
+
+
+    struct CosetBFSData
+    {
+        // BFS order of cosets, starting from 0
+        std::vector<int> order;
+
+        // parent coset in the BFS tree, -1 for root
+        std::vector<int> parentCoset;
+
+        // generator used to reach this coset from parent, -1 for root
+        std::vector<int> parentGenerator;
+
+        // shortest generator word reaching each coset from 0
+        std::vector<std::vector<uint8_t>> representativeWord;
+    };
+
+    CosetBFSData buildCosetBFSData(const CosetTable& table);
 }

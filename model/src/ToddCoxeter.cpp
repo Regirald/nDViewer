@@ -151,8 +151,8 @@ namespace Coxeter
             int target = uf.find(d.target);
             const uint8_t g = d.generator;
 
-            if (source == target)
-                return;
+            //if (source == target)
+            //    return;
 
             if (table.table[source][g] == -1)
             {
@@ -264,8 +264,13 @@ namespace Coxeter
                     0
                 });
         }
-
         bool changed = true;
+        detail::processAllDeductions(
+            table,
+            uf,
+            deductions,
+            changed);
+
 
         while (true)
         {
@@ -556,4 +561,57 @@ namespace Coxeter
         //
         return changed;
     }
+
+
+    CosetBFSData buildCosetBFSData(const CosetTable& table)
+    {
+        if (table.table.empty())
+            throw std::runtime_error("buildCosetBFSData: empty coset table");
+
+        const int cosetCount = static_cast<int>(table.table.size());
+        const int genCount = table.generators;
+
+        CosetBFSData data;
+        data.parentCoset.assign(cosetCount, -1);
+        data.parentGenerator.assign(cosetCount, -1);
+        data.representativeWord.resize(cosetCount);
+
+        std::vector<bool> visited(cosetCount, false);
+        std::queue<int> q;
+
+        // root coset
+        visited[0] = true;
+        q.push(0);
+
+        while (!q.empty())
+        {
+            const int c = q.front();
+            q.pop();
+
+            data.order.push_back(c);
+
+            for (int g = 0; g < genCount; ++g)
+            {
+                const int n = table.table[c][g];
+                if (n < 0 || n >= cosetCount)
+                    throw std::runtime_error("buildCosetBFSData: invalid table entry");
+
+                if (!visited[n])
+                {
+                    visited[n] = true;
+                    data.parentCoset[n] = c;
+                    data.parentGenerator[n] = g;
+
+                    data.representativeWord[n] = data.representativeWord[c];
+                    data.representativeWord[n].push_back(static_cast<uint8_t>(g));
+
+                    q.push(n);
+                }
+            }
+        }
+
+        return data;
+    }
+
+
 } // namespace Coxeter
