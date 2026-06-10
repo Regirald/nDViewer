@@ -53,5 +53,11 @@
     <ClInclude Include="include\model\TestFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\WythoffTopology.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\GeometryFromTopology.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

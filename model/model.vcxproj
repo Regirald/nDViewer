@@ -138,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Circle.h" />
+    <ClInclude Include="include\model\GeometryFromTopology.h" />
     <ClInclude Include="include\model\CoxeterPresentation.h" />
     <ClInclude Include="include\model\TestFile.h" />
     <ClInclude Include="include\model\ToddCoxeter.h" />
@@ -147,6 +148,7 @@
     <ClInclude Include="include\model\Manifold.h" />
     <ClInclude Include="include\model\Mesh.h" />
     <ClInclude Include="include\model\sphere.h" />
+    <ClInclude Include="include\model\WythoffTopology.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
