@@ -147,12 +147,10 @@ namespace Coxeter
             std::queue<Deduction>& deductions,
             bool& changed)
         {
-            int source = uf.find(d.source);
-            int target = uf.find(d.target);
+            int source = d.source;
+            int target = d.target;
             const uint8_t g = d.generator;
 
-            //if (source == target)
-            //    return;
 
             if (table.table[source][g] == -1)
             {
@@ -255,6 +253,7 @@ namespace Coxeter
         table.newCoset();
         uf.add();
 
+        // fill relations of the stabilizer
         for (int g : subgroup.generators)
         {
             deductions.push(
@@ -270,6 +269,7 @@ namespace Coxeter
             uf,
             deductions,
             changed);
+        ////
 
 
         while (true)
@@ -436,8 +436,7 @@ namespace Coxeter
             if (next == -1)
                 break;
 
-            result.forwardCoset =
-                uf.find(next);
+            result.forwardCoset = next;
 
             ++result.forwardPos;
         }
@@ -456,8 +455,7 @@ namespace Coxeter
             if (next == -1)
                 break;
 
-            result.backwardCoset =
-                uf.find(next);
+            result.backwardCoset = next;
 
             --result.backwardPos;
         }
@@ -484,26 +482,7 @@ namespace Coxeter
         const int n =
             (int)relator.word.size();
 
-        //
-        // complete scan
-        //
-        if (S.forwardPos == n &&
-            S.backwardPos == -1)
-        {
-            if (uf.find(S.forwardCoset) !=
-                uf.find(startCoset))
-            {
-                coincidence(
-                    table,
-                    uf,
-                    S.forwardCoset,
-                    startCoset);
-
-                changed = true;
-            }
-
-            return changed;
-        }
+        Deduction d;
 
         //
         // exactly one missing edge
@@ -511,16 +490,12 @@ namespace Coxeter
         if (S.backwardPos ==
             S.forwardPos)
         {
-            Deduction d;
 
-            d.source =
-                S.forwardCoset;
+            d.source = S.forwardCoset;
 
-            d.generator =
-                relator.word[S.forwardPos];
+            d.generator = relator.word[S.forwardPos];
 
-            d.target =
-                S.backwardCoset;
+            d.target = S.backwardCoset;
 
             deductions.push(d);
 
@@ -533,32 +508,28 @@ namespace Coxeter
             return true;
         }
 
-        //
-        // scans crossed
-        //
-        if (S.forwardPos >
-            S.backwardPos)
+        else if (S.backwardPos - S.forwardPos >= 1)
         {
-            if (uf.find(S.forwardCoset) !=
-                uf.find(S.backwardCoset))
-            {
-                coincidence(
-                    table,
-                    uf,
-                    S.forwardCoset,
-                    S.backwardCoset);
+            //do the forward first then start again
+            d.source = S.forwardCoset;
 
-                changed = true;
-            }
+            d.generator = relator.word[S.forwardPos];
 
-            return changed;
+            d.target = table.table.size(); // generate new coset
+
+            table.newCoset();
+
+            deductions.push(d);
+
+            detail::processAllDeductions(
+                table,
+                uf,
+                deductions,
+                changed);
+
+            return true;
         }
 
-        //
-        // gap > 1
-        //
-        // do nothing
-        //
         return changed;
     }
 
