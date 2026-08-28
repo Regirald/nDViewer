@@ -1,3 +1,4 @@
+#define QT_NO_DEPRECATED_WARNINGS
 #include <QElapsedTimer>
 #include <QMouseEvent>
 #include <QClipboard>

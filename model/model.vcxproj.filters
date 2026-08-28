@@ -21,6 +21,9 @@
     <ClCompile Include="src\ToddCoxeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\GramMatrixNormals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\model\ImplicitFunction.h">
@@ -57,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\model\GeometryFromTopology.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\GramMatrixNormals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include "CoxeterPresentation.h"
 #include "ToddCoxeter.h"
 #include "GeometryFromTopology.h"
+#include "GramMatrixNormals.h"
 
 // include your ToddCoxeter.cpp declarations
 namespace Coxeter
@@ -96,7 +97,8 @@ void test_A3()
 
 void test_B3()
 {
-    Presentation P = makeCoxeter({ 4,3 });
+    const std::vector<int>& schlafli = { 4,3 };
+    Presentation P = makeCoxeter(schlafli);
     auto R = makeRelators(P);
     Subgroup Hv = makeVertexStabilizer(P.rank);
 
@@ -106,28 +108,12 @@ void test_B3()
     CosetBFSData bfsData = buildCosetBFSData(T);
 
 
+     auto v0_and_mirrors = buildV0andMirrors<3, float>(P);
 
-    std::vector<Vec<3, float>> mirrors(3);
-    mirrors[0] = { 1,0,0 };
+     Vec<3, float> v0 = v0_and_mirrors.first;
+     std::vector<Vec<3, float>> mirrors = v0_and_mirrors.second;
 
-    mirrors[1] =
-    {
-        static_cast<float>(std::cos(3 * M_PI / 4)),
-        static_cast<float>(std::sin(3 * M_PI / 4)),
-         0
-    };
 
-    mirrors[2] =
-    {
-        0,
-        static_cast<float>(std::cos(2 * M_PI / 3)),
-        static_cast<float>(std::sqrt(1 - std::pow(std::cos(2 * M_PI / 3), 2)))
-    };
-    Vec<3, float> v0;
-	//solve v0 such that mirror 0 is at distance 1, mirror 1 is at distance 0, mirror 2 is at distance 0
-	v0[0] = 1;
-	v0[1] = 0;
-	v0[2] = 0;
 
     PolytopeGeometry<3> geom = generateGeometry<3>(
             bfsData,
@@ -135,7 +121,7 @@ void test_B3()
             mirrors);
     std::cout << "[B3] cosets = " << T.table.size() << "\n";
 
-    assert(T.table.size() == 48);
+    assert(T.table.size() == 8);
 }
 
 void test_H3()
