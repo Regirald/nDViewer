@@ -77,16 +77,28 @@ int main(int argc, char* argv[])
      */
 
 
-    auto P =
-        Coxeter::buildPresentation(
-            { 4,3 });
+    Presentation Presentation = makeCoxeter({ 4,3 });
+    auto relators = Coxeter::buildRelators(Presentation);
+    Subgroup Hv = makeVertexStabilizer(Presentation.rank);
 
-    auto relators =
-        Coxeter::buildRelators(P);
+    CosetTable T =
+        enumerateCosets(Presentation, relators, Hv);
+
+    CosetBFSData bfsData = buildCosetBFSData(T);
+
+    auto v0_and_mirrors = buildV0andMirrors<3, float>(Presentation);
+
+    Vec<3, float> v0 = v0_and_mirrors.first;
+    std::vector<Vec<3, float>> mirrors = v0_and_mirrors.second;
+
+    PolytopeGeometry<3> geom = generateGeometry<3>(
+        bfsData,
+        v0,
+        mirrors);
 
     std::cout
         << "Rank = "
-        << P.rank
+        << Presentation.rank
         << std::endl;
 
     std::cout
@@ -97,11 +109,14 @@ int main(int argc, char* argv[])
     test();
 
 
-    //auto polygon = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
+
+    Mesh<3> cubicMesh;
+	cubicMesh.vertices = geom.vertices;
+
 
     // 4. Open a window dedicated to computer vision visualization
     Viewer viewer;    
-    //viewer.setMesh(&polygon);
+    viewer.setMesh(&cubicMesh);
     //viewer.setMesh(&mesh3);
     //viewer.setImplicitFunction(sphere3.get());
     //viewer.setImplicitFunction(&sphere1);

@@ -44,10 +44,6 @@ namespace Coxeter
         const std::vector<Relator>& relators,
         const Subgroup& subgroupGenerators);
 
-    void defineFirstUndefinedEntry(
-        CosetTable& table,
-        UnionFind& uf,
-        std::queue<Deduction>& deductions);
 
     int firstUndefinedCoset(
         const CosetTable& table,
