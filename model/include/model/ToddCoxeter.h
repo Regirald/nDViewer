@@ -18,18 +18,6 @@ namespace Coxeter
         int newCoset();
     };
 
-    struct UnionFind
-    {
-        std::vector<int> parent;
-
-        int add();
-
-        int find(int x);
-
-        void unite(
-            int a,
-            int b);
-    };
 
     struct Deduction
     {
@@ -49,12 +37,6 @@ namespace Coxeter
         const CosetTable& table,
         int& generator);
 
-    void coincidence(
-        CosetTable& table,
-        UnionFind& uf,
-        int a,
-        int b);
-
 
     struct ScanResult
     {
@@ -67,13 +49,11 @@ namespace Coxeter
 
     ScanResult scanWord(
         CosetTable& table,
-        UnionFind& uf,
         const Relator& relator,
         int startCoset);
 
     bool scanRelator(
         CosetTable& table,
-        UnionFind& uf,
         const Relator& relator,
         int startCoset,
         std::queue<Deduction>& deductions);

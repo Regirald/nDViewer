@@ -56,62 +56,9 @@ int main(int argc, char* argv[])
     Mesh<3> gridMesh3 = GridToMesh<3, float>::convert(orthoGrid3);
 
 
-    /*
-    Schläfli symbol
-        ↓
-        Coxeter matrix
-        ↓
-        Coxeter group presentation
-        ↓
-        Word reduction engine
-        ↓
-        Group enumeration(Todd–Coxeter or equivalent)
-        ↓
-        Parabolic subgroup generation
-        ↓
-        Coset enumeration
-        ↓
-        Incidence extraction
-        ↓
-        Vertices / edges / faces / cells
-     */
 
 
-    Presentation Presentation = makeCoxeter({ 4,3 });
-    auto relators = Coxeter::buildRelators(Presentation);
-    Subgroup Hv = makeVertexStabilizer(Presentation.rank);
-
-    CosetTable T =
-        enumerateCosets(Presentation, relators, Hv);
-
-    CosetBFSData bfsData = buildCosetBFSData(T);
-
-    auto v0_and_mirrors = buildV0andMirrors<3, float>(Presentation);
-
-    Vec<3, float> v0 = v0_and_mirrors.first;
-    std::vector<Vec<3, float>> mirrors = v0_and_mirrors.second;
-
-    PolytopeGeometry<3> geom = generateGeometry<3>(
-        bfsData,
-        v0,
-        mirrors);
-
-    std::cout
-        << "Rank = "
-        << Presentation.rank
-        << std::endl;
-
-    std::cout
-        << "Relators = "
-        << relators.size()
-        << std::endl;
-
-    test();
-
-
-
-    Mesh<3> cubicMesh;
-	cubicMesh.vertices = geom.vertices;
+    Mesh<3> cubicMesh = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
 
 
     // 4. Open a window dedicated to computer vision visualization

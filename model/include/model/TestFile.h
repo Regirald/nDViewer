@@ -115,7 +115,7 @@ void test_B3()
 
 
 
-    PolytopeGeometry<3> geom = generateGeometry<3>(
+    Mesh<3> geom = generateGeometry<3>(
             bfsData,
             v0,
             mirrors);

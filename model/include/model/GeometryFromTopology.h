@@ -17,6 +17,14 @@ struct PolytopeGeometry
 };
 
 template<size_t Dim>
+Mesh<Dim> fromPolytopeGeometryToMesh(const PolytopeGeometry<Dim>& poly)
+{
+	Mesh<Dim> mesh;
+	mesh.vertices = poly.vertices;
+	return mesh;
+}
+
+template<size_t Dim>
 Vec<Dim, float> reflect(
     const Vec<Dim, float>& x,
     const Vec<Dim, float>& normal)
@@ -55,7 +63,7 @@ Vec<Dim, float> applyWord(
 }
 
 template<size_t Dim>
-PolytopeGeometry<Dim>
+Mesh<Dim>
 generateGeometry(
     const Coxeter::CosetBFSData& bfsData,
     const Vec<Dim, float>& baseVertex,
@@ -77,5 +85,5 @@ generateGeometry(
                 mirrorNormals);
     }
 
-    return poly;
+    return fromPolytopeGeometryToMesh(poly);
 }
