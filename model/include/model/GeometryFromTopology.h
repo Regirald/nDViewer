@@ -8,12 +8,16 @@
 #include "Mesh.h"
 
 
+template<size_t Dim>
+using Matrix = Vec<Dim, Vec<Dim, float>>;
+template<size_t Dim>
+using Vector = Vec<Dim, float>;
 
 template<size_t Dim>
 struct PolytopeGeometry
 {
-    std::vector<Vec<Dim, float>> vertices;
-    std::vector<std::pair<int, int>> edges;
+    std::vector<Vector<Dim>> vertices;
+    std::vector<std::vector<int>> edges;
     std::vector<std::vector<int>> faces;
     std::vector<std::vector<int>> cells;
 
@@ -23,10 +27,6 @@ struct PolytopeGeometry
 
 
 
-template<size_t Dim>
-using Matrix = Vec<Dim, Vec<Dim, float>>;
-template<size_t Dim>
-using Vector = Vec<Dim, float>;
 
 template<size_t Dim>
 inline Matrix<Dim> cholesky(const Matrix<Dim>& G)
@@ -149,6 +149,8 @@ Mesh<Dim> fromPolytopeGeometryToMesh(const PolytopeGeometry<Dim>& poly)
 {
 	Mesh<Dim> mesh;
 	mesh.vertices = poly.vertices;
+    mesh.indices = 
+
 	return mesh;
 }
 
@@ -194,20 +196,21 @@ std::vector<Vec<Dim, float>> applyWord(
 }
 
 template<size_t Dim>
-Mesh<Dim> generateGeometry(
+PolytopeGeometry<Dim> generateGeometry(
     const Coxeter::CosetBFSData& bfsDataVertex,
     const Coxeter::CosetBFSData& bfsDataEdge,
     const Initializers<Dim>& initializers,
-    const std::vector<Vec<Dim, float>>& mirrorNormals)
+    const std::vector<Vec<Dim, float>>& mirrorNormals,
+    const std::vector<std::vector<int>>& edgesIndex)
 {
     PolytopeGeometry<Dim> poly;
 
-    const size_t count =
-        bfsDataVertex.representativeWord.size();
+    const size_t nbVertex = bfsDataVertex.representativeWord.size();
+    const size_t nbEdge = bfsDataEdge.representativeWord.size();
 
-    poly.vertices.resize(count);
+    poly.vertices.resize(nbVertex);
 
-    for (size_t i = 0;i < count;++i)
+    for (size_t i = 0;i < nbVertex;++i)
     {
         poly.vertices[i] =
             applyWord(
@@ -216,6 +219,8 @@ Mesh<Dim> generateGeometry(
                 mirrorNormals)[0];
     }
 
-    return fromPolytopeGeometryToMesh(poly);
+    poly.edges = edgesIndex;
+
+    return poly;
 }
 

@@ -331,4 +331,29 @@ namespace Coxeter
     }
 
 
+    std::vector<std::vector<int>> edgesIndexFromTable(const CosetTable& vertexTable, const CosetBFSData& vertexBFSData,
+        const CosetTable& edgeTable, const CosetBFSData& edgeBFSData) 
+    {
+        
+        std::vector<std::vector<int>> edgesIndex;
+		edgesIndex.resize(edgeTable.table.size());
+
+		std::vector<int> He0 = { vertexBFSData.order[0], vertexBFSData.order[1] }; // TODO templatize for higher dimensions
+		for (int edgeCoset : edgeBFSData.order)
+		{
+            std::vector<uint8_t> generator = edgeBFSData.representativeWord[edgeCoset];
+
+            for (int vertexCoset : He0)
+            {
+				for (uint8_t g : generator)
+				{
+					vertexCoset = vertexTable.table[vertexCoset][g];
+				}
+				edgesIndex[edgeCoset].push_back(vertexCoset);
+            }
+
+		}
+		return edgesIndex;
+    }
+
 } // namespace Coxeter

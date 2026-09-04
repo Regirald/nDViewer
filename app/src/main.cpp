@@ -58,12 +58,12 @@ int main(int argc, char* argv[])
 
 
 
-    Mesh<3> cubicMesh = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
+    PolytopeGeometry<3> cubicPolytope = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
 
 
     // 4. Open a window dedicated to computer vision visualization
     Viewer viewer;    
-    viewer.setMesh(&cubicMesh);
+    viewer.setMesh(&cubicPolytope);
     //viewer.setMesh(&mesh3);
     //viewer.setImplicitFunction(sphere3.get());
     //viewer.setImplicitFunction(&sphere1);

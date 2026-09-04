@@ -18,6 +18,8 @@ Mesh<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(const std::vect
     CosetBFSData bfsDataVertex = buildCosetBFSData(Tv);
     CosetBFSData bfsDataEdge = buildCosetBFSData(Te);
 
+	std::vector<std::vector<int>> edgesIndex = edgesIndexFromTable(Tv, bfsDataVertex, Te, bfsDataEdge);
+
     auto initializersAndMirrors = buildInitializersAndMirrors<Dim>(Presentation);
 
     Initializers<Dim> initializers = initializersAndMirrors.first;
@@ -27,7 +29,8 @@ Mesh<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(const std::vect
         bfsDataVertex,
         bfsDataEdge,
         initializers,
-        mirrors);
+        mirrors, 
+        edgesIndex);
 }
 
 

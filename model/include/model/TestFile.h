@@ -113,12 +113,7 @@ void test_B3()
      Initializers<3> initializers = initializersAndMirrors.first;
      std::vector<Vec<3, float>> mirrors = initializersAndMirrors.second;
 
-     Mesh<3> geom = generateGeometry<3>(
-         bfsData,
-         bfsData,
-         initializers,
-         mirrors);
-    std::cout << "[B3] cosets = " << T.table.size() << "\n";
+
 
     assert(T.table.size() == 8);
 }
