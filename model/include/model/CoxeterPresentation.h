@@ -32,6 +32,9 @@ namespace Coxeter
 
     Subgroup buildVertexStabilizer(
 		int rank);
+
+    Subgroup buildEdgeStabilizer(
+		int rank);
 }
 
 

@@ -10,20 +10,23 @@ Mesh<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(const std::vect
     Presentation Presentation = buildPresentation(schlafli);
     auto relators = buildRelators(Presentation);
     Subgroup Hv = buildVertexStabilizer(Presentation.rank);
+    Subgroup He = buildEdgeStabilizer(Presentation.rank);
 
-    CosetTable T =
-        enumerateCosets(Presentation, relators, Hv);
+    CosetTable Tv = enumerateCosets(Presentation, relators, Hv);
+    CosetTable Te = enumerateCosets(Presentation, relators, He);
 
-    CosetBFSData bfsData = buildCosetBFSData(T);
+    CosetBFSData bfsDataVertex = buildCosetBFSData(Tv);
+    CosetBFSData bfsDataEdge = buildCosetBFSData(Te);
 
-    auto v0_and_mirrors = buildV0andMirrors<Dim, float>(Presentation);
+    auto initializersAndMirrors = buildInitializersAndMirrors<Dim>(Presentation);
 
-    Vec<Dim, float> v0 = v0_and_mirrors.first;
-    std::vector<Vec<Dim, float>> mirrors = v0_and_mirrors.second;
+    Initializers<Dim> initializers = initializersAndMirrors.first;
+    std::vector<Vec<Dim, float>> mirrors = initializersAndMirrors.second;
 
     return generateGeometry<Dim>(
-        bfsData,
-        v0,
+        bfsDataVertex,
+        bfsDataEdge,
+        initializers,
         mirrors);
 }
 

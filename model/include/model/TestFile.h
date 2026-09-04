@@ -2,7 +2,6 @@
 #include "CoxeterPresentation.h"
 #include "ToddCoxeter.h"
 #include "GeometryFromTopology.h"
-#include "GramMatrixNormals.h"
 
 // include your ToddCoxeter.cpp declarations
 namespace Coxeter
@@ -108,17 +107,17 @@ void test_B3()
     CosetBFSData bfsData = buildCosetBFSData(T);
 
 
-     auto v0_and_mirrors = buildV0andMirrors<3, float>(P);
-
-     Vec<3, float> v0 = v0_and_mirrors.first;
-     std::vector<Vec<3, float>> mirrors = v0_and_mirrors.second;
+     auto initializersAndMirrors = buildInitializersAndMirrors<3>(P);
 
 
+     Initializers<3> initializers = initializersAndMirrors.first;
+     std::vector<Vec<3, float>> mirrors = initializersAndMirrors.second;
 
-    Mesh<3> geom = generateGeometry<3>(
-            bfsData,
-            v0,
-            mirrors);
+     Mesh<3> geom = generateGeometry<3>(
+         bfsData,
+         bfsData,
+         initializers,
+         mirrors);
     std::cout << "[B3] cosets = " << T.table.size() << "\n";
 
     assert(T.table.size() == 8);

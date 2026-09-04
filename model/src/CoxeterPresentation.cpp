@@ -96,6 +96,21 @@ namespace Coxeter
         return H;
     }
 
+    Subgroup buildEdgeStabilizer(int rank)
+    {
+        Subgroup H;
+
+        for (int i = 0; i < rank; ++i)
+        {
+            if (i == 1)
+                continue;
+
+            H.generators.push_back(i);
+        }
+
+        return H;
+    }
+
 
 
 

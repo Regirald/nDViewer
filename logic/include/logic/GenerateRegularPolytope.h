@@ -3,7 +3,6 @@
 #include "model/Mesh.h"
 #include "model/CoxeterPresentation.h"
 #include "model/ToddCoxeter.h"
-#include "model/GramMatrixNormals.h"
 #include "model/GeometryFromTopology.h"
 
 template <size_t Dim>
