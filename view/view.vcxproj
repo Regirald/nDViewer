@@ -167,6 +167,7 @@
     <ClCompile Include="src\Renderer\RenderImplicitFunction.cpp" />
     <ClCompile Include="src\Renderer\RenderingManager.cpp" />
     <ClCompile Include="src\Renderer\RenderMesh.cpp" />
+    <ClCompile Include="src\Renderer\RenderPolytope.cpp" />
     <ClCompile Include="src\Renderer\RenderTargetSphere.cpp" />
     <ClCompile Include="src\Viewer.cpp" />
   </ItemGroup>
@@ -180,6 +181,7 @@
     <ClInclude Include="include\view\Renderer\Renderer.h" />
     <ClInclude Include="include\view\Renderer\RenderingManager.h" />
     <ClInclude Include="include\view\Renderer\RenderMesh.h" />
+    <ClInclude Include="include\view\Renderer\RenderPolytope.h" />
     <ClInclude Include="include\view\Renderer\RenderTargetSphere.h" />
     <ClInclude Include="include\view\Renderer\VolumeRenderer.h" />
     <ClInclude Include="include\view\Viewer.h" />

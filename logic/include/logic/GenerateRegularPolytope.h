@@ -9,7 +9,7 @@ template <size_t Dim>
 class RegularPolytopeGenerator
 {
 public:
-    static Mesh<Dim> generateRegularPolytope(const std::vector<int>& schlafli);
+    static PolytopeGeometry<Dim> generateRegularPolytope(const std::vector<int>& schlafli);
 
 };
 

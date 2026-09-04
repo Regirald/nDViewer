@@ -144,15 +144,7 @@ inline std::pair<Initializers<Dim>, std::vector<Vec<Dim, float>>> buildInitializ
 
 
 
-template<size_t Dim>
-Mesh<Dim> fromPolytopeGeometryToMesh(const PolytopeGeometry<Dim>& poly)
-{
-	Mesh<Dim> mesh;
-	mesh.vertices = poly.vertices;
-    mesh.indices = 
 
-	return mesh;
-}
 
 template<size_t Dim>
 Vec<Dim, float> reflect(

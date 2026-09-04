@@ -6,6 +6,7 @@
 #include "model/Mesh.h"
 #include "RenderMesh.h"
 #include "RenderImplicitFunction.h"
+#include "RenderPolytope.h"
 
 template <size_t Dim>
 class Mesh;
@@ -23,6 +24,11 @@ template <size_t Dim>
 	inline void setImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
 	{
 		renderContainer.push_back(std::make_unique<RenderImplicitFunction<Dim>>(implicitFunction));
+	}
+template <size_t Dim>
+	inline void setPolytope(PolytopeGeometry<Dim>* polytope)
+	{
+		renderContainer.push_back(std::make_unique<RenderPolytope<Dim>>(polytope));
 	}
 	void setBackground();
 	void setExampleTriangle();

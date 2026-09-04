@@ -5,7 +5,7 @@ using namespace Coxeter;
 
 
 template<size_t Dim>
-Mesh<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(const std::vector<int>& schlafli)
+PolytopeGeometry<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(const std::vector<int>& schlafli)
 {
     Presentation Presentation = buildPresentation(schlafli);
     auto relators = buildRelators(Presentation);
