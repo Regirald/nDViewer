@@ -331,14 +331,22 @@ namespace Coxeter
     }
 
 
-    std::vector<std::vector<int>> edgesIndexFromTable(const CosetTable& vertexTable, const CosetBFSData& vertexBFSData,
-        const CosetTable& edgeTable, const CosetBFSData& edgeBFSData) 
+    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, const CosetBFSData& vertexBFSData,
+        const CosetBFSData& edgeBFSData, const CosetBFSData& faceBFSData, const std::vector<int>& schlafli)
     {
         
         std::vector<std::vector<int>> edgesIndex;
-		edgesIndex.resize(edgeTable.table.size());
+        std::vector<std::vector<int>> facesIndex;
+		edgesIndex.resize(edgeBFSData.order.size());
+		facesIndex.resize(faceBFSData.order.size());
 
 		std::vector<int> He0 = { vertexBFSData.order[0], vertexBFSData.order[1] }; // TODO templatize for higher dimensions
+        std::vector<int> Hf0;
+		for (int i = 0; i < schlafli[0]; ++i)
+		{
+			Hf0.push_back(vertexBFSData.order[i]);
+		}
+
 		for (int edgeCoset : edgeBFSData.order)
 		{
             std::vector<uint8_t> generator = edgeBFSData.representativeWord[edgeCoset];
@@ -353,7 +361,31 @@ namespace Coxeter
             }
 
 		}
-		return edgesIndex;
+		for (int faceCoset : faceBFSData.order)
+		{
+			std::vector<uint8_t> generator = faceBFSData.representativeWord[faceCoset];
+			for (int vertexCoset : Hf0)
+			{
+				for (uint8_t g : generator)
+				{
+					vertexCoset = vertexTable.table[vertexCoset][g];
+				}
+				facesIndex[faceCoset].push_back(vertexCoset);
+			}
+		}
+		return std::make_pair(edgesIndex, facesIndex);
+    }
+
+    std::vector<std::vector<std::vector<int>>> edgesIndexFromTable(const std::vector<CosetTable>& Tables, const std::vector<CosetBFSData>& costetsBFSData)
+    {
+
+        std::vector<std::vector<int>> elements0;
+
+        for (int i = 0; i < Tables.size(); i++)
+        {
+
+        }
+        return std::vector<std::vector<std::vector<int>>>();
     }
 
 } // namespace Coxeter

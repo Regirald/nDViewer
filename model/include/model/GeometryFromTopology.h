@@ -190,15 +190,13 @@ std::vector<Vec<Dim, float>> applyWord(
 template<size_t Dim>
 PolytopeGeometry<Dim> generateGeometry(
     const Coxeter::CosetBFSData& bfsDataVertex,
-    const Coxeter::CosetBFSData& bfsDataEdge,
     const Initializers<Dim>& initializers,
     const std::vector<Vec<Dim, float>>& mirrorNormals,
-    const std::vector<std::vector<int>>& edgesIndex)
+    const std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>& edgesAndFacesIndex)
 {
     PolytopeGeometry<Dim> poly;
 
     const size_t nbVertex = bfsDataVertex.representativeWord.size();
-    const size_t nbEdge = bfsDataEdge.representativeWord.size();
 
     poly.vertices.resize(nbVertex);
 
@@ -211,7 +209,8 @@ PolytopeGeometry<Dim> generateGeometry(
                 mirrorNormals)[0];
     }
 
-    poly.edges = edgesIndex;
+    poly.edges = edgesAndFacesIndex.first;
+    poly.faces = edgesAndFacesIndex.second;
 
     return poly;
 }

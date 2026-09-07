@@ -11,14 +11,21 @@ PolytopeGeometry<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(con
     auto relators = buildRelators(Presentation);
     Subgroup Hv = buildVertexStabilizer(Presentation.rank);
     Subgroup He = buildEdgeStabilizer(Presentation.rank);
+    std::vector<Subgroup> allStabilizers = buildAllStabilizers(Presentation.rank);
+    
+    std::vector<CosetTable> Tables;
+    std::vector<CosetBFSData> costetsBFSData;
+    for (auto stabilizer : allStabilizers)
+    {
+        CosetTable T = enumerateCosets(Presentation, relators, stabilizer);
+        CosetBFSData bfsData = buildCosetBFSData(T);
 
-    CosetTable Tv = enumerateCosets(Presentation, relators, Hv);
-    CosetTable Te = enumerateCosets(Presentation, relators, He);
+        Tables.push_back(T);
+        costetsBFSData.push_back(bfsData);
+    }
 
-    CosetBFSData bfsDataVertex = buildCosetBFSData(Tv);
-    CosetBFSData bfsDataEdge = buildCosetBFSData(Te);
 
-	std::vector<std::vector<int>> edgesIndex = edgesIndexFromTable(Tv, bfsDataVertex, Te, bfsDataEdge);
+	auto edgesAndFacesIndex = edgesAndFacesIndexFromTables(Tables[0], costetsBFSData[0], costetsBFSData[1], costetsBFSData[2], schlafli);
 
     auto initializersAndMirrors = buildInitializersAndMirrors<Dim>(Presentation);
 
@@ -26,11 +33,10 @@ PolytopeGeometry<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(con
     std::vector<Vec<Dim, float>> mirrors = initializersAndMirrors.second;
 
     return generateGeometry<Dim>(
-        bfsDataVertex,
-        bfsDataEdge,
+        costetsBFSData[0],
         initializers,
         mirrors, 
-        edgesIndex);
+        edgesAndFacesIndex);
 }
 
 
