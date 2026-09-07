@@ -77,7 +77,6 @@ namespace Coxeter
     CosetBFSData buildCosetBFSData(const CosetTable& table);
 
 
-    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, const CosetBFSData& vertexBFSData,
-        const CosetBFSData& edgeBFSData, const CosetBFSData& faceBFSData, const std::vector<int>& schlafli);
+    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, std::vector<CosetBFSData> bfsData, const std::vector<int>& schlafli);
 
 }

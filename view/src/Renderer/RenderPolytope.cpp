@@ -13,7 +13,8 @@ RenderPolytope<Dim>::RenderPolytope(PolytopeGeometry<Dim>* polytope)
 	: m_polytope(polytope)
 {
 	vbo = 0;
-	ebo = 0;
+	eboEdges = 0;
+	eboFaces = 0;
 	gl = nullptr;
 	m_initialized = false;
 }
@@ -90,6 +91,25 @@ void RenderPolytope<Dim>::initializeGLResources()
 	m_indexCount = static_cast<int>(edgeIndices.size());
 
 	// -------------------------
+	// Build face indices (triangulate polygonal faces)
+	// -------------------------
+	std::vector<uint32_t> faceIndices;
+	for (const auto& f : m_polytope->faces)
+	{
+		if (f.size() < 3)
+			continue;
+		// fan triangulation: (0,i,i+1)
+		for (size_t i = 0; i + 2 < f.size(); ++i)
+		{
+			faceIndices.push_back(static_cast<uint32_t>(f[i]));
+			faceIndices.push_back(static_cast<uint32_t>(f[i + 1]));
+			faceIndices.push_back(static_cast<uint32_t>(f[i + 2]));
+		}
+	}
+
+	m_faceIndexCount = static_cast<int>(faceIndices.size());
+
+	// -------------------------
 	// 3. Create VAO FIRST
 	// -------------------------
 	gl->glGenVertexArrays(1, &vao);
@@ -106,17 +126,27 @@ void RenderPolytope<Dim>::initializeGLResources()
 		GL_STATIC_DRAW);
 
 	// -------------------------
-	// 5. Create & fill EBO
+	// 5. Create & fill EBO for edges
 	// -------------------------
-	gl->glGenBuffers(1, &ebo);
-	gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	gl->glGenBuffers(1, &eboEdges);
+	gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboEdges);
 	gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 		edgeIndices.size() * sizeof(uint32_t),
 		edgeIndices.data(),
 		GL_STATIC_DRAW);
 
 	// -------------------------
-	// 6. Define vertex layout
+	// 6. Create & fill EBO for faces
+	// -------------------------
+	gl->glGenBuffers(1, &eboFaces);
+	gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFaces);
+	gl->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		faceIndices.size() * sizeof(uint32_t),
+		faceIndices.data(),
+		GL_STATIC_DRAW);
+
+	// -------------------------
+	// 7. Define vertex layout
 	// -------------------------
 	gl->glEnableVertexAttribArray(0);
 	gl->glVertexAttribPointer(
@@ -156,11 +186,27 @@ void RenderPolytope<Dim>::render(const ndv::RenderContext& context)
 	m_program.setUniformValue("u_view", context.view);
 	m_program.setUniformValue("u_projection", context.projection);
 
-	// Draw edges
-	m_program.setUniformValue("u_color", QVector3D(0.0f, 0.0f, 0.0f));
 	gl->glBindVertexArray(vao);
-	::glLineWidth(2.0f);
-	gl->glDrawElements(GL_LINES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+
+	// Draw faces (filled)
+	if (m_faceIndexCount > 0)
+	{
+		m_program.setUniformValue("u_color", QVector3D(0.9f, 0.9f, 0.9f));
+		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		// bind faces EBO to VAO
+		gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFaces);
+		gl->glDrawElements(GL_TRIANGLES, m_faceIndexCount, GL_UNSIGNED_INT, nullptr);
+	}
+
+	// Draw edges (lines)
+	if (m_indexCount > 0)
+	{
+		m_program.setUniformValue("u_color", QVector3D(0.0f, 0.0f, 0.0f));
+		::glLineWidth(2.0f);
+		// bind edges EBO to VAO
+		gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboEdges);
+		gl->glDrawElements(GL_LINES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+	}
 
 	// Draw vertices as points
 	m_program.setUniformValue("u_color", QVector3D(0.9f, 0.2f, 0.2f));
@@ -184,7 +230,8 @@ RenderPolytope<Dim>::~RenderPolytope()
 		return;
 
 	if (vbo) gl->glDeleteBuffers(1, &vbo);
-	if (ebo) gl->glDeleteBuffers(1, &ebo);
+	if (eboEdges) gl->glDeleteBuffers(1, &eboEdges);
+	if (eboFaces) gl->glDeleteBuffers(1, &eboFaces);
 	if (vao) gl->glDeleteVertexArrays(1, &vao);
 }
 

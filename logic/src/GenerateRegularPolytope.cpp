@@ -25,7 +25,7 @@ PolytopeGeometry<Dim> RegularPolytopeGenerator<Dim>::generateRegularPolytope(con
     }
 
 
-	auto edgesAndFacesIndex = edgesAndFacesIndexFromTables(Tables[0], costetsBFSData[0], costetsBFSData[1], costetsBFSData[2], schlafli);
+	auto edgesAndFacesIndex = edgesAndFacesIndexFromTables(Tables[0], costetsBFSData, schlafli);
 
     auto initializersAndMirrors = buildInitializersAndMirrors<Dim>(Presentation);
 

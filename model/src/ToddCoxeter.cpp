@@ -331,20 +331,38 @@ namespace Coxeter
     }
 
 
-    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, const CosetBFSData& vertexBFSData,
-        const CosetBFSData& edgeBFSData, const CosetBFSData& faceBFSData, const std::vector<int>& schlafli)
+    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, std::vector<CosetBFSData> costetsBFSData, const std::vector<int>& schlafli)
     {
         
         std::vector<std::vector<int>> edgesIndex;
         std::vector<std::vector<int>> facesIndex;
-		edgesIndex.resize(edgeBFSData.order.size());
-		facesIndex.resize(faceBFSData.order.size());
 
-		std::vector<int> He0 = { vertexBFSData.order[0], vertexBFSData.order[1] }; // TODO templatize for higher dimensions
+        CosetBFSData vertexBFSData = costetsBFSData[0];
+        CosetBFSData edgeBFSData = costetsBFSData[1];
+		edgesIndex.resize(edgeBFSData.order.size());
+        CosetBFSData faceBFSData;
+		bool hasFaceData = costetsBFSData.size() > 2;
+        if (hasFaceData)
+        {
+            faceBFSData = costetsBFSData[2];
+		    facesIndex.resize(faceBFSData.order.size());
+        }
+        else
+        {
+            std::vector<int> face;
+            for (int i = 0; i < schlafli[0]; ++i)
+            {
+                face.push_back({ vertexBFSData.order[i] });
+            }
+            facesIndex.push_back(face);
+        }
+
+
+		std::vector<int> He0 = { 0, 1};
         std::vector<int> Hf0;
 		for (int i = 0; i < schlafli[0]; ++i)
 		{
-			Hf0.push_back(vertexBFSData.order[i]);
+			Hf0.push_back(i);
 		}
 
 		for (int edgeCoset : edgeBFSData.order)
@@ -361,18 +379,21 @@ namespace Coxeter
             }
 
 		}
-		for (int faceCoset : faceBFSData.order)
-		{
-			std::vector<uint8_t> generator = faceBFSData.representativeWord[faceCoset];
-			for (int vertexCoset : Hf0)
-			{
-				for (uint8_t g : generator)
-				{
-					vertexCoset = vertexTable.table[vertexCoset][g];
-				}
-				facesIndex[faceCoset].push_back(vertexCoset);
-			}
-		}
+        if (hasFaceData)
+        {
+            for (int faceCoset : faceBFSData.order)
+            {
+                std::vector<uint8_t> generator = faceBFSData.representativeWord[faceCoset];
+                for (int vertexCoset : Hf0)
+                {
+                    for (uint8_t g : generator)
+                    {
+                        vertexCoset = vertexTable.table[vertexCoset][g];
+                    }
+                    facesIndex[faceCoset].push_back(vertexCoset);
+                }
+            }
+        }
 		return std::make_pair(edgesIndex, facesIndex);
     }
 
