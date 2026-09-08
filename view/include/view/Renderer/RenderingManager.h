@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include "Renderer.h"
-#include "Renderer/RenderContext.h"
+#include "renderer.h"
+#include "RenderContext.h"
 #include "model/Mesh.h"
 #include "RenderMesh.h"
 #include "RenderImplicitFunction.h"

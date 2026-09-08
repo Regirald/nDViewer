@@ -4,6 +4,11 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QVector3D>
+#include "Renderer/VerticesRenderer.h"
+#include "Renderer/EdgesRenderer.h"
+#include "Renderer/FacesRenderer.h"
+#include <memory>
+#include <unordered_map>
 
 // ------------------------------------------------------------
 // Constructor (NO OpenGL here)
@@ -178,46 +183,37 @@ void RenderPolytope<Dim>::render(const ndv::RenderContext& context)
 	if (!m_initialized)
 		return;
 
-	gl->glEnable(GL_DEPTH_TEST);
-	gl->glDepthFunc(GL_LESS);
-
-	m_program.bind();
-
-	m_program.setUniformValue("u_view", context.view);
-	m_program.setUniformValue("u_projection", context.projection);
-
-	gl->glBindVertexArray(vao);
-
-	// Draw faces (filled)
-	if (m_faceIndexCount > 0)
+	// Delegate rendering of components to specialized renderers (3D only)
+	if constexpr (Dim == 3)
 	{
-		m_program.setUniformValue("u_color", QVector3D(0.9f, 0.9f, 0.9f));
-		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		// bind faces EBO to VAO
-		gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFaces);
-		gl->glDrawElements(GL_TRIANGLES, m_faceIndexCount, GL_UNSIGNED_INT, nullptr);
+		static std::unordered_map<RenderPolytope<Dim>*, std::unique_ptr<VerticesRenderer>> s_verticesMap;
+		static std::unordered_map<RenderPolytope<Dim>*, std::unique_ptr<EdgesRenderer>> s_edgesMap;
+		static std::unordered_map<RenderPolytope<Dim>*, std::unique_ptr<FacesRenderer>> s_facesMap;
+
+		// ensure renderers are initialized for this instance
+		if (s_verticesMap.find(this) == s_verticesMap.end())
+		{
+			s_verticesMap[this] = std::make_unique<VerticesRenderer>(static_cast<PolytopeGeometry<3>*>(m_polytope));
+			s_verticesMap[this]->initializeGLResources();
+		}
+
+		if (s_edgesMap.find(this) == s_edgesMap.end())
+		{
+			s_edgesMap[this] = std::make_unique<EdgesRenderer>(static_cast<PolytopeGeometry<3>*>(m_polytope));
+			s_edgesMap[this]->initializeGLResources();
+		}
+
+		if (s_facesMap.find(this) == s_facesMap.end())
+		{
+			s_facesMap[this] = std::make_unique<FacesRenderer>(static_cast<PolytopeGeometry<3>*>(m_polytope));
+			s_facesMap[this]->initializeGLResources();
+		}
+
+		// Render each component
+		s_verticesMap[this]->render(context);
+		s_edgesMap[this]->render(context);
+		s_facesMap[this]->render(context);
 	}
-
-	// Draw edges (lines)
-	if (m_indexCount > 0)
-	{
-		m_program.setUniformValue("u_color", QVector3D(0.0f, 0.0f, 0.0f));
-		::glLineWidth(2.0f);
-		// bind edges EBO to VAO
-		gl->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboEdges);
-		gl->glDrawElements(GL_LINES, m_indexCount, GL_UNSIGNED_INT, nullptr);
-	}
-
-	// Draw vertices as points
-	m_program.setUniformValue("u_color", QVector3D(0.9f, 0.2f, 0.2f));
-	glEnable(GL_PROGRAM_POINT_SIZE);
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(8.0f);
-	gl->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(m_polytope->vertices.size()));
-
-	gl->glBindVertexArray(0);
-
-	m_program.release();
 }
 
 // ------------------------------------------------------------

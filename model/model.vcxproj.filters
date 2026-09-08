@@ -56,5 +56,14 @@
     <ClInclude Include="include\model\GeometryFromTopology.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\spheres.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\cylinders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\planes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

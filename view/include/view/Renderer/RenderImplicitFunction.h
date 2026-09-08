@@ -11,12 +11,14 @@ class RenderImplicitFunction : public Renderer
 public:
 	RenderImplicitFunction(ImplicitFunction<Dim>* implicitFunction);
 
+	RenderImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> implicitFunction);
+
 	void initializeGLResources();
 	void generateSDF();
 	void uploadSDF(const std::vector<float>& data);
 	void render(const ndv::RenderContext& context) override;
 
-	ImplicitFunction<Dim>* m_implicitFunction;
+	std::shared_ptr<ImplicitFunction<Dim>> m_implicitFunction;
 	QOpenGLShaderProgram m_program;
 	QOpenGLExtraFunctions* gl = nullptr;
 	bool m_initialized = false;
