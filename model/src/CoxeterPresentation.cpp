@@ -96,6 +96,39 @@ namespace Coxeter
         return H;
     }
 
+    Subgroup buildEdgeStabilizer(int rank)
+    {
+        Subgroup H;
+
+        for (int i = 0; i < rank; ++i)
+        {
+            if (i == 1)
+                continue;
+
+            H.generators.push_back(i);
+        }
+
+        return H;
+    }
+
+    std::vector<Subgroup> buildAllStabilizers(int rank)
+    {
+        std::vector<Subgroup> stabilizers;
+        
+		for (int i = 0; i < rank; ++i)
+		{
+			Subgroup H;
+			for (int j = 0; j < rank; ++j)
+			{
+				if (j == i)
+					continue;
+				H.generators.push_back(j);
+			}
+			stabilizers.push_back(std::move(H));
+		}
+		return stabilizers;
+    }
+
 
 
 

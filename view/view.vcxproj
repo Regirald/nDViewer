@@ -163,16 +163,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera\Camera.cpp" />
+    <ClCompile Include="src\Renderer\EdgesRenderer.cpp" />
+    <ClCompile Include="src\Renderer\FacesRenderer.cpp" />
     <ClCompile Include="src\Renderer\RenderBackground.cpp" />
     <ClCompile Include="src\Renderer\RenderImplicitFunction.cpp" />
     <ClCompile Include="src\Renderer\RenderingManager.cpp" />
     <ClCompile Include="src\Renderer\RenderMesh.cpp" />
+    <ClCompile Include="src\Renderer\RenderPolytope.cpp" />
     <ClCompile Include="src\Renderer\RenderTargetSphere.cpp" />
+    <ClCompile Include="src\Renderer\VerticesRenderer.cpp" />
     <ClCompile Include="src\Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\view\Camera\Camera.h" />
+    <ClInclude Include="include\view\Renderer\EdgesRenderer.h" />
     <ClInclude Include="include\view\Renderer\ExampleTriangleRenderer.h" />
+    <ClInclude Include="include\view\Renderer\FacesRenderer.h" />
     <ClInclude Include="include\view\Renderer\GLMeshRenderer.h" />
     <ClInclude Include="include\view\Renderer\RenderImplicitFunction.h" />
     <ClInclude Include="include\view\Renderer\RenderBackground.h" />
@@ -180,7 +186,9 @@
     <ClInclude Include="include\view\Renderer\Renderer.h" />
     <ClInclude Include="include\view\Renderer\RenderingManager.h" />
     <ClInclude Include="include\view\Renderer\RenderMesh.h" />
+    <ClInclude Include="include\view\Renderer\RenderPolytope.h" />
     <ClInclude Include="include\view\Renderer\RenderTargetSphere.h" />
+    <ClInclude Include="include\view\Renderer\VerticesRenderer.h" />
     <ClInclude Include="include\view\Renderer\VolumeRenderer.h" />
     <ClInclude Include="include\view\Viewer.h" />
   </ItemGroup>

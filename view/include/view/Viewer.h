@@ -26,6 +26,12 @@ public:
         renderingManager.setImplicitFunction(implicitFunction);
     }
 
+    template <size_t Dim>
+    inline void setPolytope(PolytopeGeometry<Dim>* polytope)
+    {
+        renderingManager.setPolytope(polytope);
+    }
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

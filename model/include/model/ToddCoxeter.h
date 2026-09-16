@@ -18,18 +18,6 @@ namespace Coxeter
         int newCoset();
     };
 
-    struct UnionFind
-    {
-        std::vector<int> parent;
-
-        int add();
-
-        int find(int x);
-
-        void unite(
-            int a,
-            int b);
-    };
 
     struct Deduction
     {
@@ -44,20 +32,10 @@ namespace Coxeter
         const std::vector<Relator>& relators,
         const Subgroup& subgroupGenerators);
 
-    void defineFirstUndefinedEntry(
-        CosetTable& table,
-        UnionFind& uf,
-        std::queue<Deduction>& deductions);
 
     int firstUndefinedCoset(
         const CosetTable& table,
         int& generator);
-
-    void coincidence(
-        CosetTable& table,
-        UnionFind& uf,
-        int a,
-        int b);
 
 
     struct ScanResult
@@ -71,13 +49,11 @@ namespace Coxeter
 
     ScanResult scanWord(
         CosetTable& table,
-        UnionFind& uf,
         const Relator& relator,
         int startCoset);
 
     bool scanRelator(
         CosetTable& table,
-        UnionFind& uf,
         const Relator& relator,
         int startCoset,
         std::queue<Deduction>& deductions);
@@ -99,4 +75,8 @@ namespace Coxeter
     };
 
     CosetBFSData buildCosetBFSData(const CosetTable& table);
+
+
+    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, std::vector<CosetBFSData> bfsData, const std::vector<int>& schlafli);
+
 }

@@ -56,52 +56,14 @@ int main(int argc, char* argv[])
     Mesh<3> gridMesh3 = GridToMesh<3, float>::convert(orthoGrid3);
 
 
-    /*
-    Schläfli symbol
-        ↓
-        Coxeter matrix
-        ↓
-        Coxeter group presentation
-        ↓
-        Word reduction engine
-        ↓
-        Group enumeration(Todd–Coxeter or equivalent)
-        ↓
-        Parabolic subgroup generation
-        ↓
-        Coset enumeration
-        ↓
-        Incidence extraction
-        ↓
-        Vertices / edges / faces / cells
-     */
 
 
-    auto P =
-        Coxeter::buildPresentation(
-            { 4,3 });
+    PolytopeGeometry<3> cubicPolytope = RegularPolytopeGenerator<3>::generateRegularPolytope({ 5, 3});
 
-    auto relators =
-        Coxeter::buildRelators(P);
-
-    std::cout
-        << "Rank = "
-        << P.rank
-        << std::endl;
-
-    std::cout
-        << "Relators = "
-        << relators.size()
-        << std::endl;
-
-    test();
-
-
-    //auto polygon = RegularPolytopeGenerator<3>::generateRegularPolytope({ 4, 3 });
 
     // 4. Open a window dedicated to computer vision visualization
     Viewer viewer;    
-    //viewer.setMesh(&polygon);
+    viewer.setPolytope(&cubicPolytope);
     //viewer.setMesh(&mesh3);
     //viewer.setImplicitFunction(sphere3.get());
     //viewer.setImplicitFunction(&sphere1);

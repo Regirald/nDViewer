@@ -12,38 +12,6 @@ namespace Coxeter
 {
 
 
-
-    int UnionFind::add()
-    {
-        const int id = static_cast<int>(parent.size());
-        parent.push_back(id);
-        return id;
-    }
-
-    int UnionFind::find(int x)
-    {
-        if (x < 0 || x >= static_cast<int>(parent.size()))
-            throw std::out_of_range("UnionFind::find: index out of range");
-
-        if (parent[x] == x)
-            return x;
-
-        parent[x] = find(parent[x]);
-        return parent[x];
-    }
-
-    void UnionFind::unite(int a, int b)
-    {
-        a = find(a);
-        b = find(b);
-
-        if (a != b)
-            parent[b] = a;
-    }
-
-
-
-
     namespace detail
     {
 
@@ -53,106 +21,17 @@ namespace Coxeter
             table.table[b][g] = a;
         }
 
-        static void coincidence(
-            CosetTable& table,
-            UnionFind& uf,
-            int a,
-            int b,
-            std::queue<Deduction>& deductions,
-            bool& changed)
-        {
-            std::queue<std::pair<int, int>> pending;
-            pending.push({ a, b });
-
-            while (!pending.empty())
-            {
-                auto [x0, y0] = pending.front();
-                pending.pop();
-
-                int x = uf.find(x0);
-                int y = uf.find(y0);
-
-                if (x == y)
-                    continue;
-
-                uf.unite(x, y);
-                changed = true;
-
-                const int rep = uf.find(x);
-                const int other = (rep == x) ? y : x;
-
-                for (int g = 0; g < table.generators; ++g)
-                {
-                    int tx = table.table[x][g];
-                    int ty = table.table[y][g];
-
-                    if (tx == -1 && ty == -1)
-                        continue;
-
-                    if (tx == -1)
-                    {
-                        table.table[rep][g] = uf.find(ty);
-                        table.table[uf.find(ty)][g] = rep;
-                        continue;
-                    }
-
-                    if (ty == -1)
-                    {
-                        table.table[rep][g] = uf.find(tx);
-                        table.table[uf.find(tx)][g] = rep;
-                        continue;
-                    }
-
-                    tx = uf.find(tx);
-                    ty = uf.find(ty);
-
-                    if (tx != ty)
-                        pending.push({ tx, ty });
-                }
-
-                (void)other;
-            }
-
-            while (!deductions.empty())
-            {
-                Deduction d = deductions.front();
-                deductions.pop();
-
-                d.source = uf.find(d.source);
-                d.target = uf.find(d.target);
-
-                if (d.source == d.target)
-                    continue;
-
-                int existing = table.table[d.source][d.generator];
-
-                if (existing == -1)
-                {
-                    rawLink(table, d.source, d.generator, d.target);
-                    changed = true;
-                    continue;
-                }
-
-                existing = uf.find(existing);
-
-                if (existing != d.target)
-                    pending.push({ existing, d.target });
-            }
-        }
 
         static void processDeduction(
             CosetTable& table,
-            UnionFind& uf,
             const Deduction& d,
             std::queue<Deduction>& deductions,
             bool& changed)
         {
-            int source = uf.find(d.source);
-            int target = uf.find(d.target);
+            int source = d.source;
+            int target = d.target;
             const uint8_t g = d.generator;
 
-            //if (source == target)
-            //    return;
 
             if (table.table[source][g] == -1)
             {
@@ -161,17 +40,11 @@ namespace Coxeter
                 return;
             }
 
-            int existing = uf.find(table.table[source][g]);
-
-            if (existing == target)
-                return;
-
-            coincidence(table, uf, existing, target, deductions, changed);
+            //coincidence(table, uf, existing, target, deductions, changed);
         }
 
         static void processAllDeductions(
             CosetTable& table,
-            UnionFind& uf,
             std::queue<Deduction>& deductions,
             bool& changed)
         {
@@ -180,45 +53,10 @@ namespace Coxeter
                 Deduction d = deductions.front();
                 deductions.pop();
 
-                processDeduction(table, uf, d, deductions, changed);
+                processDeduction(table, d, deductions, changed);
             }
         }
 
-
-        static void compressTable(CosetTable& table, UnionFind& uf)
-        {
-            std::vector<int> repToNew(table.table.size(), -1);
-            int nextId = 0;
-
-            for (int i = 0; i < static_cast<int>(table.table.size()); ++i)
-            {
-                const int rep = uf.find(i);
-                if (repToNew[rep] == -1)
-                    repToNew[rep] = nextId++;
-            }
-
-            std::vector<std::vector<int>> newTable(
-                nextId,
-                std::vector<int>(table.generators, -1));
-
-            for (int i = 0; i < static_cast<int>(table.table.size()); ++i)
-            {
-                const int rep = uf.find(i);
-                const int row = repToNew[rep];
-
-                for (int g = 0; g < table.generators; ++g)
-                {
-                    int tgt = table.table[i][g];
-                    if (tgt == -1)
-                        continue;
-
-                    tgt = uf.find(tgt);
-                    newTable[row][g] = repToNew[tgt];
-                }
-            }
-
-            table.table = std::move(newTable);
-        }
 
         static bool hasUndefinedEntries(const CosetTable& table)
         {
@@ -248,13 +86,11 @@ namespace Coxeter
     {
         CosetTable table;
         table.generators = presentation.rank;
-
-        UnionFind uf;
         std::queue<Deduction> deductions;
 
         table.newCoset();
-        uf.add();
 
+        // fill relations of the stabilizer
         for (int g : subgroup.generators)
         {
             deductions.push(
@@ -267,15 +103,13 @@ namespace Coxeter
         bool changed = true;
         detail::processAllDeductions(
             table,
-            uf,
             deductions,
             changed);
+        ////
 
 
         while (true)
         {
-            changed = false;
-
             //
             // Saturation phase
             //
@@ -283,34 +117,16 @@ namespace Coxeter
                 c < (int)table.table.size();
                 ++c)
             {
-                if (uf.find(c) != c)
-                    continue;
-
                 for (const Relator& relator
                     : relators)
                 {
-                    changed |=
-                        scanRelator(
+                    scanRelator(
                             table,
-                            uf,
                             relator,
                             c,
                             deductions);
                 }
             }
-
-            detail::processAllDeductions(
-                table,
-                uf,
-                deductions,
-                changed);
-
-            //
-            // If saturation produced something,
-            // continue before defining anything.
-            //
-            if (changed)
-                continue;
 
             //
             // Completely finished
@@ -318,56 +134,12 @@ namespace Coxeter
             if (!detail::hasUndefinedEntries(table))
                 break;
 
-            //
-            // Felsch step:
-            // define exactly one new coset
-            //
-            defineFirstUndefinedEntry(
-                table,
-                uf,
-                deductions);
-
-            detail::processAllDeductions(
-                table,
-                uf,
-                deductions,
-                changed);
         }
-
-        detail::compressTable(
-            table,
-            uf);
 
         return table;
     }
 
-    void defineFirstUndefinedEntry(
-        CosetTable& table,
-        UnionFind& uf,
-        std::queue<Deduction>& deductions)
-    {
-        int g;
-
-        int c =
-            firstUndefinedCoset(
-                table,
-                g);
-
-        if (c < 0)
-            return;
-
-        int n =
-            table.newCoset();
-
-        uf.add();
-
-        deductions.push(
-            {
-                c,
-                (uint8_t)g,
-                n
-            });
-    }
+   
 
     int firstUndefinedCoset(
         const CosetTable& table,
@@ -387,16 +159,6 @@ namespace Coxeter
 
         return -1;
     }
-    void coincidence(
-        CosetTable& table,
-        UnionFind& uf,
-        int a,
-        int b)
-    {
-        std::queue<Deduction> empty;
-        bool changed = false;
-        detail::coincidence(table, uf, a, b, empty, changed);
-    }
 
 
 	///SCAN 
@@ -404,7 +166,6 @@ namespace Coxeter
 
     ScanResult scanWord(
         CosetTable& table,
-        UnionFind& uf,
         const Relator& relator,
         int startCoset)
     {
@@ -416,11 +177,9 @@ namespace Coxeter
         result.forwardPos = 0;
         result.backwardPos = n - 1;
 
-        result.forwardCoset =
-            uf.find(startCoset);
+        result.forwardCoset = startCoset;
 
-        result.backwardCoset =
-            uf.find(startCoset);
+        result.backwardCoset = startCoset;
 
         //
         // forward
@@ -436,8 +195,7 @@ namespace Coxeter
             if (next == -1)
                 break;
 
-            result.forwardCoset =
-                uf.find(next);
+            result.forwardCoset = next;
 
             ++result.forwardPos;
         }
@@ -456,8 +214,7 @@ namespace Coxeter
             if (next == -1)
                 break;
 
-            result.backwardCoset =
-                uf.find(next);
+            result.backwardCoset = next;
 
             --result.backwardPos;
         }
@@ -467,7 +224,6 @@ namespace Coxeter
 
     bool scanRelator(
         CosetTable& table,
-        UnionFind& uf,
         const Relator& relator,
         int startCoset,
         std::queue<Deduction>& deductions)
@@ -477,88 +233,49 @@ namespace Coxeter
         ScanResult S =
             scanWord(
                 table,
-                uf,
                 relator,
                 startCoset);
 
         const int n =
             (int)relator.word.size();
 
-        //
-        // complete scan
-        //
-        if (S.forwardPos == n &&
-            S.backwardPos == -1)
-        {
-            if (uf.find(S.forwardCoset) !=
-                uf.find(startCoset))
-            {
-                coincidence(
-                    table,
-                    uf,
-                    S.forwardCoset,
-                    startCoset);
 
-                changed = true;
-            }
-
-            return changed;
-        }
 
         //
-        // exactly one missing edge
+        // one missing edge or more otherwise (scan crossed) dissmis
         //
-        if (S.backwardPos ==
-            S.forwardPos)
+        if (S.backwardPos == S.forwardPos || S.backwardPos - S.forwardPos >= 1)
         {
             Deduction d;
 
-            d.source =
-                S.forwardCoset;
+            d.source = S.forwardCoset;
+            d.generator = relator.word[S.forwardPos];
+            if (S.backwardPos - S.forwardPos >= 1)
+            {
+                d.target = table.table.size(); // generate new coset
 
-            d.generator =
-                relator.word[S.forwardPos];
+                table.newCoset();
 
-            d.target =
-                S.backwardCoset;
+            }
+            else {
+                d.target = S.backwardCoset;
+            }
 
             deductions.push(d);
 
             detail::processAllDeductions(
                 table,
-                uf,
                 deductions,
                 changed);
+
+            if (S.backwardPos - S.forwardPos >= 1) //continue until scan pass
+            {
+                scanRelator(table, relator, startCoset, deductions);
+            }
 
             return true;
         }
 
-        //
-        // scans crossed
-        //
-        if (S.forwardPos >
-            S.backwardPos)
-        {
-            if (uf.find(S.forwardCoset) !=
-                uf.find(S.backwardCoset))
-            {
-                coincidence(
-                    table,
-                    uf,
-                    S.forwardCoset,
-                    S.backwardCoset);
-
-                changed = true;
-            }
-
-            return changed;
-        }
-
-        //
-        // gap > 1
-        //
-        // do nothing
-        //
         return changed;
     }
 
@@ -613,5 +330,83 @@ namespace Coxeter
         return data;
     }
 
+
+    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, std::vector<CosetBFSData> costetsBFSData, const std::vector<int>& schlafli)
+    {
+        
+        std::vector<std::vector<int>> edgesIndex;
+        std::vector<std::vector<int>> facesIndex;
+
+        CosetBFSData vertexBFSData = costetsBFSData[0];
+        CosetBFSData edgeBFSData = costetsBFSData[1];
+		edgesIndex.resize(edgeBFSData.order.size());
+        CosetBFSData faceBFSData;
+		bool hasFaceData = costetsBFSData.size() > 2;
+        if (hasFaceData)
+        {
+            faceBFSData = costetsBFSData[2];
+		    facesIndex.resize(faceBFSData.order.size());
+        }
+        else
+        {
+            std::vector<int> face;
+            for (int i = 0; i < schlafli[0]; ++i)
+            {
+                face.push_back({ vertexBFSData.order[i] });
+            }
+            facesIndex.push_back(face);
+        }
+
+
+		std::vector<int> He0 = { 0, 1};
+        std::vector<int> Hf0;
+		for (int i = 0; i < schlafli[0]; ++i)
+		{
+			Hf0.push_back(i);
+		}
+
+		for (int edgeCoset : edgeBFSData.order)
+		{
+            std::vector<uint8_t> generator = edgeBFSData.representativeWord[edgeCoset];
+
+            for (int vertexCoset : He0)
+            {
+				for (uint8_t g : generator)
+				{
+					vertexCoset = vertexTable.table[vertexCoset][g];
+				}
+				edgesIndex[edgeCoset].push_back(vertexCoset);
+            }
+
+		}
+        if (hasFaceData)
+        {
+            for (int faceCoset : faceBFSData.order)
+            {
+                std::vector<uint8_t> generator = faceBFSData.representativeWord[faceCoset];
+                for (int vertexCoset : Hf0)
+                {
+                    for (uint8_t g : generator)
+                    {
+                        vertexCoset = vertexTable.table[vertexCoset][g];
+                    }
+                    facesIndex[faceCoset].push_back(vertexCoset);
+                }
+            }
+        }
+		return std::make_pair(edgesIndex, facesIndex);
+    }
+
+    std::vector<std::vector<std::vector<int>>> edgesIndexFromTable(const std::vector<CosetTable>& Tables, const std::vector<CosetBFSData>& costetsBFSData)
+    {
+
+        std::vector<std::vector<int>> elements0;
+
+        for (int i = 0; i < Tables.size(); i++)
+        {
+
+        }
+        return std::vector<std::vector<std::vector<int>>>();
+    }
 
 } // namespace Coxeter
