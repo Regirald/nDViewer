@@ -23,7 +23,7 @@ void EdgesRenderer::initializeGLResources()
 	}
 
 	m_cylinders = std::make_unique<CylindersCollection>(segments, radii);
-	m_renderer = std::make_unique<RenderImplicitFunction<3>>(m_cylinders.get());
+	m_renderer = std::make_unique<RenderImplicitFunction<3>>(m_cylinders.release());
 	m_renderer->initializeGLResources();
 }
 
