@@ -11,7 +11,21 @@ public:
 	// Each cylinder is defined by two endpoints and a radius
 	CylindersCollection(const std::vector<std::pair<Point, Point>>& segments, const std::vector<float>& radii)
 		: segments(segments), radii(radii)
-	{}
+	{
+	//initialize m_Bounds
+		for (size_t i = 0; i < segments.size(); ++i)
+		{
+			const Point& a = segments[i].first;
+			const Point& b = segments[i].second;
+			float r = radii[i];
+			m_boundsMin[0] = std::min(m_boundsMin[0], std::min(a[0], b[0]) - r);
+			m_boundsMin[1] = std::min(m_boundsMin[1], std::min(a[1], b[1]) - r);
+			m_boundsMin[2] = std::min(m_boundsMin[2], std::min(a[2], b[2]) - r);
+			m_boundsMax[0] = std::max(m_boundsMax[0], std::max(a[0], b[0]) + r);
+			m_boundsMax[1] = std::max(m_boundsMax[1], std::max(a[1], b[1]) + r);
+			m_boundsMax[2] = std::max(m_boundsMax[2], std::max(a[2], b[2]) + r);
+		}
+	}
 
 	float evaluateSDF(const Point& p) const override
 	{
