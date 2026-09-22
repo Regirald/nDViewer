@@ -1,0 +1,203 @@
+#pragma once
+#include "ImplicitFunction.h"
+#include <vector>
+#include <string>
+#include <QVector3D>
+
+class PolytopeNodes : public ImplicitFunction<3> {
+public:
+	using Point = ImplicitFunction<3>::Point;
+
+	// Each node is defined by a position and a radius
+	PolytopeNodes(const std::vector<Point>& nodes, const std::vector<float>& radii)
+		: nodes(nodes), radii(radii)
+	{
+		//initialize m_Bounds
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			const Point& p = nodes[i];
+			float r = radii[i];
+			m_boundsMin[0] = std::min(m_boundsMin[0], p[0] - r);
+			m_boundsMin[1] = std::min(m_boundsMin[1], p[1] - r);
+			m_boundsMin[2] = std::min(m_boundsMin[2], p[2] - r);
+			m_boundsMax[0] = std::max(m_boundsMax[0], p[0] + r);
+			m_boundsMax[1] = std::max(m_boundsMax[1], p[1] + r);
+			m_boundsMax[2] = std::max(m_boundsMax[2], p[2] + r);
+		}
+	}
+
+
+	float evaluateSDF(const Point& p) const override
+	{
+		float d = std::numeric_limits<float>::infinity();
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			const Point& n = nodes[i];
+			// distance from point p to node n
+			float dx = p[0] - n[0];
+			float dy = p[1] - n[1];
+			float dz = p[2] - n[2];
+			float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+			d = std::min(d, dist - radii[i]);
+		}
+		return d;
+	}
+
+	std::string buildGLSL(GLSLContext& ctx) const override
+	{
+		std::string fname = ctx.makeName("sdf_cylinders");
+
+		mutable_u_p.clear();
+		mutable_u_r.clear();
+
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			mutable_u_p.push_back(ctx.makeUniform("u_p", "vec3"));
+			mutable_u_r.push_back(ctx.makeUniform("u_radius", "float"));
+		}
+
+		ctx.append("float " + fname + "(vec3 p) {");
+		ctx.append("    float d = 1e9;");
+
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			// manually inline distance to node math in GLSL
+			ctx.append("    {");
+			ctx.append("        vec3 delta = p - " + mutable_u_p[i] + ";");
+			ctx.append("        float r = " + mutable_u_r[i] + ";");
+			ctx.append("        d = min(d, length(delta) - r);");
+			ctx.append("    }");
+
+		}
+
+		ctx.append("    return d;");
+		ctx.append("}");
+
+		return fname;
+	}
+
+	void setGLUniforms(QOpenGLShaderProgram& program) const override
+	{
+		ImplicitFunction<3>::setGLUniforms(program);
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			program.setUniformValue(mutable_u_p[i].c_str(), QVector3D(nodes[i][0], nodes[i][1], nodes[i][2]));
+			program.setUniformValue(mutable_u_r[i].c_str(), radii[i]);
+		}
+	}
+
+
+	const std::string getFragmentShader() const override
+	{
+		GLSLContext ctx;
+
+		std::string rootFunc = buildGLSL(ctx);
+
+		std::string sdfEntry =
+			"float sampleSDF(vec3 p)\n"
+			"{\n"
+			"    return " + rootFunc + "(p);\n"
+			"}\n";
+
+		const char* part1 = R"(
+        #version 330 core
+
+        in vec2 v_uv;
+        out vec4 FragColor;
+
+        uniform vec3 u_cameraPos;
+        uniform mat4 u_view;
+        uniform mat4 u_invView;
+        uniform mat4 u_projection;
+        uniform mat4 u_invProjection;
+
+        uniform vec3 u_boundsMin;
+        uniform vec3 u_boundsMax;
+
+        uniform float u_maxDistance;
+        uniform int u_maxSteps;
+        uniform float u_epsilon;
+
+        // -------------------------
+        // AABB intersection
+        // -------------------------
+        bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
+        {
+            vec3 invDir = 1.0 / rd;
+            vec3 t0 = (u_boundsMin - ro) * invDir;
+            vec3 t1 = (u_boundsMax - ro) * invDir;
+
+            vec3 tsmaller = min(t0, t1);
+            vec3 tbigger  = max(t0, t1);
+
+            tmin = max(max(tsmaller.x, tsmaller.y), tsmaller.z);
+            tmax = min(min(tbigger.x, tbigger.y), tbigger.z);
+
+            return tmax > max(tmin, 0.0);
+        }
+)";
+
+		const char* part2 = R"(
+
+        void main()
+        {
+            vec2 ndc = v_uv * 2.0 - 1.0;
+
+            vec4 rayClip = vec4(ndc, -1.0, 1.0);
+            vec4 rayView = u_invProjection * rayClip;
+            rayView = vec4(rayView.xyz, 0.0);
+
+            vec3 rayDir = normalize((u_invView * rayView).xyz);
+            vec3 rayOrigin = u_cameraPos;
+
+            float tmin, tmax;
+            if (!intersectAABB(rayOrigin, rayDir, tmin, tmax))
+            {
+                discard;
+            }
+
+            float t = max(tmin, 0.0);
+
+            for (int i = 0; i < u_maxSteps; ++i)
+            {
+                vec3 p = rayOrigin + t * rayDir;
+                float d = sampleSDF(p);
+
+                if (abs(d) < u_epsilon)
+                {    
+                    vec3 color = vec3(1.0, 1.0, 0.0);
+                    float alpha = 1.0;
+                    FragColor = vec4(color, alpha);
+
+                    // ---- Depth write ----
+                    vec4 clip = u_projection * u_view * vec4(p, 1.0);
+                    float ndcDepth = clip.z / clip.w;
+                    gl_FragDepth = ndcDepth * 0.5 + 0.5;
+                    return;
+                }
+
+                t += max(abs(d) * 0.7, 0.001);
+
+                if (t > tmax || t > u_maxDistance)
+                    break;
+            }
+
+            discard;
+
+        }
+)";
+
+		return
+			std::string(part1)
+			+ ctx.uniforms
+			+ ctx.code
+			+ sdfEntry
+			+ std::string(part2);
+	}
+
+	std::vector<Point> nodes;
+	std::vector<float> radii;
+
+	mutable std::vector<std::string> mutable_u_p;
+	mutable std::vector<std::string> mutable_u_r;
+};
