@@ -26,7 +26,7 @@ public:
 	PolytopesFaces(
 		const Faces& faces,
 		const std::vector<Point>& vertices)
-		: faces(faces)
+		: m_faces(faces)
 	{
 		// -------------------------------------------------------------
 		// Compute bounds from ALL vertices.
@@ -42,7 +42,7 @@ public:
 			std::numeric_limits<float>::lowest(),
 			std::numeric_limits<float>::lowest());
 
-		for (const auto& face : faces)
+		for (const auto& face : m_faces)
 		{
 			for (int index : face)
 			{
@@ -56,6 +56,7 @@ public:
 				m_boundsMax[1] = std::max(m_boundsMax[1], p[1]);
 				m_boundsMax[2] = std::max(m_boundsMax[2], p[2]);
 			}
+
 		}
 
 		// Small padding for numerical robustness.
@@ -81,6 +82,11 @@ public:
 
 			m_faceVertices.push_back(std::move(polygon));
 		}
+
+		// Reorder vertices of each face so they follow a planar convex-hull-like
+		// ordering (angle around the face centroid). This makes the winding
+		// consistent and helps the normal computation and inside-tests.
+		reorderFacesConvexHull();
 
 
 		// -------------------------------------------------------------
@@ -679,11 +685,85 @@ public:
 			+ std::string(part2);
 	}
 
+	// Reorder vertices of each face to follow a planar angular ordering around
+	// the face centroid. This provides a consistent winding (useful for
+	// normal computation and inside/outside tests) and approximates a convex
+	// hull ordering for the polygon vertices.
+	void reorderFacesConvexHull()
+	{
+		for (auto& face : m_faceVertices)
+		{
+			const size_t m = face.size();
+			if (m < 3)
+				continue;
+
+			// Compute centroid
+			Point centroid = { 0.0f, 0.0f, 0.0f };
+			for (const auto& p : face)
+			{
+				centroid += p;
+			}
+			centroid /= static_cast<float>(m);
+
+
+			// Estimate face normal by summing cross products (robust for planar
+			// polygons even if current winding is arbitrary).
+			Point n = { 0.0f, 0.0f, 0.0f };
+			for (size_t i = 0; i < m; ++i)
+			{
+				const Point& a = face[i];
+				const Point& b = face[(i + 1) % m];
+				n = cross3D(a, b);
+			}
+
+			float nlen2 = dot(n, n);
+			if (nlen2 < 1e-12f)
+				n = { 0.0f, 0.0f, 1.0f };
+			else
+				n = normalize(n);
+
+			// Build local 2D frame (u,v) in the face plane.
+			Point u = face[0] - centroid;
+			if (dot(u, u) < 1e-12f)
+			{
+				// pick an arbitrary vector perpendicular to n
+				if (std::abs(n[0]) > std::abs(n[1]))
+					u = Point{ -n[2], 0.0f, n[0] };
+				else
+					u = Point{ 0.0f, n[2], -n[1] };
+			}
+			u = normalize(u);
+
+			Point v = cross3D(n, u);
+
+			// Angle sort around centroid
+			std::vector<std::pair<float, Point>> angs;
+			angs.reserve(m);
+			for (size_t i = 0; i < m; ++i)
+			{
+				Point r = face[i] - centroid;
+				float x = dot(u, r);
+				float y = dot(v, r);
+				float a = std::atan2(y, x);
+				angs.emplace_back(a, face[i]);
+			}
+
+			std::sort(angs.begin(), angs.end(),
+				[](const std::pair<float, Point>& A, const std::pair<float, Point>& B)
+				{
+					return A.first < B.first;
+				});
+
+			for (size_t i = 0; i < m; ++i)
+				face[i] = angs[i].second;
+		}
+	}
+
 
 private:
 
 	// Original input representation
-	Faces faces;
+	Faces m_faces;
 
 	// Actual polygon geometry
 	std::vector<std::vector<Point>> m_faceVertices;
