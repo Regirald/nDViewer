@@ -62,7 +62,7 @@
     <ClInclude Include="include\model\PolytopesEdges.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\planes.h">
+    <ClInclude Include="include\model\PolytopesFaces.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\model\PolytopesNodes.h">
