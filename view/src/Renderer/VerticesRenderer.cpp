@@ -21,7 +21,7 @@ void VerticesRenderer::initializeGLResources()
 	{
 		centers.push_back(v);
 		radii.push_back(1.f); // default sphere radius
-		sphereList.push_back(Sphere(v, 1.f));
+		sphereList.push_back(Sphere(v, 0.25f));
 	}
 	std::shared_ptr<ImplicitFunction<3>> sphereFinal = std::make_shared<Sphere>(sphereList[0]);
 	for (int i = 1; i < sphereList.size(); ++i)

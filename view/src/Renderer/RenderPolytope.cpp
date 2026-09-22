@@ -197,11 +197,11 @@ void RenderPolytope<Dim>::render(const ndv::RenderContext& context)
 			s_verticesMap[this]->initializeGLResources();
 		}
 
-		//if (s_edgesMap.find(this) == s_edgesMap.end())
-		//{
-		//	s_edgesMap[this] = std::make_unique<EdgesRenderer>(static_cast<PolytopeGeometry<3>*>(m_polytope));
-		//	s_edgesMap[this]->initializeGLResources();
-		//}
+		if (s_edgesMap.find(this) == s_edgesMap.end())
+		{
+			s_edgesMap[this] = std::make_unique<EdgesRenderer>(static_cast<PolytopeGeometry<3>*>(m_polytope));
+			s_edgesMap[this]->initializeGLResources();
+		}
 
 		//if (s_facesMap.find(this) == s_facesMap.end())
 		//{
@@ -211,7 +211,7 @@ void RenderPolytope<Dim>::render(const ndv::RenderContext& context)
 
 		// Render each component
 		s_verticesMap[this]->render(context);
-		//s_edgesMap[this]->render(context);
+		s_edgesMap[this]->render(context);
 		//s_facesMap[this]->render(context);
 	}
 }

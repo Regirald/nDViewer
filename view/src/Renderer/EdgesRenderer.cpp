@@ -19,11 +19,11 @@ void EdgesRenderer::initializeGLResources()
 		auto a = m_poly->vertices[e[0]];
 		auto b = m_poly->vertices[e[1]];
 		segments.push_back({a, b});
-		radii.push_back(0.02f);
+		radii.push_back(0.2f);
 	}
 
 	m_cylinders = std::make_unique<CylindersCollection>(segments, radii);
-	m_renderer = std::make_unique<RenderImplicitFunction<3>>(m_cylinders.get());
+	m_renderer = std::make_unique<RenderImplicitFunction<3>>(m_cylinders.release());
 	m_renderer->initializeGLResources();
 }
 
