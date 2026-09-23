@@ -535,6 +535,7 @@ public:
         out vec4 FragColor;
 
         uniform vec3 u_cameraPos;
+        uniform vec3 u_lightDir;
         uniform mat4 u_view;
         uniform mat4 u_invView;
         uniform mat4 u_projection;
@@ -580,6 +581,17 @@ public:
 
 
 		const char* part2 = R"(
+		
+        vec3 estimateNormal(vec3 p)
+        {
+            float e = 0.002;
+
+            return normalize(vec3(
+                sampleSDF(p + vec3(e,0,0)) - sampleSDF(p - vec3(e,0,0)),
+                sampleSDF(p + vec3(0,e,0)) - sampleSDF(p - vec3(0,e,0)),
+                sampleSDF(p + vec3(0,0,e)) - sampleSDF(p - vec3(0,0,e))
+            ));
+        }
 
         void main()
         {
@@ -632,13 +644,14 @@ public:
 
                 if (d < u_epsilon)
                 {
-                    vec3 color =
-                        vec3(1.0, 1.0, 0.0);
-
+					vec3 n = estimateNormal(p);           
+					vec3 rayDirReflected = reflect(rayDir, n);
+					float intensity = dot(u_lightDir, rayDirReflected);
+					vec3 white = vec3(0.85);
+					vec3 blue = vec3(0.0, 0.0, 0.75);
+                    vec3 color = blue * (1 - intensity) + white * (intensity);
                     float alpha = 0.5;
-
-                    FragColor =
-                        vec4(color, alpha);
+                    FragColor =  vec4(color, alpha);
 
 
                     // -------------------------
