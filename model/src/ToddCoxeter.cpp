@@ -25,8 +25,7 @@ namespace Coxeter
         static void processDeduction(
             CosetTable& table,
             const Deduction& d,
-            std::queue<Deduction>& deductions,
-            bool& changed)
+            std::queue<Deduction>& deductions)
         {
             int source = d.source;
             int target = d.target;
@@ -36,24 +35,21 @@ namespace Coxeter
             if (table.table[source][g] == -1)
             {
                 rawLink(table, source, g, target);
-                changed = true;
                 return;
             }
 
-            //coincidence(table, uf, existing, target, deductions, changed);
         }
 
         static void processAllDeductions(
             CosetTable& table,
-            std::queue<Deduction>& deductions,
-            bool& changed)
+            std::queue<Deduction>& deductions)
         {
             while (!deductions.empty())
             {
                 Deduction d = deductions.front();
                 deductions.pop();
 
-                processDeduction(table, d, deductions, changed);
+                processDeduction(table, d, deductions);
             }
         }
 
@@ -103,8 +99,7 @@ namespace Coxeter
         bool changed = true;
         detail::processAllDeductions(
             table,
-            deductions,
-            changed);
+            deductions);
         ////
 
 
@@ -222,13 +217,14 @@ namespace Coxeter
         return result;
     }
 
-    bool scanRelator(
+    void scanRelator(
         CosetTable& table,
         const Relator& relator,
         int startCoset,
         std::queue<Deduction>& deductions)
     {
-        bool changed = false;
+        if (table.table.size() > 100)
+            return;
 
         ScanResult S =
             scanWord(
@@ -265,18 +261,15 @@ namespace Coxeter
 
             detail::processAllDeductions(
                 table,
-                deductions,
-                changed);
+                deductions);
 
             if (S.backwardPos - S.forwardPos >= 1) //continue until scan pass
             {
                 scanRelator(table, relator, startCoset, deductions);
             }
 
-            return true;
         }
 
-        return changed;
     }
 
 

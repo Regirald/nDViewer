@@ -52,7 +52,7 @@ namespace Coxeter
         const Relator& relator,
         int startCoset);
 
-    bool scanRelator(
+    void scanRelator(
         CosetTable& table,
         const Relator& relator,
         int startCoset,
