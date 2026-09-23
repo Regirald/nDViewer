@@ -44,8 +44,11 @@ inline Matrix<Dim> cholesky(const Matrix<Dim>& G)
 
             if (i == j)
             {
-                if (sum <= 0)
+                if (sum <= 0) {
                     throw std::runtime_error("Gram matrix not positive definite.");
+                    L[i][j] = 0.1;
+                    continue;
+                }
 
                 L[i][j] = std::sqrt(sum);
             }

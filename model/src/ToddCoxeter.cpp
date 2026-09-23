@@ -67,6 +67,18 @@ namespace Coxeter
             return false;
         }
 
+        static void setUndefinedToZero(CosetTable& table)
+        {
+            for (auto& row : table.table)
+            {
+                for (int& v : row)
+                {
+                    if (v == -1)
+                        v = 0;
+                }
+            }
+        }
+
     } // namespace detail
 
     int CosetTable::newCoset()
@@ -122,7 +134,13 @@ namespace Coxeter
                             deductions);
                 }
             }
-
+            // try odd schlafli symbols
+            if (table.table.size() > 100)
+            {
+                detail::setUndefinedToZero(table);
+				bool check = detail::hasUndefinedEntries(table);
+                break;
+            }
             //
             // Completely finished
             //
@@ -303,6 +321,8 @@ namespace Coxeter
             for (int g = 0; g < genCount; ++g)
             {
                 const int n = table.table[c][g];
+				//if (n == -1)
+				//	continue;  //uncomment to try odd schlalfi symbols
                 if (n < 0 || n >= cosetCount)
                     throw std::runtime_error("buildCosetBFSData: invalid table entry");
 
