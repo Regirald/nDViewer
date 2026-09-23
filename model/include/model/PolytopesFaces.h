@@ -726,7 +726,7 @@ public:
 			{
 				const Point& a = face[i];
 				const Point& b = face[(i + 1) % m];
-				n = cross3D(a, b);
+				n += cross3D(a, b);
 			}
 
 			float nlen2 = dot(n, n);
