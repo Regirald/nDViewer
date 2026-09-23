@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     auto s1ptr = std::make_shared<Sphere>(sphere1);
 	auto s2ptr = std::make_shared<Sphere>(sphere2);
     auto sphere3 = std::static_pointer_cast<ImplicitFunction<3>>(s0ptr)
-        - std::static_pointer_cast<ImplicitFunction<3>>(s1ptr);; // Union of two spheres
+        - std::static_pointer_cast<ImplicitFunction<3>>(s1ptr); // Union of two spheres
     Circle circle;
 
     // 2. Sample into scalar field
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
 
 
-    PolytopeGeometry<3> cubicPolytope = RegularPolytopeGenerator<3>::generateRegularPolytope({ 5, 3});
+    PolytopeGeometry<3> cubicPolytope = RegularPolytopeGenerator<3>::generateRegularPolytope({ 3, 5});
 
 
     // 4. Open a window dedicated to computer vision visualization

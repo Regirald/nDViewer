@@ -7,7 +7,7 @@ void EdgesRenderer::initializeGLResources()
 	if (!m_poly)
 		return;
 
-	std::vector<std::pair<CylindersCollection::Point, CylindersCollection::Point>> segments;
+	std::vector<std::pair<PolytopeEdges::Point, PolytopeEdges::Point>> segments;
 	std::vector<float> radii;
 
 	segments.reserve(m_poly->edges.size());
@@ -19,11 +19,11 @@ void EdgesRenderer::initializeGLResources()
 		auto a = m_poly->vertices[e[0]];
 		auto b = m_poly->vertices[e[1]];
 		segments.push_back({a, b});
-		radii.push_back(0.02f);
+		radii.push_back(0.1f);
 	}
 
-	m_cylinders = std::make_unique<CylindersCollection>(segments, radii);
-	m_renderer = std::make_unique<RenderImplicitFunction<3>>(m_cylinders.release());
+	m_edges = std::make_unique<PolytopeEdges>(segments, radii);
+	m_renderer = std::make_unique<RenderImplicitFunction<3>>(m_edges.release());
 	m_renderer->initializeGLResources();
 }
 

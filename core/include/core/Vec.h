@@ -134,7 +134,7 @@ double dot(const Vec<Dim, T>& a, const Vec<Dim, T>& b)
 }
 
 template <size_t Dim, typename T>
-double norm(const Vec<Dim, T>& v)
+double lenght(const Vec<Dim, T>& v)
 {
     return std::sqrt(dot(v, v));
 }
@@ -142,7 +142,7 @@ double norm(const Vec<Dim, T>& v)
 template <size_t Dim, typename T>
 Vec<Dim, T> normalize(const Vec<Dim, T>& v)
 {
-    double n = norm(v);
+    double n = lenght(v);
 
     Vec<Dim, T> r;
 
@@ -150,4 +150,29 @@ Vec<Dim, T> normalize(const Vec<Dim, T>& v)
         r[i] = v[i] / n;
 
     return r;
+}
+
+template <size_t Dim, typename T>
+Vec<Dim, T> square(const Vec<Dim, T>& v)
+{
+    Vec<Dim, T> r;
+    for (size_t i = 0; i < Dim; ++i)
+        r[i] = v[i] * v[i];
+    return r;
+}
+
+template <typename T>
+double cross2D(const Vec<2, T>& u, const Vec<2, T>& v)
+{
+	return u[0] * v[1] - u[1] * v[0];
+}
+
+template <typename T>
+Vec<3, T> cross3D(const Vec<3, T>& u, const Vec<3, T>& v)
+{
+	return Vec<3, T>{
+		    u[1] * v[2] - u[2] * v[1],
+			u[2] * v[0] - u[0] * v[2],
+			u[0] * v[1] - u[1] * v[0]
+	};
 }

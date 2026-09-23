@@ -63,9 +63,11 @@ void RenderImplicitFunction<Dim>::initializeGLResources()
         }
         
 
-        bool truc0 = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
-        bool truc1 = m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs.c_str());
-        bool truc2 = m_program.link();
+        bool flag0 = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
+        bool flag1 = m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs.c_str());
+        bool flag2 = m_program.link();
+
+		assert(flag0 && flag1 && flag2);
     }
 
     // -------------------------

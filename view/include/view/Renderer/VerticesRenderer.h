@@ -1,6 +1,6 @@
 #pragma once
 #include "Renderer/Renderer.h"
-#include "model/spheres.h"
+#include "model/PolytopesNodes.h"
 #include "Renderer/RenderImplicitFunction.h"
 #include "model/GeometryFromTopology.h"
 #include <memory>
@@ -14,6 +14,6 @@ public:
 
 private:
 	PolytopeGeometry<3>* m_poly = nullptr;
-	std::unique_ptr<SpheresCollection> m_spheres;
+	std::unique_ptr<PolytopeNodes> m_nodes;
 	std::unique_ptr<RenderImplicitFunction<3>> m_renderer;
 };
