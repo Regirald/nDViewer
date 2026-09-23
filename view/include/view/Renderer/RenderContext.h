@@ -11,6 +11,9 @@ namespace ndv
         QMatrix4x4 projection;
         QVector3D cameraPosition{ 0.0f, 0.0f, 0.0f };
         QVector3D targetPosition{ 0.0f, 0.0f, 0.0f };
+        QVector3D lightningDirection{ 1.0f, 1.0f, 0.0f };
+
+
 
         int viewportWidth = 1;
         int viewportHeight = 1;

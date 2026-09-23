@@ -116,6 +116,7 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
 
     // Camera
     m_program.setUniformValue("u_cameraPos", context.cameraPosition);
+    m_program.setUniformValue("u_lightDir", context.lightningDirection);
     m_program.setUniformValue("u_view", context.view);
     m_program.setUniformValue("u_invView", context.view.inverted());
     m_program.setUniformValue("u_projection", context.projection);
