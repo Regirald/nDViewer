@@ -12,6 +12,15 @@
 Viewer::Viewer(QWidget* parent)
     : QOpenGLWidget(parent)
 {
+	// deactivate VSync to get fps > 60 for benchmarking
+    QSurfaceFormat format;
+    format.setDepthBufferSize(24);
+    format.setVersion(3, 3);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setSwapInterval(0);
+    QSurfaceFormat::setDefaultFormat(format);
+    //
+
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
     renderingManager.setBackground();
@@ -19,7 +28,7 @@ Viewer::Viewer(QWidget* parent)
     setYawPitchFromInitialPosition();
     updateCameraFromOrbit();
     // regular update of the viewer
-    m_updateTimer.setInterval(16);
+    m_updateTimer.setInterval(0.01);
     connect(&m_updateTimer, &QTimer::timeout, this, QOverload<>::of(&Viewer::update));
     m_updateTimer.start();
 }
