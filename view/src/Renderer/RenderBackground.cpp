@@ -28,48 +28,87 @@ namespace
         initialized = true;
         const char* vertexSource =
             R"(
-            #version 120
+            #version 330 core
+
+            layout(location = 0) 
+            in vec2 a_position;
+            out vec2 v_uv;
+
             void main()
             {
-                gl_Position = vec4(gl_Vertex.xy, 0.0, 1.0);
-            };)";
+                v_uv = a_position * 0.5 + 0.5;
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+            )";
 
         const char* fragmentSource =
             R"( #version 120
-            uniform mat4 u_view;
-            uniform mat4 u_projection;
-            uniform mat4 u_invVP;
-            uniform vec2 u_resolution;
-            uniform vec3 u_axis;   // encodes how much camera aligns with world axes (optional)
+            in vec2 v_uv;
+
+            uniform mat4 u_invView;
+            uniform mat4 u_invProjection;
+
+            uniform vec3 u_Xaxis;
+            uniform vec3 u_Yaxis;
+            uniform vec3 u_Zaxis;
+
+            uniform vec3 u_lightDir;
+
             uniform float u_base;
             uniform float u_scale;
+
+            out vec4 FragColor;
+
             void main()
             {
-                // Normalized device coordinates for this pixel
-                vec2 ndc = (gl_FragCoord.xy / u_resolution) * 2.0 - 1.0;
-                // Build clip-space position at some depth (e.g. z = -1 in clip)
-                vec4 clipPos = vec4(ndc, -1.0, 1.0);
-                // Inverse projection * view to get a world-space point
-                vec4 worldPos = u_invVP * clipPos;
-                worldPos /= worldPos.w;
-                // Direction from camera (origin in view space) to worldPos in world space
-                // Camera position is inverse of view applied to origin; however, to get
-                // a camera-space direction, transform worldPos by view
-                vec4 viewPos = u_view * worldPos;
-                vec3 dir = normalize(viewPos.xyz);
-            
-                // World axes in view space
-                vec3 ax = normalize( (u_view * vec4(1.0, 0.0, 0.0, 0.0)).xyz );
-                vec3 ay = normalize( (u_view * vec4(0.0, 1.0, 0.0, 0.0)).xyz );
-                vec3 az = normalize( (u_view * vec4(0.0, 0.0, 1.0, 0.0)).xyz );
-            
-                float dx = abs(dot(dir, ax));
-                float dy = abs(dot(dir, ay));
-                float dz = abs(dot(dir, az));
-            
-                vec3 color = clamp(u_base + u_scale * vec3(dx, dy, dz), 0.0, 1.0);
-                gl_FragColor = vec4(color, 1.0);
-            };)";
+                // NDC
+                vec2 ndc = v_uv * 2.0 - 1.0;
+
+                // NDC -> view space
+                vec4 rayView4 = u_invProjection * vec4(ndc, -1.0, 1.0);
+
+                rayView4 /= rayView4.w;
+
+                vec3 rayView = normalize(rayView4.xyz);
+
+                // View -> world
+                vec3 rayWorld = normalize((u_invView * vec4(rayView, 0.0)).xyz);
+
+                // World axes
+                float dx = abs(dot(rayWorld, normalize(u_Xaxis)));
+                float dy = abs(dot(rayWorld, normalize(u_Yaxis)));
+                float dz = abs(dot(rayWorld, normalize(u_Zaxis)));
+                
+                vec3 baseColor =
+                    clamp(
+                        u_base +
+                        u_scale * vec3(dx, dy, dz),
+                        0.0,
+                        1.0
+                    );
+                vec3 white = vec3(1.0, 1.0, 1.0);
+
+                vec3 L = normalize(u_lightDir);
+
+                float cosAngle = max(dot(rayWorld, L), 0.0);
+
+                // Broad soft halo
+                float halo = pow(cosAngle, 8.0);
+
+                // Smaller bright core
+                float core = pow(cosAngle, 64.0);
+
+                // Combine
+                vec3 color =
+                    baseColor
+                    + white * 0.15 * halo
+                    + white * 0.80 * core;
+
+                color = clamp(color, 0.0, 1.0);
+
+                FragColor = vec4(color, 1.0);
+            };
+            )";
 
         program.addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
         program.addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
@@ -233,14 +272,6 @@ void RenderBackground::render(const ndv::RenderContext& context)
         return;
     }
 
-    const float* viewData = context.view.constData();
-    const float axisX = std::fabs(viewData[2]);
-    const float axisY = std::fabs(viewData[6]);
-    const float axisZ = std::fabs(viewData[10]);
-
-    const float base = 0.1f;
-    const float scale = 0.8f;
-
     QOpenGLShaderProgram& program = BackgroundProgram();
     if (!program.isLinked())
     {
@@ -255,20 +286,14 @@ void RenderBackground::render(const ndv::RenderContext& context)
     program.bind();
 
 
-    // Pass view/projection like RenderMesh does, so background uses same camera
-    const QMatrix4x4& viewMatrix = context.view;
-    const QMatrix4x4& projectionMatrix = context.projection;
-
-    QMatrix4x4 invVP = (projectionMatrix * viewMatrix).inverted();
-
-
-    program.setUniformValue("u_axis", QVector3D(axisX, axisY, axisZ));
-    program.setUniformValue("u_resolution", QVector2D(static_cast<float>(width), static_cast<float>(height)));
-    program.setUniformValue("u_view", viewMatrix);
-    program.setUniformValue("u_projection", projectionMatrix);
-    program.setUniformValue("u_invVP", invVP);
-    program.setUniformValue("u_base", base);
-    program.setUniformValue("u_scale", scale);
+    program.setUniformValue("u_invView", context.view.inverted());
+    program.setUniformValue("u_invProjection", context.projection.inverted());
+    program.setUniformValue("u_Xaxis", QVector3D(1.f, 0.0f, 0.0f));
+    program.setUniformValue("u_Yaxis", QVector3D(0.0f, 1.f, 0.0f));
+    program.setUniformValue("u_Zaxis", QVector3D(0.0f, 0.0f, 1.f));
+    program.setUniformValue("u_lightDir", context.lightningDirection);
+    program.setUniformValue("u_base", 0.1f);
+    program.setUniformValue("u_scale", 0.8f);
 
     DrawFullscreenQuad();
     program.release();
@@ -276,6 +301,7 @@ void RenderBackground::render(const ndv::RenderContext& context)
     // Draw 3D axis gizmo at world origin using same camera
     glEnable(GL_DEPTH_TEST);
     DrawAxisArrows3D(context.view, context.projection);
+
 
     std::ostringstream fpsText;
     fpsText << "FPS: " << std::fixed << std::setprecision(1) << fps;
