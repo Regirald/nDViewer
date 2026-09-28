@@ -128,12 +128,29 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
     m_program.setUniformValue("u_epsilon", 0.001f);
 
     // Draw fullscreen
-    gl->glEnable(GL_DEPTH_TEST);
-    gl->glEnable(GL_BLEND);
-    gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (m_isTransparent)
+    {
+        gl->glEnable(GL_DEPTH_TEST);
+        gl->glDepthMask(GL_FALSE);
+
+        gl->glEnable(GL_BLEND);
+        gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else
+    {
+        gl->glEnable(GL_DEPTH_TEST);
+        gl->glDepthMask(GL_TRUE);
+
+        gl->glDisable(GL_BLEND);
+    }
+
     gl->glBindVertexArray(m_fullscreenVAO);
     gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     gl->glBindVertexArray(0);
+
+    // Restore state
+    gl->glDepthMask(GL_TRUE);
+    gl->glDisable(GL_BLEND);
 
     m_program.release();
 }

@@ -6,15 +6,16 @@
 #include <memory>
 #include <vector>
 
+template <size_t Dim>
 class EdgesRenderer : public Renderer
 {
 public:
-	EdgesRenderer(PolytopeGeometry<3>* poly) : m_poly(poly) {}
+	EdgesRenderer(PolytopeGeometry<Dim>* poly) : m_poly(poly) {}
 	void initializeGLResources();
 	void render(const ndv::RenderContext& context) override;
 
 private:
-	PolytopeGeometry<3>* m_poly = nullptr;
+	PolytopeGeometry<Dim>* m_poly = nullptr;
 	// Each renderer owns a single PolytopeEdge instance.
 	std::vector<std::unique_ptr<RenderImplicitFunction<3>>> m_renderers;
 };

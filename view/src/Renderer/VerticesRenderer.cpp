@@ -4,8 +4,8 @@
 
 #include "model/Sphere.h"
 
-
-void VerticesRenderer::initializeGLResources()
+template <size_t Dim>
+void VerticesRenderer<Dim>::initializeGLResources()
 {
 	if (!m_poly)
 		return;
@@ -14,7 +14,7 @@ void VerticesRenderer::initializeGLResources()
 	m_renderers.clear();
 
 	// Create one renderer per vertex; each renderer owns its PolytopeNode
-	for (const auto& v : m_poly->vertices)
+	for (const Vector<Dim>& v : m_poly->vertices)
 	{
 		PolytopeNode::Point center = v;
 		float r = 0.25f;
@@ -27,7 +27,8 @@ void VerticesRenderer::initializeGLResources()
 	}
 }
 
-void VerticesRenderer::render(const ndv::RenderContext& context)
+template <size_t Dim>
+void VerticesRenderer<Dim>::render(const ndv::RenderContext& context)
 {
 	if (m_renderers.empty())
 		return;
@@ -38,3 +39,7 @@ void VerticesRenderer::render(const ndv::RenderContext& context)
 			r->render(context);
 	}
 }
+
+
+template class VerticesRenderer<2>;
+template class VerticesRenderer<3>;

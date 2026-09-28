@@ -4,6 +4,9 @@
 #include <QOpenGLShaderProgram>
 
 #include "Renderer/Renderer.h"
+#include "Renderer/VerticesRenderer.h"
+#include "Renderer/EdgesRenderer.h"
+#include "Renderer/FacesRenderer.h"
 #include "model/GeometryFromTopology.h"
 
 template <size_t Dim>
@@ -26,4 +29,10 @@ public:
 	QOpenGLExtraFunctions* gl = nullptr;
 	QOpenGLShaderProgram m_program;
 	PolytopeGeometry<Dim>* m_polytope;
+
+
+	VerticesRenderer<Dim>* m_verticesRenderer;
+	EdgesRenderer<Dim>* m_edgesRenderer;
+	FacesRenderer<Dim>* m_facesRenderer;
+
 };

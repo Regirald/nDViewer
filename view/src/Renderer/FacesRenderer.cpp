@@ -2,7 +2,8 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 
-void FacesRenderer::initializeGLResources()
+template <size_t Dim>
+void FacesRenderer<Dim>::initializeGLResources()
 {
 	if (!m_poly)
 		return;
@@ -19,12 +20,13 @@ void FacesRenderer::initializeGLResources()
 		auto plane = std::make_unique<PolytopeFace>(verts);
 		auto renderer = std::make_unique<RenderImplicitFunction<3>>(plane.release());
 		renderer->initializeGLResources();
+		renderer->m_isTransparent = true;  // Mark face renderers as transparent
 
 		m_renderers.push_back(std::move(renderer));
 	}
 }
-
-void FacesRenderer::render(const ndv::RenderContext& context)
+template <size_t Dim>
+void FacesRenderer<Dim>::render(const ndv::RenderContext& context)
 {
 	if (m_renderers.empty())
 		return;
@@ -35,3 +37,6 @@ void FacesRenderer::render(const ndv::RenderContext& context)
 			r->render(context);
 	}
 }
+
+template class FacesRenderer<2>;
+template class FacesRenderer<3>;

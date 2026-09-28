@@ -1,9 +1,9 @@
+#include <memory>
 #include "RenderingManager.h"
 #include "RenderBackground.h"
 #include "Renderer/ExampleTriangleRenderer.h"
 #include "Renderer/RenderTargetSphere.h"
 
-#include <memory>
 
 void RenderingManager::setBackground()
 {

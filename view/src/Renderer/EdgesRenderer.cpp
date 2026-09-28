@@ -2,7 +2,8 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 
-void EdgesRenderer::initializeGLResources()
+template <size_t Dim>
+void EdgesRenderer<Dim>::initializeGLResources()
 {
 	if (!m_poly)
 		return;
@@ -26,7 +27,8 @@ void EdgesRenderer::initializeGLResources()
 	}
 }
 
-void EdgesRenderer::render(const ndv::RenderContext& context)
+template <size_t Dim>
+void EdgesRenderer<Dim>::render(const ndv::RenderContext& context)
 {
 	if (m_renderers.empty())
 		return;
@@ -37,3 +39,6 @@ void EdgesRenderer::render(const ndv::RenderContext& context)
 			r->render(context);
 	}
 }
+
+template class EdgesRenderer<2>;
+template class EdgesRenderer<3>;

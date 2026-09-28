@@ -12,6 +12,19 @@ struct Vec {
 	Vec(T v) {
         data.fill(v);
     }
+
+    template<size_t OtherDim>
+    constexpr Vec(const Vec<OtherDim, T>& other)
+    {
+        constexpr size_t N = (Dim < OtherDim) ? Dim : OtherDim;
+
+        for (size_t i = 0; i < N; ++i)
+            data[i] = other[i];
+
+        for (size_t i = N; i < Dim; ++i)
+            data[i] = T{};
+    }
+
 	Vec(std::initializer_list<T> list) {
         size_t i = 0;
         for (T v : list) {

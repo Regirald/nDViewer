@@ -22,7 +22,7 @@ public:
 	QOpenGLShaderProgram m_program;
 	QOpenGLExtraFunctions* gl = nullptr;
 	bool m_initialized = false;
-
+	bool m_isTransparent = false;
 
 	GLuint m_fullscreenVAO = 0;
     GLuint m_fullscreenVBO = 0;
