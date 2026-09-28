@@ -17,11 +17,17 @@ struct GLSLContext
         return base + "_" + std::to_string(counter++);
     }
 
-    std::string makeUniform(const std::string& base, const std::string& type)
+    std::string makeUniformUnique(const std::string& base, const std::string& type)
     {
         std::string name = base + "_" + std::to_string(counter++);
         uniforms += "uniform " + type + " " + name + ";\n";
         return name;
+    }
+
+    std::string makeUniform(const std::string& base, const std::string& type)
+    {
+        uniforms += "uniform " + type + " " + base + ";\n";
+        return base;
     }
 
     void append(const std::string& s)

@@ -46,9 +46,9 @@ public:
 	{
 		std::string fname = ctx.makeName("sdf_edge");
 
-		mutable_u_p0 = ctx.makeUniform("u_p0", "vec3");
-		mutable_u_p1 = ctx.makeUniform("u_p1", "vec3");
-		mutable_u_r = ctx.makeUniform("u_radius", "float");
+		mutable_u_p0 = ctx.makeUniformUnique("u_p0", "vec3");
+		mutable_u_p1 = ctx.makeUniformUnique("u_p1", "vec3");
+		mutable_u_r = ctx.makeUniformUnique("u_radius", "float");
 
 		ctx.append("float " + fname + "(vec3 p) {");
 		ctx.append("    vec3 a = " + mutable_u_p0 + ";");

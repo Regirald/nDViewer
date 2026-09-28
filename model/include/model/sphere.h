@@ -29,8 +29,8 @@ public:
     {
 
             std::string fname = ctx.makeName("sdf_sphere");
-            u_radius = ctx.makeUniform("u_radius", "float");
-            u_center = ctx.makeUniform("u_center", "vec3");
+            u_radius = ctx.makeUniformUnique("u_radius", "float");
+            u_center = ctx.makeUniformUnique("u_center", "vec3");
 
             ctx.append("float " + fname + "(vec3 p) {");
             ctx.append("    return length(p - " + u_center + ") - " + u_radius + ";");

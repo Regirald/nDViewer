@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
 
 
-    PolytopeGeometry<3> cubicPolytope = RegularPolytopeGenerator<3>::generateRegularPolytope({3, 3});
+    PolytopeGeometry<3> cubicPolytope = RegularPolytopeGenerator<3>::generateRegularPolytope({5, 3});
 
 
     // 4. Open a window dedicated to computer vision visualization

@@ -36,8 +36,8 @@ public:
 	{
 		std::string fname = ctx.makeName("sdf_node");
 
-		mutable_u_p = ctx.makeUniform("u_p", "vec3");
-		mutable_u_r = ctx.makeUniform("u_radius", "float");
+		mutable_u_p = ctx.makeUniformUnique("u_p", "vec3");
+		mutable_u_r = ctx.makeUniformUnique("u_radius", "float");
 
 		ctx.append("float " + fname + "(vec3 p) {");
 		ctx.append("    vec3 delta = p - " + mutable_u_p + ";");

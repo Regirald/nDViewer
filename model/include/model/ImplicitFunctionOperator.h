@@ -54,7 +54,7 @@ public:
         ctx.append("    float d2 = " + fB + "(p);");
         if (m_smooth)
         {
-            u_k = ctx.makeUniform("u_k", "float");
+            u_k = ctx.makeUniformUnique("u_k", "float");
             ctx.append("    float k = " + u_k + ";");
             ctx.append("    if (k <= 0.0) return min(d1, d2);");
             ctx.append("    float h = clamp(0.5 + 0.5*(d2 - d1)/k, 0.0, 1.0);");
@@ -138,7 +138,7 @@ public:
         ctx.append("    float d2 = " + fB + "(p);");
         if (m_smooth)
         {
-            u_k = ctx.makeUniform("u_k", "float");
+            u_k = ctx.makeUniformUnique("u_k", "float");
             ctx.append("    float k = " + u_k + ";");
             ctx.append("    if (k <= 0.0) return max(d1, d2);");
             ctx.append("    float nd1 = -d1; float nd2 = -d2;");
@@ -224,7 +224,7 @@ public:
         ctx.append("    float d2 = " + fB + "(p);");
         if (m_smooth)
         {
-            u_k = ctx.makeUniform("u_k", "float");
+            u_k = ctx.makeUniformUnique("u_k", "float");
             ctx.append("    float k = " + u_k + ";");
             ctx.append("    if (k <= 0.0) return max(d1, -d2);");
             ctx.append("    float nd1 = -d1; float nd2 = d2;");

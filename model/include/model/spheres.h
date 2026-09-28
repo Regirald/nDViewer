@@ -34,8 +34,8 @@ public:
 		mutable_u_radii.clear();
 		for (size_t i = 0; i < centers.size(); ++i)
 		{
-			mutable_u_centers.push_back(ctx.makeUniform("u_center", "vec3"));
-			mutable_u_radii.push_back(ctx.makeUniform("u_radius", "float"));
+			mutable_u_centers.push_back(ctx.makeUniformUnique("u_center", "vec3"));
+			mutable_u_radii.push_back(ctx.makeUniformUnique("u_radius", "float"));
 		}
 
 		ctx.append("float " + fname + "(vec3 p) {");
