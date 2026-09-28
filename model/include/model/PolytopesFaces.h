@@ -422,10 +422,6 @@ private:
 	// Oriented normal.
 	Point m_faceNormal;
 
-	// Bounds for the face vertices (AABB).
-	QVector3D m_boundsMin;
-	QVector3D m_boundsMax;
-
 	// Generated GLSL uniform names
 	mutable std::vector<std::string> mutable_u_vertices;
 	mutable std::string mutable_u_normal;
