@@ -4,6 +4,7 @@
 #include "Renderer/RenderImplicitFunction.h"
 #include "model/GeometryFromTopology.h"
 #include <memory>
+#include <vector>
 
 class EdgesRenderer : public Renderer
 {
@@ -14,6 +15,6 @@ public:
 
 private:
 	PolytopeGeometry<3>* m_poly = nullptr;
-	std::unique_ptr<PolytopeEdges> m_edges;
-	std::unique_ptr<RenderImplicitFunction<3>> m_renderer;
+	// Each renderer owns a single PolytopeEdge instance.
+	std::vector<std::unique_ptr<RenderImplicitFunction<3>>> m_renderers;
 };

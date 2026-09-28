@@ -7,29 +7,33 @@ void EdgesRenderer::initializeGLResources()
 	if (!m_poly)
 		return;
 
-	std::vector<std::pair<PolytopeEdges::Point, PolytopeEdges::Point>> segments;
-	std::vector<float> radii;
-
-	segments.reserve(m_poly->edges.size());
-	radii.reserve(m_poly->edges.size());
+	m_renderers.clear();
 
 	for (const auto& e : m_poly->edges)
 	{
 		if (e.size() < 2) continue;
 		auto a = m_poly->vertices[e[0]];
 		auto b = m_poly->vertices[e[1]];
-		segments.push_back({a, b});
-		radii.push_back(0.1f);
-	}
 
-	m_edges = std::make_unique<PolytopeEdges>(segments, radii);
-	m_renderer = std::make_unique<RenderImplicitFunction<3>>(m_edges.release());
-	m_renderer->initializeGLResources();
+		std::pair<PolytopeEdge::Point, PolytopeEdge::Point> seg{ a, b };
+		float r = 0.1f;
+
+		auto edge = std::make_unique<PolytopeEdge>(seg, r);
+		auto renderer = std::make_unique<RenderImplicitFunction<3>>(edge.release());
+		renderer->initializeGLResources();
+
+		m_renderers.push_back(std::move(renderer));
+	}
 }
 
 void EdgesRenderer::render(const ndv::RenderContext& context)
 {
-	if (!m_renderer)
+	if (m_renderers.empty())
 		return;
-	m_renderer->render(context);
+
+	for (auto& r : m_renderers)
+	{
+		if (r)
+			r->render(context);
+	}
 }

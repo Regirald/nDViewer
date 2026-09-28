@@ -4,6 +4,7 @@
 #include "Renderer/RenderImplicitFunction.h"
 #include "model/GeometryFromTopology.h"
 #include <memory>
+#include <vector>
 
 class VerticesRenderer : public Renderer
 {
@@ -14,6 +15,6 @@ public:
 
 private:
 	PolytopeGeometry<3>* m_poly = nullptr;
-	std::unique_ptr<PolytopeNodes> m_nodes;
-	std::unique_ptr<RenderImplicitFunction<3>> m_renderer;
+	// Each renderer will own its PolytopeNode instance internally.
+	std::vector<std::unique_ptr<RenderImplicitFunction<3>>> m_renderers;
 };
