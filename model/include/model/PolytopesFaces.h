@@ -348,15 +348,32 @@ public:
 
 				if (d < u_epsilon)
 				{
-					vec3 n = normalize(u_face_normal);       
-					vec3 rayDirReflected = reflect(rayDir, n);
-					float intensity = dot(u_lightDir, rayDirReflected);
-					vec3 white = vec3(0.85);
-					vec3 blue = vec3(0.0, 0.0, 0.75);
-					vec3 color = blue * (1 - intensity) + white * (intensity);
-					float alpha = 0.5;
-					FragColor =  vec4(color, alpha);
+					vec3 n = normalize(u_face_normal);
+					vec3 v = normalize(-rayDir);
+					vec3 l = normalize(u_lightDir);
 
+					vec3 r = reflect(-v, n);
+
+					float facingLight = max(dot(r, l), 0.0);
+
+					// Broad reflection
+					float broad = pow(facingLight, 8.0);
+
+					// Sharp mirror glint
+					float sharp = pow(facingLight, 64.0);
+
+					vec3 baseColor = vec3(0.025, 0.08, 0.50);
+					vec3 reflectedColor = vec3(0.55, 0.72, 1.0);
+
+					vec3 color = baseColor;
+
+					// Broad reflected light
+					color += reflectedColor * broad * 0.45;
+
+					// Small intense glint
+					color += vec3(0.9, 0.95, 1.0) * sharp * 0.5;
+
+					FragColor = vec4(color, 0.5);
 
 					// -------------------------
 					// Depth write
