@@ -8,21 +8,30 @@ struct Vec {
 
     Vec() {
         data.fill(T(0));
-	}
-	Vec(T v) {
+    }
+    Vec(T v) {
         data.fill(v);
     }
 
     template<size_t OtherDim>
     constexpr Vec(const Vec<OtherDim, T>& other)
     {
-        constexpr size_t N = (Dim < OtherDim) ? Dim : OtherDim;
+        // compression
+        if (Dim < OtherDim)
+        {
+            const T& scaleFactor = other[Dim];
+			for (size_t i = 0; i < Dim; ++i)
+				data[i] = other[i] / (scaleFactor / 4 + T(3) / 4);
+        }
+        // extending with zeros
+        else
+        {
+            for (size_t i = 0; i < OtherDim; ++i)
+                data[i] = other[i];
+            for (size_t i = OtherDim; i < Dim; ++i)
+                data[i] = T{};
+        }
 
-        for (size_t i = 0; i < N; ++i)
-            data[i] = other[i];
-
-        for (size_t i = N; i < Dim; ++i)
-            data[i] = T{};
     }
 
 	Vec(std::initializer_list<T> list) {
