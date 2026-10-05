@@ -6,16 +6,15 @@
 #include <memory>
 #include <vector>
 
-template <size_t Dim>
 class FacesRenderer : public Renderer
 {
 public:
-	FacesRenderer(PolytopeGeometry<Dim>* poly) : m_poly(poly) {}
+	FacesRenderer(PolytopeGeometry3D* poly) : m_poly(poly) {}
 	void initializeGLResources();
 	void render(const ndv::RenderContext& context) override;
 
 private:
-	PolytopeGeometry<Dim>* m_poly = nullptr;
+	PolytopeGeometry3D* m_poly = nullptr;
 	// Each renderer owns a single PolytopeFace instance.
 	std::vector<std::unique_ptr<RenderImplicitFunction<3>>> m_renderers;
 };

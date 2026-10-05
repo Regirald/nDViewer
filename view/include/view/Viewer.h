@@ -26,8 +26,7 @@ public:
         renderingManager.setImplicitFunction(implicitFunction);
     }
 
-    template <size_t Dim>
-    inline void setPolytope(PolytopeGeometry<Dim>* polytope)
+    inline void setPolytope(PolytopeGeometry3D* polytope)
     {
         renderingManager.setPolytope(polytope);
     }

@@ -25,10 +25,9 @@ template <size_t Dim>
 	{
 		renderContainer.push_back(std::make_unique<RenderImplicitFunction<Dim>>(implicitFunction));
 	}
-template <size_t Dim>
-	inline void setPolytope(PolytopeGeometry<Dim>* polytope)
+	inline void setPolytope(PolytopeGeometry3D* polytope)
 	{
-		renderContainer.push_back(std::make_unique<RenderPolytope<Dim>>(polytope));
+		renderContainer.push_back(std::make_unique<RenderPolytope>(polytope));
 	}
 	void setBackground();
 	void setExampleTriangle();

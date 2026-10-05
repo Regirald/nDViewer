@@ -4,15 +4,16 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QVector3D>
-
+#include "Renderer/VerticesRenderer.h"
+#include "Renderer/EdgesRenderer.h"
+#include "Renderer/FacesRenderer.h"
 #include <memory>
 #include <unordered_map>
 
 // ------------------------------------------------------------
 // Constructor (NO OpenGL here)
 // ------------------------------------------------------------
-template<size_t Dim>
-RenderPolytope<Dim>::RenderPolytope(PolytopeGeometry<Dim>* polytope)
+RenderPolytope::RenderPolytope(PolytopeGeometry3D* polytope)
 	: m_polytope(polytope)
 {
 	vbo = 0;
@@ -25,8 +26,7 @@ RenderPolytope<Dim>::RenderPolytope(PolytopeGeometry<Dim>* polytope)
 // ------------------------------------------------------------
 // GPU initialization (called lazily when context is valid)
 // ------------------------------------------------------------
-template<size_t Dim>
-void RenderPolytope<Dim>::initializeGLResources()
+void RenderPolytope::initializeGLResources()
 {
 	if (!m_polytope)
 		return;
@@ -74,10 +74,7 @@ void RenderPolytope<Dim>::initializeGLResources()
 	{
 		flatVertices.push_back(v[0]);
 		flatVertices.push_back(v[1]);
-		if constexpr (Dim == 3)
-			flatVertices.push_back(v[2]);
-		else
-			flatVertices.push_back(0.0f);
+		flatVertices.push_back(v[2]);
 	}
 
 	// Build indices for edges (pairs)
@@ -166,23 +163,13 @@ void RenderPolytope<Dim>::initializeGLResources()
 	// -------------------------
 	gl->glBindVertexArray(0);
 
-	// Initialize specialized renderers
-	m_verticesRenderer = new VerticesRenderer<Dim>(m_polytope);
-	m_edgesRenderer = new EdgesRenderer<Dim>(m_polytope);
-	m_facesRenderer = new FacesRenderer<Dim>(m_polytope);
-
-	m_verticesRenderer->initializeGLResources();
-	m_edgesRenderer->initializeGLResources();
-	m_facesRenderer->initializeGLResources();
-
 	m_initialized = true;
 }
 
 // ------------------------------------------------------------
 // Render
 // ------------------------------------------------------------
-template<size_t Dim>
-void RenderPolytope<Dim>::render(const ndv::RenderContext& context)
+void RenderPolytope::render(const ndv::RenderContext& context)
 {
 	if (!m_initialized)
 		initializeGLResources();
@@ -190,23 +177,43 @@ void RenderPolytope<Dim>::render(const ndv::RenderContext& context)
 	if (!m_initialized)
 		return;
 
-	// Render each component
-	m_verticesRenderer->render(context);
-	m_edgesRenderer->render(context);
-	m_facesRenderer->render(context);
+	// Delegate rendering of components to specialized renderers (3D only)
+
+		static std::unordered_map<RenderPolytope*, std::unique_ptr<VerticesRenderer>> s_verticesMap;
+		static std::unordered_map<RenderPolytope*, std::unique_ptr<EdgesRenderer>> s_edgesMap;
+		static std::unordered_map<RenderPolytope*, std::unique_ptr<FacesRenderer>> s_facesMap;
+
+		// ensure renderers are initialized for this instance
+		if (s_verticesMap.find(this) == s_verticesMap.end())
+		{
+			s_verticesMap[this] = std::make_unique<VerticesRenderer>(static_cast<PolytopeGeometry3D*>(m_polytope));
+			s_verticesMap[this]->initializeGLResources();
+		}
+
+		if (s_edgesMap.find(this) == s_edgesMap.end())
+		{
+			s_edgesMap[this] = std::make_unique<EdgesRenderer>(static_cast<PolytopeGeometry3D*>(m_polytope));
+			s_edgesMap[this]->initializeGLResources();
+		}
+
+		if (s_facesMap.find(this) == s_facesMap.end())
+		{
+			s_facesMap[this] = std::make_unique<FacesRenderer>(static_cast<PolytopeGeometry3D*>(m_polytope));
+			s_facesMap[this]->initializeGLResources();
+		}
+
+		// Render each component
+		s_verticesMap[this]->render(context);
+		s_edgesMap[this]->render(context);
+		s_facesMap[this]->render(context);
 	
 }
 
 // ------------------------------------------------------------
 // Destructor (cleanup)
 // ------------------------------------------------------------
-template<size_t Dim>
-RenderPolytope<Dim>::~RenderPolytope()
+RenderPolytope::~RenderPolytope()
 {
-	delete m_verticesRenderer;
-	delete m_edgesRenderer;
-	delete m_facesRenderer;
-
 	if (!gl)
 		return;
 
@@ -216,9 +223,4 @@ RenderPolytope<Dim>::~RenderPolytope()
 	if (vao) gl->glDeleteVertexArrays(1, &vao);
 }
 
-// ------------------------------------------------------------
-// Explicit instantiation
-// ------------------------------------------------------------
-//template class RenderPolytope<2>;
-template class RenderPolytope<3>;
 
