@@ -10,7 +10,7 @@ ParamsWidget::ParamsWidget(QWidget* parent)
 {
 	// Controls
 	m_spinA = new QSpinBox();
-	m_spinA->setMinimum(2);
+	m_spinA->setMinimum(0);
 	m_spinA->setMaximum(20);
 	m_spinA->setValue(3);
 
