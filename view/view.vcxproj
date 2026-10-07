@@ -173,9 +173,11 @@
     <ClCompile Include="src\Renderer\RenderTargetSphere.cpp" />
     <ClCompile Include="src\Renderer\VerticesRenderer.cpp" />
     <ClCompile Include="src\Viewer.cpp" />
+    <ClCompile Include="src\ParamsWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\view\Camera\Camera.h" />
+    <ClInclude Include="include\view\MainWindow.h" />
     <ClInclude Include="include\view\Renderer\EdgesRenderer.h" />
     <ClInclude Include="include\view\Renderer\ExampleTriangleRenderer.h" />
     <ClInclude Include="include\view\Renderer\FacesRenderer.h" />
@@ -191,6 +193,7 @@
     <ClInclude Include="include\view\Renderer\VerticesRenderer.h" />
     <ClInclude Include="include\view\Renderer\VolumeRenderer.h" />
     <ClInclude Include="include\view\Viewer.h" />
+    <ClInclude Include="include\view\ParamsWidget.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />

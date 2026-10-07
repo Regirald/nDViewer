@@ -3,6 +3,13 @@
 #include <Windows.h>
 #include <gl/GL.h>
 #include <QApplication>
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QSpinBox>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QLabel>
 #include <memory>
 // Core model / logic includes
 #include "model/Sphere.h"
@@ -24,6 +31,8 @@
 #include "logic/GenerateRegularPolytope.h"
 
 #include "view/Viewer.h"
+#include "view/ParamsWidget.h"
+#include "view/MainWindow.h"
 
 int main(int argc, char* argv[])
 {
@@ -58,13 +67,10 @@ int main(int argc, char* argv[])
 
 
 
-    PolytopeGeometry3D cubicPolytope = RegularPolytopeGenerator<4>::generateRegularPolytope({5, 3, 3});
-
 
     // 4. Open a window dedicated to computer vision visualization
-    Viewer viewer;    
-    viewer.setPolytope(&cubicPolytope);
-    //viewer.setMesh(&mesh3);
+    // Use MainWindow which contains the viewer and the control panel.
+    MainWindow* mainWidget = new MainWindow();
     //viewer.setImplicitFunction(sphere3.get());
     //viewer.setImplicitFunction(&sphere1);
     // To use the union implicit function instead, pass sphere2.get()
@@ -72,6 +78,8 @@ int main(int argc, char* argv[])
     //viewer.setMesh(&gridMesh2);
     //viewer.setMesh(&gridMesh3);
 
-    viewer.show();
+    mainWidget->resize(1200, 800);
+    mainWidget->show();
+
     return app.exec(); // Qt event loop
 }

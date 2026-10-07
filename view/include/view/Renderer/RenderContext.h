@@ -19,5 +19,8 @@ namespace ndv
         int viewportHeight = 1;
 
         float time = 0.0f;
+        // When true, full shaded faces are rendered. When false, only vertices/edges are drawn for
+        // a cheaper rendering mode.
+        bool fullShadedRendering = true;
     };
 }

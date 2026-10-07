@@ -31,6 +31,12 @@ public:
         renderingManager.setPolytope(polytope);
     }
 
+    // Toggle full shaded faces rendering (true) or cheaper vertices/edges only (false)
+    inline void setFullShaded(bool enabled)
+    {
+        renderingManager.context().fullShadedRendering = enabled;
+    }
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

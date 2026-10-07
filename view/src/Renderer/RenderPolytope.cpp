@@ -202,10 +202,13 @@ void RenderPolytope::render(const ndv::RenderContext& context)
 			s_facesMap[this]->initializeGLResources();
 		}
 
-		// Render each component
+		// Render each component. Faces rendering can be toggled off for performance.
 		s_verticesMap[this]->render(context);
 		s_edgesMap[this]->render(context);
-		s_facesMap[this]->render(context);
+		if (context.fullShadedRendering)
+		{
+			s_facesMap[this]->render(context);
+		}
 	
 }
 
