@@ -70,7 +70,6 @@ int main(int argc, char* argv[])
 
     // 4. Open a window dedicated to computer vision visualization
     // Use MainWindow which contains the viewer and the control panel.
-    MainWindow* mainWidget = new MainWindow();
     //viewer.setImplicitFunction(sphere3.get());
     //viewer.setImplicitFunction(&sphere1);
     // To use the union implicit function instead, pass sphere2.get()
@@ -78,6 +77,9 @@ int main(int argc, char* argv[])
     //viewer.setMesh(&gridMesh2);
     //viewer.setMesh(&gridMesh3);
 
+
+
+    MainWindow* mainWidget = new MainWindow();
     mainWidget->resize(1200, 800);
     mainWidget->show();
 

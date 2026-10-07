@@ -8,22 +8,28 @@
 #include <QCheckBox>
 #include <QLabel>
 
-#include "Viewer.h"
 #include "model/GeometryFromTopology.h"
 #include "logic/GenerateRegularPolytope.h"
 
 class ParamsWidget : public QWidget
 {
+	Q_OBJECT
+
 public:
 	// Construct with an initial polytope to display
-	ParamsWidget(QWidget* parent = nullptr);
+	explicit ParamsWidget(QWidget* parent = nullptr);
 
-	// Access the contained Viewer instance (owned by this widget)
-	Viewer* viewer() const { return m_viewer; }
+	// Accessors used by MainWindow to read widget state and connect signals
+	int valueA() const;
+	int valueB() const;
+	int valueC() const;
+	bool shaded() const;
+
+public slots:
+	QPushButton* generateButton() const { return m_generateBtn; }
+	QCheckBox* shadedCheckBox() const { return m_shadedCheck; }
 
 private:
-	Viewer* m_viewer = nullptr;
-	std::shared_ptr<PolytopeGeometry3D> m_currentPolytope;
 
 	QSpinBox* m_spinA = nullptr;
 	QSpinBox* m_spinB = nullptr;
@@ -31,3 +37,4 @@ private:
 	QPushButton* m_generateBtn = nullptr;
 	QCheckBox* m_shadedCheck = nullptr;
 };
+// End of ParamsWidget.h

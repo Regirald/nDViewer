@@ -53,9 +53,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\view\Viewer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\view\Camera\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -101,11 +98,16 @@
     <ClInclude Include="include\view\Renderer\FacesRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\view\ParamsWidget.h">
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="include\view\ParamsWidget.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\view\MainWindow.h">
+    </QtMoc>
+    <QtMoc Include="include\view\Viewer.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
+    </QtMoc>
+    <QtMoc Include="include\view\MainWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

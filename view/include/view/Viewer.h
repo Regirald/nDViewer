@@ -11,6 +11,7 @@
 
 class Viewer : public QOpenGLWidget
 {
+    Q_OBJECT
 public:
     explicit Viewer(QWidget* parent = nullptr);
 
@@ -26,6 +27,7 @@ public:
         renderingManager.setImplicitFunction(implicitFunction);
     }
 
+public slots:
     inline void setPolytope(PolytopeGeometry3D* polytope)
     {
         renderingManager.setPolytope(polytope);

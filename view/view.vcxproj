@@ -60,6 +60,7 @@
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtModules>core;gui;widgets;opengl;openglwidgets</QtModules>
+    <QtInstall>6.11.0_msvc2022_64</QtInstall>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">
@@ -125,6 +126,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(ProjectDir)include\view;$(ProjectDir)include\view\Camera;$(ProjectDir)include\view\Renderer;$(SolutionDir)Core\include;$(SolutionDir)Model\include;$(SolutionDir)Logic\include;$(SolutionDir)Database\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -177,7 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\view\Camera\Camera.h" />
-    <ClInclude Include="include\view\MainWindow.h" />
+    <QtMoc Include="include\view\MainWindow.h" />
     <ClInclude Include="include\view\Renderer\EdgesRenderer.h" />
     <ClInclude Include="include\view\Renderer\ExampleTriangleRenderer.h" />
     <ClInclude Include="include\view\Renderer\FacesRenderer.h" />
@@ -192,8 +194,8 @@
     <ClInclude Include="include\view\Renderer\RenderTargetSphere.h" />
     <ClInclude Include="include\view\Renderer\VerticesRenderer.h" />
     <ClInclude Include="include\view\Renderer\VolumeRenderer.h" />
-    <ClInclude Include="include\view\Viewer.h" />
-    <ClInclude Include="include\view\ParamsWidget.h" />
+    <QtMoc Include="include\view\Viewer.h" />
+    <QtMoc Include="include\view\ParamsWidget.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />

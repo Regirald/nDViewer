@@ -8,10 +8,6 @@
 ParamsWidget::ParamsWidget(QWidget* parent)
 	: QWidget(parent)
 {
-	// Create viewer and keep polytope alive in a shared_ptr
-	m_viewer = new Viewer(this);
-	m_viewer->setPolytope(m_currentPolytope.get());
-
 	// Controls
 	m_spinA = new QSpinBox();
 	m_spinA->setMinimum(2);
@@ -47,21 +43,12 @@ ParamsWidget::ParamsWidget(QWidget* parent)
 
 	controls->setLayout(vLayout);
 
-	hLayout->addWidget(m_viewer, 1);
 	hLayout->addWidget(controls);
 
-	// Connections
-	connect(m_generateBtn, &QPushButton::clicked, this, [this]() {
-		int a = m_spinA->value();
-		int b = m_spinB->value();
-		int c = m_spinC->value();
-		m_currentPolytope = std::make_shared<PolytopeGeometry3D>(RegularPolytopeGenerator<4>::generateRegularPolytope({ a, b, c }));
-		m_viewer->setPolytope(m_currentPolytope.get());
-		m_viewer->update();
-	});
-
-	connect(m_shadedCheck, &QCheckBox::toggled, this, [this](bool checked) {
-		m_viewer->setFullShaded(checked);
-		m_viewer->update();
-	});
+	// No direct connections to the viewer here; MainWindow will connect to the buttons/signals
 }
+
+int ParamsWidget::valueA() const { return m_spinA->value(); }
+int ParamsWidget::valueB() const { return m_spinB->value(); }
+int ParamsWidget::valueC() const { return m_spinC->value(); }
+bool ParamsWidget::shaded() const { return m_shadedCheck->isChecked(); }
