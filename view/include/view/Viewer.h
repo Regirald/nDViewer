@@ -30,7 +30,13 @@ public:
 public slots:
     inline void setPolytope(PolytopeGeometry3D* polytope)
     {
+        makeCurrent();
+
         renderingManager.setPolytope(polytope);
+
+        update();
+
+        doneCurrent();
     }
 
     // Toggle full shaded faces rendering (true) or cheaper vertices/edges only (false)

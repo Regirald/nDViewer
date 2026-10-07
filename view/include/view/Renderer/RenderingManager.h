@@ -15,6 +15,7 @@ class RenderingManager
 {
 public:
 	void renderScene();
+
 template <size_t Dim>
 	inline void setMesh(Mesh<Dim>* mesh)
 	{
@@ -25,10 +26,9 @@ template <size_t Dim>
 	{
 		renderContainer.push_back(std::make_unique<RenderImplicitFunction<Dim>>(implicitFunction));
 	}
-	inline void setPolytope(PolytopeGeometry3D* polytope)
-	{
-		renderContainer.push_back(std::make_unique<RenderPolytope>(polytope));
-	}
+
+	void setPolytope(PolytopeGeometry3D* polytope);
+
 	void setBackground();
 	void setExampleTriangle();
 	void setViewport(int width, int height);

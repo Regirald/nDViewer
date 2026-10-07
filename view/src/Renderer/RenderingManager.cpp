@@ -44,6 +44,21 @@ ndv::RenderContext& RenderingManager::context()
 	return m_context;
 }
 
+void RenderingManager::setPolytope(PolytopeGeometry3D* polytope)
+{
+	for (auto& renderer : renderContainer)
+	{
+		if (dynamic_cast<RenderPolytope*>(renderer.get()))
+		{
+			renderer = std::make_unique<RenderPolytope>(polytope);
+			return;
+		}
+	}
+
+	renderContainer.push_back(std::make_unique<RenderPolytope>(polytope));
+
+}
+
 
 void RenderingManager::renderScene()
 {
