@@ -11,7 +11,7 @@ class RenderImplicitFunction : public Renderer
 public:
 	RenderImplicitFunction(ImplicitFunction<Dim>* implicitFunction);
 
-	RenderImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> implicitFunction);
+	RenderImplicitFunction(std::unique_ptr<ImplicitFunction<Dim>> implicitFunction);
 
 	void initializeGLResources();
 	void generateSDF();

@@ -17,7 +17,7 @@ void FacesRenderer::initializeGLResources()
 			verts.push_back(m_poly->vertices[idx]);
 
 		auto plane = std::make_unique<PolytopeFace>(verts);
-		auto renderer = std::make_unique<RenderImplicitFunction<3>>(plane.release());
+		auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(plane));
 		renderer->initializeGLResources();
 		renderer->m_isTransparent = true;  // Mark face renderers as transparent
 

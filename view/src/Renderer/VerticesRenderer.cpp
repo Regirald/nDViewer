@@ -19,7 +19,7 @@ void VerticesRenderer::initializeGLResources()
 		float r = 0.25f;
 
 		auto node = std::make_unique<PolytopeNode>(center, r);
-		auto renderer = std::make_unique<RenderImplicitFunction<3>>(node.release());
+		auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(node));
 		renderer->initializeGLResources();
 
 		m_renderers.push_back(std::move(renderer));
