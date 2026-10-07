@@ -15,12 +15,12 @@ ParamsWidget::ParamsWidget(QWidget* parent)
 	m_spinA->setValue(3);
 
 	m_spinB = new QSpinBox();
-	m_spinB->setMinimum(2);
+	m_spinB->setMinimum(0);
 	m_spinB->setMaximum(20);
 	m_spinB->setValue(3);
 
 	m_spinC = new QSpinBox();
-	m_spinC->setMinimum(2);
+	m_spinC->setMinimum(0);
 	m_spinC->setMaximum(20);
 	m_spinC->setValue(3);
 
