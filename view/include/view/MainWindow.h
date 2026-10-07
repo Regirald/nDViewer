@@ -21,7 +21,8 @@ public:
 public:
 	void onGenerate(int a, int b, int c)
 	{
-		PolytopeGeometry3D poly = RegularPolytopeGenerator<4>::generateRegularPolytope({ a, b, c });
+		std::vector<int> schlafli = { a, b, c };
+		PolytopeGeometry3D poly = RegularPolytopeGenerator::generateRegularPolytope(schlafli);
 		m_currentPolytope = std::make_shared<PolytopeGeometry3D>(poly);
 		m_viewer->setPolytope(m_currentPolytope.get());
 		m_viewer->update();
