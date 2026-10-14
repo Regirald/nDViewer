@@ -2,9 +2,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 
-#include "model/Sphere.h"
-
-void VerticesRenderer::initializeGLResources()
+void VerticesRenderer::initializeGLResources(bool fullShadedRendering)
 {
 	if (!m_poly)
 		return;
@@ -12,17 +10,32 @@ void VerticesRenderer::initializeGLResources()
 	// Clear any previous renderers
 	m_renderers.clear();
 
-	// Create one renderer per vertex; each renderer owns its PolytopeNode
+// Create one renderer per vertex; each renderer owns its PolytopeNode
 	for (const auto& v : m_poly->vertices)
 	{
-		PolytopeNode::Point center = v;
-		float r = 0.25f;
+		if (fullShadedRendering)
+		{
+			PolytopeNode::Point center = v;
+			float r = 0.25f;
 
-		auto node = std::make_unique<PolytopeNode>(center, r);
-		auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(node));
-		renderer->initializeGLResources();
+			auto node = std::make_unique<PolytopeNode>(center, r);
+			auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(node));
+			renderer->initializeGLResources();
 
-		m_renderers.push_back(std::move(renderer));
+			m_renderers.push_back(std::move(renderer));
+		}
+
+		else
+		{
+			PolytopeNodeLight::Point center = v;
+			float r = 0.25f;
+
+			auto node = PolytopeNodeLight(center, r);
+			auto renderer = std::make_unique<PolytopeNodeLightRenderer>(node);
+			renderer->initializeGLResources();
+
+			m_renderers.push_back(std::move(renderer));
+		}
 	}
 }
 

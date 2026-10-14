@@ -51,6 +51,9 @@
     <ClCompile Include="src\ParamsWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Renderer\PolytopeNodeLightRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\view\Camera\Camera.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\view\Renderer\FacesRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\view\Renderer\PolytopeNodeLightRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

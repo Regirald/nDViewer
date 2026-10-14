@@ -5,6 +5,7 @@
 #include <limits>
 #include <cmath>
 #include <QVector3D>
+
 class PolytopeNode : public ImplicitFunction<3> {
 public:
 	using Point = ImplicitFunction<3>::Point;

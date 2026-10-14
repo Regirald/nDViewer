@@ -1,6 +1,6 @@
 #pragma once
 #include "Renderer/Renderer.h"
-#include "model/PolytopesFaces.h"
+#include "model/PolytopeFace.h"
 #include "Renderer/RenderImplicitFunction.h"
 #include "model/GeometryFromTopology.h"
 #include <memory>

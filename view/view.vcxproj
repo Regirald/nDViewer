@@ -167,6 +167,7 @@
     <ClCompile Include="src\Camera\Camera.cpp" />
     <ClCompile Include="src\Renderer\EdgesRenderer.cpp" />
     <ClCompile Include="src\Renderer\FacesRenderer.cpp" />
+    <ClCompile Include="src\Renderer\PolytopeNodeLightRenderer.cpp" />
     <ClCompile Include="src\Renderer\RenderBackground.cpp" />
     <ClCompile Include="src\Renderer\RenderImplicitFunction.cpp" />
     <ClCompile Include="src\Renderer\RenderingManager.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="include\view\Renderer\ExampleTriangleRenderer.h" />
     <ClInclude Include="include\view\Renderer\FacesRenderer.h" />
     <ClInclude Include="include\view\Renderer\GLMeshRenderer.h" />
+    <ClInclude Include="include\view\Renderer\PolytopeNodeLightRenderer.h" />
     <ClInclude Include="include\view\Renderer\RenderImplicitFunction.h" />
     <ClInclude Include="include\view\Renderer\RenderBackground.h" />
     <ClInclude Include="include\view\Renderer\RenderContext.h" />

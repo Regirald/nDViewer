@@ -59,13 +59,16 @@
     <ClInclude Include="include\model\spheres.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\PolytopesEdges.h">
+    <ClInclude Include="include\model\PolytopeEdge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\PolytopesFaces.h">
+    <ClInclude Include="include\model\PolytopeFace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\PolytopesNodes.h">
+    <ClInclude Include="include\model\PolytopeNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\PolytopeNodeLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

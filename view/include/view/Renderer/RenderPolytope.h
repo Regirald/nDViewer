@@ -15,7 +15,7 @@ public:
 	RenderPolytope(PolytopeGeometry3D* polytope);
 	~RenderPolytope();
 
-	void initializeGLResources();
+	void initializeGLResources(bool fullShadedRendering = true);
 	void render(const ndv::RenderContext& context) override;
 
 	GLuint vbo = 0;

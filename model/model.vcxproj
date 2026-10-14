@@ -138,11 +138,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Circle.h" />
-    <ClInclude Include="include\model\PolytopesEdges.h" />
+    <ClInclude Include="include\model\PolytopeNodeLight.h" />
+    <ClInclude Include="include\model\PolytopeEdge.h" />
     <ClInclude Include="include\model\GeometryFromTopology.h" />
     <ClInclude Include="include\model\CoxeterPresentation.h" />
-    <ClInclude Include="include\model\PolytopesFaces.h" />
-    <ClInclude Include="include\model\PolytopesNodes.h" />
+    <ClInclude Include="include\model\PolytopeFace.h" />
+    <ClInclude Include="include\model\PolytopeNode.h" />
     <ClInclude Include="include\model\spheres.h" />
     <ClInclude Include="include\model\TestFile.h" />
     <ClInclude Include="include\model\ToddCoxeter.h" />

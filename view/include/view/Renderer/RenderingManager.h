@@ -16,16 +16,18 @@ class RenderingManager
 public:
 	void renderScene();
 
-template <size_t Dim>
+	template <size_t Dim>
 	inline void setMesh(Mesh<Dim>* mesh)
 	{
 		renderContainer.push_back(std::make_unique<RenderMesh<Dim>>(mesh));
 	}
-template <size_t Dim>
+	template <size_t Dim>
 	inline void setImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
 	{
 		renderContainer.push_back(std::make_unique<RenderImplicitFunction<Dim>>(implicitFunction));
 	}
+	std::unique_ptr<Renderer>* getPolytopeRenderer();
+
 
 	void setPolytope(PolytopeGeometry3D* polytope);
 
