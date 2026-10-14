@@ -23,7 +23,7 @@ public:
 	{
 		std::vector<int> schlafli = { a, b, c };
 		PolytopeGeometry3D poly = RegularPolytopeGenerator::generateRegularPolytope(schlafli);
-		m_currentPolytope = std::make_shared<PolytopeGeometry3D>(poly);
+		m_currentPolytope = std::make_unique<PolytopeGeometry3D>(poly);
 		m_viewer->setPolytope(m_currentPolytope.get());
 		m_viewer->update();
 	}
@@ -37,7 +37,7 @@ public:
 private:
 	ParamsWidget* m_paramsWidget = nullptr;
 	Viewer* m_viewer = nullptr;
-	std::shared_ptr<PolytopeGeometry3D> m_currentPolytope;
+	std::unique_ptr<PolytopeGeometry3D> m_currentPolytope;
 };
 
 // Inline implementation for convenience
@@ -57,7 +57,7 @@ inline MainWindow::MainWindow(QWidget* parent)
 	setCentralWidget(central);
 
 	// initialize polytope storage and viewer
-	m_currentPolytope = std::make_shared<PolytopeGeometry3D>();
+	m_currentPolytope = std::make_unique<PolytopeGeometry3D>();
 	m_viewer->setPolytope(m_currentPolytope.get());
 
 	// connections: params -> main window slots (connect widget signals directly)

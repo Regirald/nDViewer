@@ -6,12 +6,6 @@
 #include "model/ImplicitFunction.h"
 
 template<size_t Dim>
-RenderImplicitFunction<Dim>::RenderImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
-    : m_implicitFunction(implicitFunction)
-{
-}
-
-template<size_t Dim>
 RenderImplicitFunction<Dim>::RenderImplicitFunction(std::unique_ptr<ImplicitFunction<Dim>> implicitFunction)
     : m_implicitFunction(std::move(implicitFunction))
 {
@@ -136,6 +130,21 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
     gl->glBindVertexArray(0);
 
     m_program.release();
+}
+
+
+template<size_t Dim>
+RenderImplicitFunction<Dim>::~RenderImplicitFunction()
+{
+    // OpenGL resources must be deleted with a compatible context current.
+    if (QOpenGLContext::currentContext() && gl)
+    {
+        if (m_fullscreenVBO)
+            gl->glDeleteBuffers(1, &m_fullscreenVBO);
+
+        if (m_fullscreenVAO)
+            gl->glDeleteVertexArrays(1, &m_fullscreenVAO);
+    }
 }
 
 template class RenderImplicitFunction<2>;
