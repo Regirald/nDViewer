@@ -42,9 +42,6 @@
     <ClCompile Include="src\Renderer\VerticesRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Renderer\EdgesRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Renderer\FacesRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -52,6 +49,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer\PolytopeNodeLightRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\PolytopeEdgeLightRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\EdgesRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\view\Renderer\PolytopeNodeLightRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\view\Renderer\PolytopeEdgeLightRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

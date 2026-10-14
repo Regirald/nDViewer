@@ -2,7 +2,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 
-void EdgesRenderer::initializeGLResources()
+void EdgesRenderer::initializeGLResources(bool fullShadedRendering)
 {
 	if (!m_poly)
 		return;
@@ -18,11 +18,22 @@ void EdgesRenderer::initializeGLResources()
 		std::pair<PolytopeEdge::Point, PolytopeEdge::Point> seg{ a, b };
 		float r = 0.1f;
 
-		auto edge = std::make_unique<PolytopeEdge>(seg, r);
-		auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(edge));
-		renderer->initializeGLResources();
+		if (fullShadedRendering)
+		{
+			auto edge = std::make_unique<PolytopeEdge>(seg, r);
+			auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(edge));
+			renderer->initializeGLResources();
 
-		m_renderers.push_back(std::move(renderer));
+			m_renderers.push_back(std::move(renderer));
+		}
+		else
+		{
+			// Lightweight renderer that draws a simple line between the two endpoints in NDC
+			auto renderer = std::make_unique<PolytopeEdgeLightRenderer>(seg, r);
+			renderer->initializeGLResources();
+
+			m_renderers.push_back(std::move(renderer));
+		}
 	}
 }
 

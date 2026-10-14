@@ -170,8 +170,8 @@ void RenderPolytope::initializeGLResources(bool fullShadedRendering)
 	m_facesRenderer = std::make_unique<FacesRenderer>(m_polytope);
 
 	m_verticesRenderer->initializeGLResources(fullShadedRendering);
-	//m_edgesRenderer->initializeGLResources(fullShadedRendering);
-	//m_facesRenderer->initializeGLResources(fullShadedRendering);
+	m_edgesRenderer->initializeGLResources(fullShadedRendering);
+	m_facesRenderer->initializeGLResources();
 
 	m_initialized = true;
 }
