@@ -9,7 +9,7 @@ namespace Coxeter
     struct CosetTable;
     CosetTable enumerateCosets(
         const Presentation& presentation,
-        const std::vector<Relator>& relators,
+        const std::vector<Generator>& relators,
         const Subgroup& subgroupGenerators);
 }
 
@@ -27,7 +27,7 @@ Presentation makeCoxeter(const std::vector<int>& schlafli)
     return buildPresentation(schlafli);
 }
 
-std::vector<Relator> makeRelators(const Presentation& P)
+std::vector<Generator> makeRelators(const Presentation& P)
 {
     return buildRelators(P);
 }

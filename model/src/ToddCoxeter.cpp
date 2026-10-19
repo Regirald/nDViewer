@@ -24,8 +24,7 @@ namespace Coxeter
 
         static void processDeduction(
             CosetTable& table,
-            const Deduction& d,
-            std::queue<Deduction>& deductions)
+            const Deduction& d)
         {
             int source = d.source;
             int target = d.target;
@@ -40,18 +39,6 @@ namespace Coxeter
 
         }
 
-        static void processAllDeductions(
-            CosetTable& table,
-            std::queue<Deduction>& deductions)
-        {
-            while (!deductions.empty())
-            {
-                Deduction d = deductions.front();
-                deductions.pop();
-
-                processDeduction(table, d, deductions);
-            }
-        }
 
 
         static bool hasUndefinedEntries(const CosetTable& table)
@@ -81,88 +68,36 @@ namespace Coxeter
 
     } // namespace detail
 
-    int CosetTable::newCoset()
+	bool isAlive(const CosetTable& table, int coset)
+	{
+		return table.cosetEquivalenceList[coset] == coset;
+	}
+
+    bool isDefined(const CosetTable& table, int coset, int rel)
+    {
+        return table.table[coset][rel] != -1;
+    }
+    void CosetTable::newCoset()
     {
         table.emplace_back(generators, -1);
-        return static_cast<int>(table.size()) - 1;
+
+        int n = static_cast<int>(table.size());
+
+        cosetEquivalenceList.push_back(n);
     }
 
-    CosetTable enumerateCosets(
-        const Presentation& presentation,
-        const std::vector<Relator>& relators,
-        const Subgroup& subgroup)
-    {
-        CosetTable table;
-        table.generators = presentation.rank;
-        std::queue<Deduction> deductions;
-
-        table.newCoset();
-
-        // fill relations of the stabilizer
-        for (int g : subgroup.generators)
-        {
-            deductions.push(
-                {
-                    0,
-                    (uint8_t)g,
-                    0
-                });
-        }
-        bool changed = true;
-        detail::processAllDeductions(
-            table,
-            deductions);
-        ////
-
-
-        while (true)
-        {
-            //
-            // Saturation phase
-            //
-            for (int c = 0;
-                c < (int)table.table.size();
-                ++c)
-            {
-                for (const Relator& relator
-                    : relators)
-                {
-                    scanRelator(
-                            table,
-                            relator,
-                            c,
-                            deductions);
-                }
-            }
-            // try odd schlafli symbols
-            if (table.table.size() > 100)
-            {
-                detail::setUndefinedToZero(table);
-				bool check = detail::hasUndefinedEntries(table);
-                break;
-            }
-            //
-            // Completely finished
-            //
-            if (!detail::hasUndefinedEntries(table))
-                break;
-
-        }
-
-        return table;
-    }
-
+    
    
 
     int firstUndefinedCoset(
         const CosetTable& table,
         int& generator)
     {
-        for (int c = 0;c < (int)table.table.size();++c)
+        for (int c = 0; c < (int)table.table.size();++c)
         {
-            for (int g = 0;g < table.generators;++g)
+            for (int g = 0; g < table.generators;++g)
             {
-                if (table.table[c][g] == -1)
+                if (isDefined(table, c, g))
                 {
                     generator = g;
                     return c;
@@ -174,30 +109,131 @@ namespace Coxeter
     }
 
 
+
+	//COINCIDENCE
+	int rootRepresentative(CosetTable& table, int coset)
+	{
+		int r = coset;
+		while (!isAlive(table, r))
+		{
+			r = table.cosetEquivalenceList[r];
+		}
+		int m = coset;
+		while (!isAlive(table, m))
+		{
+			int next = table.cosetEquivalenceList[m];
+			table.cosetEquivalenceList[m] = r;
+			m = next;
+		}
+		return r;
+	}
+    void merge(CosetTable& table, int cosetA, int cosetB)
+    {
+		int coseta = rootRepresentative(table, cosetA);
+		int cosetb = rootRepresentative(table, cosetB);
+        if (coseta != cosetb)
+        {
+            if (coseta > cosetb)
+                std::swap(coseta, cosetb);
+            table.cosetEquivalenceList[cosetb] = coseta;
+            table.coincidenceQueue.push(cosetb);
+        }
+    }
+	void processCoincidence(
+		CosetTable& table,
+		int cosetA,
+		int cosetB)
+	{
+        int nbRelators = table.table[0].size();
+
+        merge(table, cosetA, cosetB);
+        while (!table.coincidenceQueue.empty())
+        {
+            int currentDeadCoset = table.coincidenceQueue.front();
+            table.coincidenceQueue.pop();
+            for (int rel = 0; rel < nbRelators; ++rel)
+            {
+				if (!isDefined(table, currentDeadCoset, rel))
+					continue;
+                int otherCoset = table.table[currentDeadCoset][rel];
+                table.table[otherCoset][rel] = -1;
+
+                int rootCurrentDeadCoset = rootRepresentative(table, currentDeadCoset);
+                int rootOtherCoset = rootRepresentative(table, otherCoset);
+
+                if (table.table[rootCurrentDeadCoset][rel] != -1)
+                    merge(table, rootOtherCoset, table.table[rootCurrentDeadCoset][rel]);
+
+                else if (table.table[rootOtherCoset][rel] != -1)
+                    merge(table, rootCurrentDeadCoset, table.table[rootOtherCoset][rel]);
+                else
+                {
+                    table.table[rootCurrentDeadCoset][rel] = rootOtherCoset;
+                    table.table[rootOtherCoset][rel] = rootCurrentDeadCoset;
+                }
+            }
+
+        }
+    
+	}
+
+
+    // CLEAN
+    void compress(CosetTable & table)
+    {
+        int n = static_cast<int>(table.table.size());
+        std::vector<int> newIndex(n, -1);
+        int newCosetCount = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            if (isAlive(table, i))
+            {
+                newIndex[i] = newCosetCount++;
+            }
+        }
+        std::vector<std::vector<int>> newTable(newCosetCount, std::vector<int>(table.generators, -1));
+        std::vector<int> newEquivalenceList(newCosetCount);
+        for (int i = 0; i < n; ++i)
+        {
+            if (isAlive(table, i))
+            {
+                int newI = newIndex[i];
+                newEquivalenceList[newI] = newI;
+                for (int g = 0; g < table.generators; ++g)
+                {
+                    int target = table.table[i][g];
+                    if (target != -1)
+                    {
+                        int newTarget = newIndex[rootRepresentative(table, target)];
+                        newTable[newI][g] = newTarget;
+                    }
+                }
+            }
+        }
+        table.table = std::move(newTable);
+        table.cosetEquivalenceList = std::move(newEquivalenceList);
+    }
+
+
+
 	///SCAN 
 
 
-    ScanResult scanWord(
+    ScanResult scanWordForward(
         CosetTable& table,
-        const Relator& relator,
+        const Generator& relator,
         int startCoset)
     {
-        const int n =
-            (int)relator.word.size();
+        const int n = (int)relator.word.size() - 1;
 
         ScanResult result;
 
         result.forwardPos = 0;
-        result.backwardPos = n - 1;
-
+        result.backwardPos = n;
         result.forwardCoset = startCoset;
-
         result.backwardCoset = startCoset;
 
-        //
-        // forward
-        //
-        while (result.forwardPos < n)
+        while (result.forwardPos <= n)
         {
             const uint8_t g =
                 relator.word[result.forwardPos];
@@ -213,10 +249,18 @@ namespace Coxeter
             ++result.forwardPos;
         }
 
-        //
-        // backward
-        //
-        while (result.backwardPos >= 0)
+        return result;
+    }
+
+
+    ScanResult scanWordBackward(
+        ScanResult& result,
+        CosetTable& table,
+        const Generator& relator,
+        int startCoset)
+    {
+
+        while (result.backwardPos >= result.forwardPos)
         {
             const uint8_t g =
                 relator.word[result.backwardPos];
@@ -235,58 +279,76 @@ namespace Coxeter
         return result;
     }
 
-    void scanRelator(
+    void scanGenerator(
         CosetTable& table,
-        const Relator& relator,
-        int startCoset,
-        std::queue<Deduction>& deductions)
+        const Generator& generator,
+        int startCoset)
     {
-        if (table.table.size() > 100)
+        if (table.table.size() > 1000)
             return;
 
-        ScanResult S =
-            scanWord(
+        const int n = (int)generator.word.size() - 1;
+
+        ScanResult scanResultForward = scanWordForward(
                 table,
-                relator,
+                generator,
                 startCoset);
 
-        const int n =
-            (int)relator.word.size();
+        if (scanResultForward.forwardPos > n)
+        {
+		    if (scanResultForward.forwardCoset != scanResultForward.backwardCoset)
+            {
+				processCoincidence(
+					table,
+					scanResultForward.forwardCoset,
+					scanResultForward.backwardCoset);
+            }
+            else
+		    {
+			    // generator fully satisfied, nothing to do
+			    return;
+		    }
+        }
+        
+		ScanResult scanResultFB = scanWordBackward(
+            scanResultForward,
+			table,
+			generator,
+			startCoset);
 
 
-
-        //
-        // one missing edge or more otherwise (scan crossed) dissmis
-        //
-        if (S.backwardPos == S.forwardPos || S.backwardPos - S.forwardPos >= 1)
+        if (scanResultFB.forwardPos > scanResultFB.backwardPos)
+        {
+			processCoincidence(
+				table,
+				scanResultFB.forwardCoset,
+				scanResultFB.backwardCoset);
+        }
+        else if (scanResultFB.backwardPos == scanResultFB.forwardPos)
         {
             Deduction d;
 
-            d.source = S.forwardCoset;
-            d.generator = relator.word[S.forwardPos];
-            if (S.backwardPos - S.forwardPos >= 1)
-            {
-                d.target = table.table.size(); // generate new coset
+            d.source = scanResultFB.forwardCoset;
+            d.generator = generator.word[scanResultFB.forwardPos];
+            d.target = scanResultFB.backwardCoset;
 
-                table.newCoset();
-
-            }
-            else {
-                d.target = S.backwardCoset;
-            }
-
-            deductions.push(d);
-
-            detail::processAllDeductions(
-                table,
-                deductions);
-
-            if (S.backwardPos - S.forwardPos >= 1) //continue until scan pass
-            {
-                scanRelator(table, relator, startCoset, deductions);
-            }
-
+            detail::processDeduction(table, d);
         }
+		else if (scanResultFB.backwardPos > scanResultFB.forwardPos)
+		{
+			Deduction d;
+			d.source = scanResultFB.forwardCoset;
+			d.generator = generator.word[scanResultFB.forwardPos];
+			d.target = table.table.size(); // generate new coset
+			table.newCoset();
+            detail::processDeduction(table, d);
+
+			scanGenerator(table, generator, startCoset);
+		}
+		else
+		{
+			// no deduction possible
+		}
 
     }
 
@@ -420,6 +482,74 @@ namespace Coxeter
 
         }
         return std::vector<std::vector<std::vector<int>>>();
+    }
+
+
+
+
+
+    CosetTable enumerateCosets(
+        const Presentation& presentation,
+        const std::vector<Generator>& generators,
+        const Subgroup& subgroup)
+    {
+        CosetTable table;
+        table.generators = presentation.rank;
+        table.cosetEquivalenceList.push_back(0);  //initially we only have the 0-th coset H
+        table.newCoset();
+
+        std::vector<int> relators;
+        for (int i = 0; i < presentation.rank; ++i)
+        {
+            relators.push_back(i);
+        }
+        // fill relations of the stabilizer
+        for (int g : subgroup.generators)
+        {
+            Deduction d(0, static_cast<uint8_t>(g), 0);
+            detail::processDeduction(table, d);
+        }
+
+
+        int currentCoset = 0;
+        while (currentCoset < (int)table.table.size())
+        {
+            for (const Generator& generator : generators)
+            {
+                if (!isAlive(table, currentCoset))
+                    break;
+                scanGenerator(table, generator, currentCoset);
+            }
+
+            if (isAlive(table, currentCoset))
+            {
+                for (int relator : relators)
+                {
+                    if (!isDefined(table, currentCoset, relator))
+                    {
+                        table.newCoset();
+                        int newCoset = static_cast<int>(table.table.size()) - 1;
+                        detail::rawLink(table, currentCoset, relator, newCoset);
+                    }
+
+                }
+            }
+            // try odd schlafli symbols
+            if (table.table.size() > 1000)
+            {
+                detail::setUndefinedToZero(table);
+                bool check = detail::hasUndefinedEntries(table);
+                break;
+            }
+
+            if (!detail::hasUndefinedEntries(table))
+                break;
+
+            currentCoset++;
+        }
+
+        compress(table);
+        return table;
     }
 
 } // namespace Coxeter

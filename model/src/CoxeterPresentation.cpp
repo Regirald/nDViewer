@@ -31,17 +31,17 @@ namespace Coxeter
         return P;
     }
 
-    std::vector<Relator> buildRelators(
+    std::vector<Generator> buildRelators(
         const Presentation& P)
     {
-        std::vector<Relator> relators;
+        std::vector<Generator> relators;
 
         //
         // s_i² = 1
         //
         for (int i = 0;i < P.rank;++i)
         {
-            Relator r;
+            Generator r;
 
             r.word.push_back(
                 static_cast<uint8_t>(i));
@@ -65,7 +65,7 @@ namespace Coxeter
                 if (m <= 1)
                     continue;
 
-                Relator r;
+                Generator r;
 
                 for (int k = 0;k < m;++k)
                 {

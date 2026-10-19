@@ -15,7 +15,10 @@ namespace Coxeter
 
         std::vector<std::vector<int>> table;
 
-        int newCoset();
+        std::vector<int> cosetEquivalenceList;
+        std::queue<int> coincidenceQueue;
+
+        void newCoset();
     };
 
 
@@ -29,7 +32,7 @@ namespace Coxeter
 
     CosetTable enumerateCosets(
         const Presentation& presentation,
-        const std::vector<Relator>& relators,
+        const std::vector<Generator>& relators,
         const Subgroup& subgroupGenerators);
 
 
@@ -49,14 +52,14 @@ namespace Coxeter
 
     ScanResult scanWord(
         CosetTable& table,
-        const Relator& relator,
+        const Generator& relator,
         int startCoset);
 
-    void scanRelator(
+    void scanGenerator(
         CosetTable& table,
-        const Relator& relator,
-        int startCoset,
-        std::queue<Deduction>& deductions);
+        const Generator& relator,
+        int startCoset);
+
 
 
     struct CosetBFSData

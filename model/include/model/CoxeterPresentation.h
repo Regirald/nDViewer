@@ -15,7 +15,7 @@ namespace Coxeter
         std::vector<std::vector<int>> M;
     };
 
-    struct Relator
+    struct Generator
     {
         std::vector<uint8_t> word;
     };
@@ -27,7 +27,7 @@ namespace Coxeter
     Presentation buildPresentation(
         const std::vector<int>& schlafli);
 
-    std::vector<Relator> buildRelators(
+    std::vector<Generator> buildRelators(
         const Presentation& presentation);
 
     Subgroup buildVertexStabilizer(
