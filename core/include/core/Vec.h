@@ -16,22 +16,22 @@ struct Vec {
     template<size_t OtherDim>
     constexpr Vec(const Vec<OtherDim, T>& other)
     {
-        // compression
-        if (Dim < OtherDim)
+        if constexpr (Dim < OtherDim)
         {
-            const T& scaleFactor = other[Dim];
-			for (size_t i = 0; i < Dim; ++i)
-				data[i] = other[i] / (scaleFactor / 4 + T(3) / 4);
+            const T strength = T(0.3);
+            const T denominator = T(1) - strength * other[Dim];
+
+            for (size_t i = 0; i < Dim; ++i)
+                data[i] = other[i] / denominator;
         }
-        // extending with zeros
         else
         {
             for (size_t i = 0; i < OtherDim; ++i)
                 data[i] = other[i];
+
             for (size_t i = OtherDim; i < Dim; ++i)
                 data[i] = T{};
         }
-
     }
 
 	Vec(std::initializer_list<T> list) {
