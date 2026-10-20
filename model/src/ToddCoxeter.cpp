@@ -284,7 +284,7 @@ namespace Coxeter
         const Generator& generator,
         int startCoset)
     {
-        if (table.table.size() > 1000)
+        if (table.table.size() > 2000)
             return;
 
         const int n = (int)generator.word.size() - 1;
@@ -535,7 +535,7 @@ namespace Coxeter
                 }
             }
             // try odd schlafli symbols
-            if (table.table.size() > 1000)
+            if (table.table.size() > 2000)
             {
                 detail::setUndefinedToZero(table);
                 bool check = detail::hasUndefinedEntries(table);
