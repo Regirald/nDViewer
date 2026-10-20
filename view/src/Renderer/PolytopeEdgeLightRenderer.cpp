@@ -1,10 +1,5 @@
 #include "PolytopeEdgeLightRenderer.h"
 
-#include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLShaderProgram>
-#include <QVector3D>
-#include <QVector4D>
 
 PolytopeEdgeLightRenderer::~PolytopeEdgeLightRenderer()
 {
