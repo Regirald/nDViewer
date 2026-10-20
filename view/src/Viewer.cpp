@@ -152,10 +152,10 @@ void Viewer::mouseMoveEvent(QMouseEvent* event)
     {
         const float zoomSensitivity = 0.01f;
         m_zoom += -dy * zoomSensitivity;
-        if (m_zoom < 0.1f)
-            m_zoom = 0.1f;
-        if (m_zoom > 10.0f)
-            m_zoom = 10.0f;
+        if (m_zoom < 0.05f)
+            m_zoom = 0.05f;
+        if (m_zoom > 50.0f)
+            m_zoom = 50.0f;
     }
     else if (m_middleDown)
     {
