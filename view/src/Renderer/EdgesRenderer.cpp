@@ -29,7 +29,7 @@ void EdgesRenderer::initializeGLResources(bool fullShadedRendering)
 		else
 		{
 			// Lightweight renderer that draws a simple line between the two endpoints in NDC
-			auto renderer = std::make_unique<PolytopeEdgeLightRenderer>(seg, r);
+			auto renderer = std::make_unique<PolytopeEdgeLightRenderer>(seg);
 			renderer->initializeGLResources();
 
 			m_renderers.push_back(std::move(renderer));

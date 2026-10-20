@@ -1,5 +1,5 @@
 #pragma once
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 
 #include "Renderer/Renderer.h"
 #include "model/PolytopeEdge.h"
@@ -7,8 +7,8 @@
 class PolytopeEdgeLightRenderer : public Renderer
 {
 public:
-	PolytopeEdgeLightRenderer(const std::pair<PolytopeEdge::Point, PolytopeEdge::Point>& seg, float radius)
-		: m_a(seg.first), m_b(seg.second), m_radius(radius)
+	PolytopeEdgeLightRenderer(const std::pair<PolytopeEdge::Point, PolytopeEdge::Point>& seg)
+		: m_a(seg.first), m_b(seg.second)
 	{
 	}
 	~PolytopeEdgeLightRenderer() override;
@@ -17,10 +17,14 @@ public:
 
 	void initializeGLResources();
 private:
-	bool m_initialized = false;
-	QOpenGLFunctions* m_gl = nullptr;
-
 	PolytopeEdge::Point m_a;
 	PolytopeEdge::Point m_b;
-	float m_radius = 0.0f;
+
+	QOpenGLExtraFunctions* m_gl = nullptr;
+	QOpenGLShaderProgram* m_program = nullptr;
+
+	unsigned int m_vao = 0;
+	unsigned int m_vbo = 0;
+
+	bool m_initialized = false;
 };
