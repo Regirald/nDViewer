@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <cstdint>
+#include <tuple>
 
 namespace Coxeter
 {
@@ -80,6 +81,6 @@ namespace Coxeter
     CosetBFSData buildCosetBFSData(const CosetTable& table);
 
 
-    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, std::vector<CosetBFSData> bfsData, const std::vector<int>& schlafli);
+    std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, const std::vector<CosetBFSData>& bfsData, const std::vector<int>& schlafli);
 
 }

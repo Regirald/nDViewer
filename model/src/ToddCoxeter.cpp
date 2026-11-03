@@ -406,11 +406,12 @@ namespace Coxeter
     }
 
 
-    std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, std::vector<CosetBFSData> costetsBFSData, const std::vector<int>& schlafli)
+    std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>, std::vector<std::vector<int>>> edgesAndFacesIndexFromTables(const CosetTable& vertexTable, const std::vector<CosetBFSData>& costetsBFSData, const std::vector<int>& schlafli)
     {
         
         std::vector<std::vector<int>> edgesIndex;
         std::vector<std::vector<int>> facesIndex;
+        std::vector<std::vector<int>> cellsIndex;
 
         CosetBFSData vertexBFSData = costetsBFSData[0];
         CosetBFSData edgeBFSData = costetsBFSData[1];
@@ -430,6 +431,11 @@ namespace Coxeter
                 face.push_back({ vertexBFSData.order[i] });
             }
             facesIndex.push_back(face);
+        }
+        const bool hasCellData = costetsBFSData.size() > 3;
+        if (hasCellData)
+        {
+            cellsIndex.resize(costetsBFSData[3].order.size());
         }
 
 
@@ -469,7 +475,47 @@ namespace Coxeter
                 }
             }
         }
-		return std::make_pair(edgesIndex, facesIndex);
+
+        if (hasCellData)
+        {
+            std::vector<int> cellVertices;
+            std::queue<int> pendingVertices;
+            std::vector<bool> visitedVertices(vertexTable.table.size(), false);
+
+            pendingVertices.push(0);
+            visitedVertices[0] = true;
+            while (!pendingVertices.empty())
+            {
+                const int vertexCoset = pendingVertices.front();
+                pendingVertices.pop();
+                cellVertices.push_back(vertexCoset);
+
+                for (int generator = 0; generator < vertexTable.generators - 1; ++generator)
+                {
+                    const int adjacentVertex = vertexTable.table[vertexCoset][generator];
+                    if (!visitedVertices[adjacentVertex])
+                    {
+                        visitedVertices[adjacentVertex] = true;
+                        pendingVertices.push(adjacentVertex);
+                    }
+                }
+            }
+
+            for (int cellCoset : costetsBFSData[3].order)
+            {
+                const std::vector<uint8_t>& generatorWord = costetsBFSData[3].representativeWord[cellCoset];
+                for (int vertexCoset : cellVertices)
+                {
+                    for (uint8_t generator : generatorWord)
+                    {
+                        vertexCoset = vertexTable.table[vertexCoset][generator];
+                    }
+                    cellsIndex[cellCoset].push_back(vertexCoset);
+                }
+            }
+        }
+
+        return std::make_tuple(edgesIndex, facesIndex, cellsIndex);
     }
 
     std::vector<std::vector<std::vector<int>>> edgesIndexFromTable(const std::vector<CosetTable>& Tables, const std::vector<CosetBFSData>& costetsBFSData)

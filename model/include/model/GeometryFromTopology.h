@@ -200,7 +200,7 @@ PolytopeGeometry<Dim> generateGeometry(
     const Coxeter::CosetBFSData& bfsDataVertex,
     const Initializers<Dim>& initializers,
     const std::vector<Vec<Dim, float>>& mirrorNormals,
-    const std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>& edgesAndFacesIndex)
+    const std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>, std::vector<std::vector<int>>>& edgesFacesAndCellsIndex)
 {
     PolytopeGeometry<Dim> poly;
 
@@ -217,8 +217,9 @@ PolytopeGeometry<Dim> generateGeometry(
                 mirrorNormals)[0];
     }
 
-    poly.edges = edgesAndFacesIndex.first;
-    poly.faces = edgesAndFacesIndex.second;
+    poly.edges = std::get<0>(edgesFacesAndCellsIndex);
+    poly.faces = std::get<1>(edgesFacesAndCellsIndex);
+    poly.cells = std::get<2>(edgesFacesAndCellsIndex);
 
     return poly;
 }

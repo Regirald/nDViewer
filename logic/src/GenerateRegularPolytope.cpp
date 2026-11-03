@@ -47,7 +47,7 @@ PolytopeGeometry<Dim> RegularPolytopeGenerator::generateRegularPolytopeFromSimpl
     }
 
 
-	auto edgesAndFacesIndex = edgesAndFacesIndexFromTables(Tables[0], costetsBFSData, schlafli);
+    auto edgesFacesAndCellsIndex = edgesAndFacesIndexFromTables(Tables[0], costetsBFSData, schlafli);
 
     auto initializersAndMirrors = buildInitializersAndMirrors<Dim>(Presentation);
 
@@ -58,7 +58,7 @@ PolytopeGeometry<Dim> RegularPolytopeGenerator::generateRegularPolytopeFromSimpl
         costetsBFSData[0],
         initializers,
         mirrors, 
-        edgesAndFacesIndex);
+        edgesFacesAndCellsIndex);
 
 }
 const std::vector<int> RegularPolytopeGenerator::simplifySchlafli(const std::vector<int>&schlafli)
