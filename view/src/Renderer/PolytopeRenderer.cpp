@@ -24,6 +24,7 @@ void PolytopeRendererProxy::defineDimension() {
 	else
 	{
 		m_dim = Unknown;
+		throw std::runtime_error("Unsupported dimension for polytope rendering.");
 	}
 
 }

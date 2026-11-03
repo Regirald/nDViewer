@@ -8,12 +8,8 @@
 #include <memory>
 #include <vector>
 
-class AbstractVerticesRenderer : public Renderer
-{
-};
-
 template <size_t Dim>
-class VerticesRenderer : public AbstractVerticesRenderer
+class VerticesRenderer : public Renderer
 {
 public:
 	VerticesRenderer(PolytopeGeometry<Dim>* poly) : m_poly(poly) {}
@@ -22,6 +18,5 @@ public:
 
 private:
 	PolytopeGeometry<Dim>* m_poly = nullptr;
-	// Each renderer will own its PolytopeNode instance internally.
 	std::vector<std::unique_ptr<Renderer>> m_renderers;
 };
