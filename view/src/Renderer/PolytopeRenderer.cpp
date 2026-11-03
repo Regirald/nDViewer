@@ -24,7 +24,6 @@ void PolytopeRendererProxy::defineDimension() {
 	else
 	{
 		m_dim = Unknown;
-		throw std::runtime_error("Unsupported dimension for polytope rendering.");
 	}
 
 }
@@ -97,6 +96,17 @@ void PolytopeRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 	{
 		m_facesRenderer->initializeGLResources();
 	}
+
+	m_accelerationStructure = std::make_unique<PolytopeAccelerationStructure<Dim>>(m_polytope);
+	m_accelerationStructure->build();
+
+	std::cout << "BVH nodes: "
+		<< m_accelerationStructure->nodes().size()
+		<< '\n';
+
+	std::cout << "BVH primitives: "
+		<< m_accelerationStructure->primitives().size()
+		<< '\n';
 
 	m_initialized = true;
 }
