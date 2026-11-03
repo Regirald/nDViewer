@@ -2,7 +2,8 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 
-void VerticesRenderer::initializeGLResources(bool fullShadedRendering)
+template <size_t Dim>
+void VerticesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 {
 	if (!m_poly)
 		return;
@@ -37,9 +38,11 @@ void VerticesRenderer::initializeGLResources(bool fullShadedRendering)
 			m_renderers.push_back(std::move(renderer));
 		}
 	}
+
 }
 
-void VerticesRenderer::render(const ndv::RenderContext& context)
+template <size_t Dim>
+void VerticesRenderer<Dim>::render(const ndv::RenderContext& context)
 {
 	if (m_renderers.empty())
 		return;
@@ -50,3 +53,7 @@ void VerticesRenderer::render(const ndv::RenderContext& context)
 			r->render(context);
 	}
 }
+
+template class VerticesRenderer<2>;
+template class VerticesRenderer<3>;
+template class VerticesRenderer<4>;

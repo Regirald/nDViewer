@@ -36,7 +36,7 @@
     <ClCompile Include="src\Renderer\RenderImplicitFunction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Renderer\RenderPolytope.cpp">
+    <ClCompile Include="src\Renderer\PolytopeRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer\VerticesRenderer.cpp">
@@ -95,7 +95,7 @@
     <ClInclude Include="include\view\Renderer\RenderImplicitFunction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\view\Renderer\RenderPolytope.h">
+    <ClInclude Include="include\view\Renderer\PolytopeRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\view\Renderer\VerticesRenderer.h">

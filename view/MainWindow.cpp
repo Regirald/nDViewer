@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent)
 	central->setLayout(hLayout);
 	setCentralWidget(central);
 
-	m_currentPolytope = std::make_unique<PolytopeGeometry3D>();
+	m_currentPolytope = std::make_unique<AbstractPolytopeGeometry>();
 	m_viewer->setPolytope(m_currentPolytope.get());
 
 	connect(m_paramsWidget->generateButton(), &QPushButton::clicked, this, [this]() {
@@ -32,8 +32,7 @@ MainWindow::MainWindow(QWidget* parent)
 void MainWindow::onGenerate(int a, int b, int c)
 {
 	std::vector<int> schlafli = { a, b, c };
-	PolytopeGeometry3D poly = RegularPolytopeGenerator::generateRegularPolytope(schlafli);
-	m_currentPolytope = std::make_unique<PolytopeGeometry3D>(poly);
+	m_currentPolytope.reset(RegularPolytopeGenerator::generateRegularPolytope(schlafli));
 	m_viewer->setPolytope(m_currentPolytope.get());
 	m_viewer->update();
 }

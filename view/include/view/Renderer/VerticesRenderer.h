@@ -8,15 +8,20 @@
 #include <memory>
 #include <vector>
 
-class VerticesRenderer : public Renderer
+class AbstractVerticesRenderer : public Renderer
+{
+};
+
+template <size_t Dim>
+class VerticesRenderer : public AbstractVerticesRenderer
 {
 public:
-	VerticesRenderer(PolytopeGeometry3D* poly) : m_poly(poly) {}
+	VerticesRenderer(PolytopeGeometry<Dim>* poly) : m_poly(poly) {}
 	void initializeGLResources(bool fullShadedRendering = true);
 	void render(const ndv::RenderContext& context) override;
 
 private:
-	PolytopeGeometry3D* m_poly = nullptr;
+	PolytopeGeometry<Dim>* m_poly = nullptr;
 	// Each renderer will own its PolytopeNode instance internally.
 	std::vector<std::unique_ptr<Renderer>> m_renderers;
 };

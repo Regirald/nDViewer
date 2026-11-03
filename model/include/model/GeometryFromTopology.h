@@ -13,9 +13,16 @@ using Matrix = Vec<Dim, Vec<Dim, float>>;
 template<size_t Dim>
 using Vector = Vec<Dim, float>;
 
-struct PolytopeGeometry3D
+
+struct AbstractPolytopeGeometry
 {
-    std::vector<Vec<3, float>> vertices;
+	virtual ~AbstractPolytopeGeometry() = default;
+};
+
+template <size_t Dim>
+struct PolytopeGeometry : public AbstractPolytopeGeometry
+{
+    std::vector<Vec<Dim, float>> vertices;
     std::vector<std::vector<int>> edges;
     std::vector<std::vector<int>> faces;
     std::vector<std::vector<int>> cells;
@@ -189,13 +196,13 @@ std::vector<Vec<Dim, float>> applyWord(
 }
 
 template<size_t Dim>
-PolytopeGeometry3D generateGeometry(
+PolytopeGeometry<Dim> generateGeometry(
     const Coxeter::CosetBFSData& bfsDataVertex,
     const Initializers<Dim>& initializers,
     const std::vector<Vec<Dim, float>>& mirrorNormals,
     const std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>& edgesAndFacesIndex)
 {
-    PolytopeGeometry3D poly;
+    PolytopeGeometry<Dim> poly;
 
     const size_t nbVertex = bfsDataVertex.representativeWord.size();
 

@@ -44,16 +44,16 @@ ndv::RenderContext& RenderingManager::context()
 	return m_context;
 }
 
-void RenderingManager::setPolytope(PolytopeGeometry3D* polytope)
+void RenderingManager::setPolytope(AbstractPolytopeGeometry* polytope)
 {
 	std::unique_ptr<Renderer>* renderer = getPolytopeRenderer();
 	if (renderer != nullptr)
 	{
-		*renderer = std::make_unique<RenderPolytope>(polytope);
+		*renderer = std::make_unique<PolytopeRendererProxy>(polytope);
 	}
 	else
 	{
-		renderContainer.push_back(std::make_unique<RenderPolytope>(polytope));
+		renderContainer.push_back(std::make_unique<PolytopeRendererProxy>(polytope));
 	}
 }
 
@@ -62,7 +62,7 @@ std::unique_ptr<Renderer>* RenderingManager::getPolytopeRenderer()
 {
 	for (auto& renderer : renderContainer)
 	{
-		RenderPolytope* polytopeRenderer = dynamic_cast<RenderPolytope*>(renderer.get());
+		PolytopeRendererProxy* polytopeRenderer = dynamic_cast<PolytopeRendererProxy*>(renderer.get());
 		if (polytopeRenderer != nullptr)
 		{
 			return &renderer;

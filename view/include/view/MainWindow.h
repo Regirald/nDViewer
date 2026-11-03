@@ -24,5 +24,5 @@ public:
 private:
 	ParamsWidget* m_paramsWidget = nullptr;
 	Viewer* m_viewer = nullptr;
-	std::unique_ptr<PolytopeGeometry3D> m_currentPolytope;
+	std::unique_ptr<AbstractPolytopeGeometry> m_currentPolytope;
 };

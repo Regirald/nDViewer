@@ -4,19 +4,22 @@
 using namespace Coxeter;
 
 
-PolytopeGeometry3D RegularPolytopeGenerator::generateRegularPolytope(std::vector<int>& schlafli)
+AbstractPolytopeGeometry* RegularPolytopeGenerator::generateRegularPolytope(std::vector<int>& schlafli)
 {
     const std::vector<int>& schlafli_simplified = RegularPolytopeGenerator::simplifySchlafli(schlafli);
     switch (schlafli_simplified.size() + 1)
     {
     case 2:
-        return RegularPolytopeGenerator::generateRegularPolytopeFromSimplifiedSchlafli<2>(schlafli_simplified);
+		return new PolytopeGeometry<2>(
+			generateRegularPolytopeFromSimplifiedSchlafli<2>(schlafli_simplified));
 
     case 3:
-        return RegularPolytopeGenerator::generateRegularPolytopeFromSimplifiedSchlafli<3>(schlafli_simplified);
+        return new PolytopeGeometry<3>(
+            generateRegularPolytopeFromSimplifiedSchlafli<3>(schlafli_simplified));
 
     case 4:
-        return RegularPolytopeGenerator::generateRegularPolytopeFromSimplifiedSchlafli<4>(schlafli_simplified);
+        return new PolytopeGeometry<4>(
+            generateRegularPolytopeFromSimplifiedSchlafli<4>(schlafli_simplified));
 
     default:
         throw std::runtime_error("Unsupported dimension");
@@ -24,7 +27,7 @@ PolytopeGeometry3D RegularPolytopeGenerator::generateRegularPolytope(std::vector
 }
 
 template<size_t Dim>
-PolytopeGeometry3D RegularPolytopeGenerator::generateRegularPolytopeFromSimplifiedSchlafli(const std::vector<int>& schlafli)
+PolytopeGeometry<Dim> RegularPolytopeGenerator::generateRegularPolytopeFromSimplifiedSchlafli(const std::vector<int>& schlafli)
 {
     Presentation Presentation = buildPresentation(schlafli);
     auto relators = buildRelators(Presentation);

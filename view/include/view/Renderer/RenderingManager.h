@@ -6,7 +6,7 @@
 #include "model/Mesh.h"
 #include "RenderMesh.h"
 #include "RenderImplicitFunction.h"
-#include "RenderPolytope.h"
+#include "PolytopeRenderer.h"
 
 template <size_t Dim>
 class Mesh;
@@ -29,7 +29,7 @@ public:
 	std::unique_ptr<Renderer>* getPolytopeRenderer();
 
 
-	void setPolytope(PolytopeGeometry3D* polytope);
+	void setPolytope(AbstractPolytopeGeometry* polytope);
 
 	void setBackground();
 	void setExampleTriangle();

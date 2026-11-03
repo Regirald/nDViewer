@@ -28,7 +28,7 @@ public:
     }
 
 public slots:
-    inline void setPolytope(PolytopeGeometry3D* polytope)
+    inline void setPolytope(AbstractPolytopeGeometry* polytope)
     {
         makeCurrent();
 
@@ -44,9 +44,9 @@ public slots:
     {
         renderingManager.context().fullShadedRendering = enabled;
 
-        RenderPolytope* polytopeRenderer = dynamic_cast<RenderPolytope*>(renderingManager.getPolytopeRenderer()->get());
+        PolytopeRendererProxy* polytopeRenderer = dynamic_cast<PolytopeRendererProxy*>(renderingManager.getPolytopeRenderer()->get());
         if (polytopeRenderer)
-		    polytopeRenderer->m_initialized = false;
+		    polytopeRenderer->m_polytopeRenderer->m_initialized = false;
 
     }
 
