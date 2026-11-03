@@ -30,7 +30,10 @@ void RenderPolytope::initializeGLResources(bool fullShadedRendering)
 
 	m_verticesRenderer->initializeGLResources(fullShadedRendering);
 	m_edgesRenderer->initializeGLResources(fullShadedRendering);
-	m_facesRenderer->initializeGLResources();
+	if (fullShadedRendering)
+	{
+		m_facesRenderer->initializeGLResources();
+	}
 
 	m_initialized = true;
 }

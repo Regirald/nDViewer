@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ImplicitFunction.h"
+#include "PolytopeShader.h"
 
 #include <vector>
 #include <string>
@@ -156,7 +157,7 @@ public:
 		for (size_t j = 0; j < m_faceVertices.size(); ++j)
 			mutable_u_vertices[j] = ctx.makeUniformUnique("u_face_vertex", "vec3");
 
-		mutable_u_normal = ctx.makeUniform("u_face_normal", "vec3");
+		mutable_u_normal = "u_face_normal";
 
 		ctx.append("float " + fname + "(vec3 p) {");
 		ctx.append("    vec3 n = normalize(" + mutable_u_normal + ");");
@@ -233,190 +234,8 @@ public:
 	const std::string getFragmentShader() const override
 	{
 		GLSLContext ctx;
-
 		std::string rootFunc = buildGLSL(ctx);
-
-		std::string sdfEntry =
-			"float sampleSDF(vec3 p)\n"
-			"{\n"
-			"    return " + rootFunc + "(p);\n"
-			"}\n";
-
-
-		const char* part1 = R"(
-		#version 330 core
-
-		in vec2 v_uv;
-		out vec4 FragColor;
-
-		uniform vec3 u_cameraPos;
-		uniform vec3 u_lightDir;
-		uniform mat4 u_view;
-		uniform mat4 u_invView;
-		uniform mat4 u_projection;
-		uniform mat4 u_invProjection;
-
-		uniform vec3 u_boundsMin;
-		uniform vec3 u_boundsMax;
-
-		uniform float u_maxDistance;
-		uniform int u_maxSteps;
-		uniform float u_epsilon;
-
-
-		// -------------------------
-		// AABB intersection
-		// -------------------------
-
-		bool intersectAABB(
-			vec3 ro,
-			vec3 rd,
-			out float tmin,
-			out float tmax)
-		{
-			vec3 invDir = 1.0 / rd;
-
-			vec3 t0 = (u_boundsMin - ro) * invDir;
-			vec3 t1 = (u_boundsMax - ro) * invDir;
-
-			vec3 tsmaller = min(t0, t1);
-			vec3 tbigger  = max(t0, t1);
-
-			tmin = max(
-				max(tsmaller.x, tsmaller.y),
-				tsmaller.z);
-
-			tmax = min(
-				min(tbigger.x, tbigger.y),
-				tbigger.z);
-
-			return tmax > max(tmin, 0.0);
-		}
-)";
-
-
-		const char* part2 = R"(
-
-		void main()
-		{
-			vec2 ndc = v_uv * 2.0 - 1.0;
-
-			vec4 rayClip =
-				vec4(ndc, -1.0, 1.0);
-
-			vec4 rayView =
-				u_invProjection * rayClip;
-
-			rayView /= rayView.w;
-
-			vec3 rayDir =
-				normalize(
-					(u_invView *
-					 vec4(rayView.xyz, 0.0)).xyz);
-
-			vec3 rayOrigin =
-				u_cameraPos;
-
-
-			float tmin;
-			float tmax;
-
-			if (!intersectAABB(
-					rayOrigin,
-					rayDir,
-					tmin,
-					tmax))
-			{
-				discard;
-			}
-
-
-			float t =
-				max(tmin, 0.0);
-
-
-			for (int i = 0;
-				 i < u_maxSteps;
-				 ++i)
-			{
-				vec3 p =
-					rayOrigin + t * rayDir;
-
-				float d =
-					sampleSDF(p);
-
-
-				if (d < u_epsilon)
-				{
-					vec3 n = normalize(u_face_normal);
-					vec3 v = normalize(-rayDir);
-					vec3 l = normalize(u_lightDir);
-
-					vec3 r = reflect(-v, n);
-
-					float facingLight = max(dot(r, l), 0.0);
-
-					// Broad reflection
-					float broad = pow(facingLight, 8.0);
-
-					// Sharp mirror glint
-					float sharp = pow(facingLight, 64.0);
-
-					vec3 baseColor = vec3(0.025, 0.08, 0.50);
-					vec3 reflectedColor = vec3(0.55, 0.72, 1.0);
-
-					vec3 color = baseColor;
-
-					// Broad reflected light
-					color += reflectedColor * broad * 0.45;
-
-					// Small intense glint
-					color += vec3(0.9, 0.95, 1.0) * sharp * 0.5;
-
-					FragColor = vec4(color, 0.5);
-
-					// -------------------------
-					// Depth write
-					// -------------------------
-
-					vec4 clip =
-						u_projection *
-						u_view *
-						vec4(p, 1.0);
-
-					float ndcDepth =
-						clip.z / clip.w;
-
-					gl_FragDepth =
-						ndcDepth * 0.5 + 0.5;
-
-					return;
-				}
-
-
-				// The distance is unsigned, so this is
-				// intentionally NOT simply "t += d".
-				t += max(d * 0.7, 0.001);
-
-
-				if (t > tmax ||
-					t > u_maxDistance)
-				{
-					break;
-				}
-			}
-
-			discard;
-		}
-)";
-
-
-		return
-			std::string(part1)
-			+ ctx.uniforms
-			+ ctx.code
-			+ sdfEntry
-			+ std::string(part2);
+		return buildPolytopeFragmentShader(ctx, rootFunc, PolytopeShaderStyle::Face);
 	}
 
 

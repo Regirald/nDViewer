@@ -144,6 +144,8 @@
     <ClInclude Include="include\model\CoxeterPresentation.h" />
     <ClInclude Include="include\model\PolytopeFace.h" />
     <ClInclude Include="include\model\PolytopeNode.h" />
+    <ClInclude Include="include\model\PolytopeShader.h" />
+    <None Include="include\model\PolytopeShader.glsl" />
     <ClInclude Include="include\model\spheres.h" />
     <ClInclude Include="include\model\TestFile.h" />
     <ClInclude Include="include\model\ToddCoxeter.h" />
