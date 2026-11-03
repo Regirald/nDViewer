@@ -57,6 +57,9 @@
     <ClCompile Include="src\Renderer\EdgesRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\view\Camera\Camera.h">

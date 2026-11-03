@@ -164,6 +164,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="src\Camera\Camera.cpp" />
     <ClCompile Include="src\Renderer\EdgesRenderer.cpp" />
     <ClCompile Include="src\Renderer\FacesRenderer.cpp" />
