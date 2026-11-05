@@ -77,5 +77,11 @@
     <None Include="include\model\PolytopeShader.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <ClInclude Include="include\model\VerticeSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="blabla.glsl">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

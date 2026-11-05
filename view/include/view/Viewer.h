@@ -45,7 +45,7 @@ public slots:
         renderingManager.context().fullShadedRendering = enabled;
 
         PolytopeRendererProxy* polytopeRenderer = dynamic_cast<PolytopeRendererProxy*>(renderingManager.getPolytopeRenderer()->get());
-        if (polytopeRenderer)
+        if (polytopeRenderer && polytopeRenderer->m_polytopeRenderer)
 		    polytopeRenderer->m_polytopeRenderer->m_initialized = false;
 
     }

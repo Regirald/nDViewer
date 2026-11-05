@@ -49,8 +49,9 @@ public:
     };
 
     explicit PolytopeAccelerationStructure(
-        const PolytopeGeometry<Dim>* polytope)
-        : m_polytope(polytope)
+        const PolytopeGeometry<Dim>* polytope,
+        Scalar primitivePadding = 0.0f)
+        : m_polytope(polytope), m_primitivePadding(primitivePadding)
     {
     }
 
@@ -74,7 +75,7 @@ public:
             static_cast<uint32_t>(m_primitives.size()));
     }
 
-    const std::vector<Node>& nodes() const
+    std::vector<Node>& nodes()
     {
         return m_nodes;
     }
@@ -97,6 +98,7 @@ public:
 private:
 
     const PolytopeGeometry<Dim>* m_polytope = nullptr;
+    Scalar m_primitivePadding = 0.0f;
 
     std::vector<Node> m_nodes;
     std::vector<Primitive> m_primitives;
@@ -153,6 +155,12 @@ private:
 
             if (validVertexCount == 0)
                 continue;
+
+            for (size_t d = 0; d < Dim; ++d)
+            {
+                primitive.bounds.min[d] -= m_primitivePadding;
+                primitive.bounds.max[d] += m_primitivePadding;
+            }
 
             primitive.centroid /=
                 static_cast<Scalar>(validVertexCount);
@@ -322,3 +330,9 @@ private:
         return nodeIndex;
     }
 };
+
+
+
+template class PolytopeAccelerationStructure<2>;
+template class PolytopeAccelerationStructure<3>;
+template class PolytopeAccelerationStructure<4>;

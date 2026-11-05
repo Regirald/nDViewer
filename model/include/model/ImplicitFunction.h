@@ -43,6 +43,8 @@ class ImplicitFunction {
 public:
     using Point = Vec<Dim, float>;
 
+    virtual ~ImplicitFunction() = default;
+
     virtual float evaluateSDF(const Point& p) const = 0;
 
     virtual const std::string getFragmentShader() const;

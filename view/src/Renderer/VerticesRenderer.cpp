@@ -1,57 +1,36 @@
 #include "VerticesRenderer.h"
-#include <QOpenGLContext>
-#include <QOpenGLExtraFunctions>
+#include "AccelerationStructureBVH.h"
+#include "model/VerticeSet.h"
+#include <utility>
+#include <vector>
 
 template <size_t Dim>
 void VerticesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 {
-	if (!m_poly)
+	m_renderer.reset();
+	if (!m_poly || m_poly->vertices.empty())
 		return;
 
-	// Clear any previous renderers
-	m_renderers.clear();
+	constexpr float radius = 0.25f;
 
-// Create one renderer per vertex; each renderer owns its PolytopeNode
-	for (const auto& v : m_poly->vertices)
-	{
-		if (fullShadedRendering)
-		{
-			PolytopeNode::Point center = v;
-			float r = 0.25f;
+	PolytopeAccelerationStructure<Dim> accelerationStructure(m_poly, radius);
+	accelerationStructure.build();
 
-			auto node = std::make_unique<PolytopeNode>(center, r);
-			auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(node));
-			renderer->initializeGLResources();
+	std::vector<uint32_t> primitiveIndices;
+	primitiveIndices.reserve(accelerationStructure.primitives().size());
+	for (const auto& primitive : accelerationStructure.primitives())
+		primitiveIndices.push_back(primitive.cellIndex);
 
-			m_renderers.push_back(std::move(renderer));
-		}
-
-		else
-		{
-			PolytopeNodeLight::Point center = v;
-			float r = 0.25f;
-
-			auto node = PolytopeNodeLight(center, r);
-			auto renderer = std::make_unique<PolytopeNodeLightRenderer>(node);
-			renderer->initializeGLResources();
-
-			m_renderers.push_back(std::move(renderer));
-		}
-	}
-
+	auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, accelerationStructure.nodes(), std::move(primitiveIndices), radius);
+	m_renderer = std::make_unique<RenderImplicitFunction<Dim>>(std::move(verticeSet));
+	m_renderer->initializeGLResources();
 }
 
 template <size_t Dim>
 void VerticesRenderer<Dim>::render(const ndv::RenderContext& context)
 {
-	if (m_renderers.empty())
-		return;
-
-	for (auto& r : m_renderers)
-	{
-		if (r)
-			r->render(context);
-	}
+	if (m_renderer)
+		m_renderer->render(context);
 }
 
 template class VerticesRenderer<2>;
