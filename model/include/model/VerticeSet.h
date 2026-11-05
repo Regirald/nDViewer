@@ -39,27 +39,13 @@ public:
 		if (!this->nodes.empty())
 		{
 			const Node& root = this->nodes.front();
-			Vec<3, float> rootBoundsMin = root.bounds.min; //down casting to 3D for bounds carful it scale the bounds!
-			Vec<3, float> rootBoundsMax = root.bounds.max;
+			Point rootBoundsMin = root.bounds.min;
+			Point rootBoundsMax = root.bounds.max;
 
 			ImplicitFunction<Dim>::m_boundsMin = QVector3D(rootBoundsMin[0], rootBoundsMin[1], rootBoundsMin[2]);
 			ImplicitFunction<Dim>::m_boundsMax = QVector3D(rootBoundsMax[0], rootBoundsMax[1], rootBoundsMax[2]);
 		}
-		else if (!this->vertices.empty())
-		{
-			Vec<3, float> minimum = this->vertices.front();
-			Vec<3, float> maximum = this->vertices.front();
-			for (const Vec<3, float>& vertex : this->vertices)
-			{
-				for (size_t axis = 0; axis < 3; ++axis)
-				{
-					minimum[axis] = std::min(minimum[axis], vertex[axis] - radius);
-					maximum[axis] = std::max(maximum[axis], vertex[axis] + radius);
-				}
-			}
-			ImplicitFunction<Dim>::m_boundsMin = QVector3D(minimum[0], minimum[1], minimum[2]);
-			ImplicitFunction<Dim>::m_boundsMax = QVector3D(maximum[0], maximum[1], maximum[2]);
-		}
+
 
 		packBVHData();
 	}
