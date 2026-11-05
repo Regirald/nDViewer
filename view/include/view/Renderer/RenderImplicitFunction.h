@@ -13,8 +13,6 @@ public:
 	~RenderImplicitFunction();
 
 	void initializeGLResources();
-	void generateSDF();
-	void uploadSDF(const std::vector<float>& data);
 	void render(const ndv::RenderContext& context) override;
 
 	std::unique_ptr<ImplicitFunction<Dim>> m_implicitFunction;
