@@ -19,21 +19,20 @@ uniform float u_maxDistance;
 uniform int u_maxSteps;
 uniform float u_epsilon;
 
-#define POLYTOPE_VERTEX_BVH
+uniform samplerBuffer u_bvhData;uniform int u_bvhNodeCount;uniform int u_bvhVertexOffset;uniform int u_bvhPrimitiveOffset;
 
-#ifdef POLYTOPE_VERTEX_BVH
-uniform samplerBuffer u_bvhData;
-uniform int u_bvhNodeCount;
-uniform int u_bvhVertexOffset;
-uniform int u_bvhPrimitiveOffset;
-#endif
-float bvhBoundsDistance(vec3 p, int nodeIndex) {
-    vec3 boundsMin = texelFetch(u_bvhData, nodeIndex * 3).xyz;
-    vec3 boundsMax = texelFetch(u_bvhData, nodeIndex * 3 + 1).xyz;
-    vec3 outside = max(max(boundsMin - p, p - boundsMax), vec3(0.0));
-    return length(outside) - texelFetch(u_bvhData, nodeIndex * 3).w;
+float bvhBoundsDistance(vec4 p, int nodeOffset) {
+    vec4 boundsMin;
+    vec4 boundsMax;
+    for (int i = 0; i < 4; ++i) {
+        boundsMin[i] = texelFetch(u_bvhData, nodeOffset + i).r;
+        boundsMax[i] = texelFetch(u_bvhData, nodeOffset + 4 + i).r;
+    }
+    vec4 outside = max(max(boundsMin - p, p - boundsMax), vec4(0.0));
+    float nodeRadius = texelFetch(u_bvhData, nodeOffset + 12).r;
+    return length(outside) - nodeRadius;
 }
-float sampleVertexBVH(vec3 p) {
+float sampleVertexBVH(vec4 p) {
     if (u_bvhNodeCount == 0) return 1e20;
     int stack[64];
     int stackSize = 1;
@@ -43,38 +42,43 @@ float sampleVertexBVH(vec3 p) {
     while (stackSize > 0 && visited < u_bvhNodeCount) {
         int nodeIndex = stack[--stackSize];
         ++visited;
-        if (bvhBoundsDistance(p, nodeIndex) > bestDistance) continue;
-        vec4 metadata = texelFetch(u_bvhData, nodeIndex * 3 + 2);
-        int primitiveCount = int(metadata.w);
+        int nodeOffset = nodeIndex * 13;
+        if (bvhBoundsDistance(p, nodeOffset) > bestDistance) continue;
+        int metadataOffset = nodeOffset + 8;
+        int leftChild = int(texelFetch(u_bvhData, metadataOffset).r);
+        int rightChild = int(texelFetch(u_bvhData, metadataOffset + 1).r);
+        int firstPrimitive = int(texelFetch(u_bvhData, metadataOffset + 2).r);
+        int primitiveCount = int(texelFetch(u_bvhData, metadataOffset + 3).r);
         if (primitiveCount > 0) {
-            int firstPrimitive = int(metadata.z);
             for (int i = 0; i < primitiveCount; ++i) {
-                int vertexIndex = int(texelFetch(u_bvhData, u_bvhPrimitiveOffset + firstPrimitive + i).x);
-                vec4 vertex = texelFetch(u_bvhData, u_bvhVertexOffset + vertexIndex);
-                bestDistance = min(bestDistance, length(p - vertex.xyz) - vertex.w);
+                int primitiveOffset = u_bvhPrimitiveOffset + firstPrimitive + i;
+                int vertexIndex = int(texelFetch(u_bvhData, primitiveOffset).r);
+                int vertexOffset = u_bvhVertexOffset + vertexIndex * 5;
+                vec4 vertex;
+                for (int i = 0; i < 4; ++i)
+                    vertex[i] = texelFetch(u_bvhData, vertexOffset + i).r;
+                float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;
+                bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);
             }
         } else {
-            int leftChild = int(metadata.x);
-            int rightChild = int(metadata.y);
-            if (leftChild >= 0 && bvhBoundsDistance(p, leftChild) <= bestDistance && stackSize < 64) stack[stackSize++] = leftChild;
-            if (rightChild >= 0 && bvhBoundsDistance(p, rightChild) <= bestDistance && stackSize < 64) stack[stackSize++] = rightChild;
+            int leftOffset = leftChild * 13;
+            int rightOffset = rightChild * 13;
+            if (leftChild >= 0 && bvhBoundsDistance(p, leftOffset) <= bestDistance && stackSize < 64)
+                stack[stackSize++] = leftChild;
+            if (rightChild >= 0 && bvhBoundsDistance(p, rightOffset) <= bestDistance && stackSize < 64)
+                stack[stackSize++] = rightChild;
         }
     }
     return bestDistance;
 }
 
-#ifdef POLYTOPE_VERTEX_BVH
-float sampleSDF(vec3 p)
-{
-	return sampleVertexBVH(p);
-}
-#else
+
 float sampleSDF(vec3 p)
 {
     return sampleVertexBVH(p);
 }
 
-#endif
+
 
 bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
 {

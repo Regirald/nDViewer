@@ -15,14 +15,25 @@ enum class PolytopeShaderStyle
 inline std::string buildPolytopeFragmentShader(
 	GLSLContext& ctx,
 	const std::string& rootFunc,
-	PolytopeShaderStyle style)
+	PolytopeShaderStyle style, int Dim = 3)
 {
-	std::string shader =
+	std::string shader = 
 #include "PolytopeShader.glsl"
-	;
+		;
+
+	std::string vectorType;
+
+	switch (Dim)
+	{
+	case 2: vectorType = "vec2"; break;
+	case 3: vectorType = "vec3"; break;
+	case 4: vectorType = "vec4"; break;
+	default: throw std::invalid_argument("Unsupported dimension");
+	}
+
 
 	const std::string sdfEntry =
-		"float sampleSDF(vec3 p)\n"
+		"float sampleSDF(/*__VECTOR_DIM__*/ p)\n"
 		"{\n"
 		"    return " + rootFunc + "(p);\n"
 		"}\n";
@@ -55,6 +66,7 @@ inline std::string buildPolytopeFragmentShader(
 	replaceMarker("/*__POLYTOPE_SDF_CODE__*/", ctx.code);
 	replaceMarker("/*__POLYTOPE_SDF_ENTRY__*/", sdfEntry);
 	replaceMarker("/*__POLYTOPE_HIT_SHADER__*/", shadingFunction);
+	replaceMarker("/*__VECTOR_DIM__*/", vectorType);
 
 	return shader;
 }

@@ -20,21 +20,11 @@ uniform int u_maxSteps;
 uniform float u_epsilon;
 
 /*__POLYTOPE_UNIFORMS__*/
-#ifdef POLYTOPE_VERTEX_BVH
-uniform samplerBuffer u_bvhData;
-uniform int u_bvhNodeCount;
-uniform int u_bvhVertexOffset;
-uniform int u_bvhPrimitiveOffset;
-#endif
+
 /*__POLYTOPE_SDF_CODE__*/
-#ifdef POLYTOPE_VERTEX_BVH
-float sampleSDF(vec3 p)
-{
-	return sampleVertexBVH(p);
-}
-#else
+
 /*__POLYTOPE_SDF_ENTRY__*/
-#endif
+
 
 bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
 {
