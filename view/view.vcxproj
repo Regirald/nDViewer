@@ -164,7 +164,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\view\AccelerationStructureBVH.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="src\Camera\Camera.cpp" />
     <ClCompile Include="src\Renderer\EdgesRenderer.cpp" />
