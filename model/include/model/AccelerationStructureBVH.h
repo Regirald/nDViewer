@@ -1,18 +1,14 @@
-
 #pragma once
 
 #include <vector>
-#include <array>
 #include <cstdint>
 #include <limits>
 #include <algorithm>
-#include <numeric>
-#include <stdexcept>
 
 #include "model/GeometryFromTopology.h"
 
 template <size_t Dim>
-class PolytopeAccelerationStructure
+class AccelerationStructureBVH
 {
 public:
 
@@ -27,7 +23,7 @@ public:
 
     struct Primitive
     {
-        uint32_t cellIndex;
+        uint32_t index;
         AABB bounds;
         Vector centroid;
     };
@@ -48,7 +44,7 @@ public:
         }
     };
 
-    explicit PolytopeAccelerationStructure(
+    explicit AccelerationStructureBVH(
         const PolytopeGeometry<Dim>* polytope,
         Scalar primitivePadding = 0.0f)
         : m_polytope(polytope), m_primitivePadding(primitivePadding)
@@ -75,7 +71,7 @@ public:
             static_cast<uint32_t>(m_primitives.size()));
     }
 
-    std::vector<Node>& nodes()
+    const std::vector<Node>& nodes() const
     {
         return m_nodes;
     }
@@ -114,56 +110,29 @@ private:
     void buildPrimitives()
     {
         const auto& vertices = m_polytope->vertices;
-        const auto& cells = m_polytope->cells;
 
-        m_primitives.reserve(cells.size());
+        m_primitives.reserve(vertices.size());
 
-        for (uint32_t cellIndex = 0;
-            cellIndex < cells.size();
-            ++cellIndex)
+        for (uint32_t index = 0;
+            index < vertices.size();
+            ++index)
         {
-            const auto& cell = cells[cellIndex];
-
-            if (cell.empty())
-                continue;
+            const auto& vertex = vertices[index];
 
             Primitive primitive;
-            primitive.cellIndex = cellIndex;
+            primitive.index = index;
 
             initializeAABB(primitive.bounds);
 
-            primitive.centroid = Vector{};
+            expandAABB(primitive.bounds, vertex);
 
-            uint32_t validVertexCount = 0;
-
-            for (int vertexIndex : cell)
-            {
-                if (vertexIndex < 0 ||
-                    static_cast<size_t>(vertexIndex) >= vertices.size())
-                {
-                    throw std::runtime_error(
-                        "Invalid vertex index in polytope cell");
-                }
-
-                const Vector& vertex = vertices[vertexIndex];
-
-                expandAABB(primitive.bounds, vertex);
-
-                primitive.centroid += vertex;
-                ++validVertexCount;
-            }
-
-            if (validVertexCount == 0)
-                continue;
+            primitive.centroid = vertex;
 
             for (size_t d = 0; d < Dim; ++d)
             {
                 primitive.bounds.min[d] -= m_primitivePadding;
                 primitive.bounds.max[d] += m_primitivePadding;
             }
-
-            primitive.centroid /=
-                static_cast<Scalar>(validVertexCount);
 
             m_primitives.push_back(primitive);
         }
@@ -333,6 +302,6 @@ private:
 
 
 
-template class PolytopeAccelerationStructure<2>;
-template class PolytopeAccelerationStructure<3>;
-template class PolytopeAccelerationStructure<4>;
+template class AccelerationStructureBVH<2>;
+template class AccelerationStructureBVH<3>;
+template class AccelerationStructureBVH<4>;

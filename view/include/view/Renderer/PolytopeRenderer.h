@@ -6,7 +6,7 @@
 #include "Renderer/EdgesRenderer.h"
 #include "Renderer/FacesRenderer.h"
 #include "model/GeometryFromTopology.h"
-#include "AccelerationStructureBVH.h"
+#include "model/AccelerationStructureBVH.h"
 
 
 class AbstractPolytopeRenderer : public Renderer
@@ -54,5 +54,5 @@ public:
 	std::unique_ptr<EdgesRenderer<Dim>> m_edgesRenderer;
 	std::unique_ptr<FacesRenderer<Dim>> m_facesRenderer;
 
-	std::unique_ptr<PolytopeAccelerationStructure<Dim>> m_accelerationStructure;
+	std::unique_ptr<AccelerationStructureBVH<Dim>> m_accelerationStructure;
 };

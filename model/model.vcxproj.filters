@@ -83,5 +83,8 @@
     <ClInclude Include="blabla.glsl">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\AccelerationStructureBVH.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

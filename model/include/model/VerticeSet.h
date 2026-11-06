@@ -22,18 +22,19 @@ class VerticeSet : public ImplicitFunction<Dim>
 {
 public:
 	using Point = typename ImplicitFunction<Dim>::Point;
-	using Node = typename PolytopeAccelerationStructure<Dim>::Node;
+	using Node = typename AccelerationStructureBVH<Dim>::Node;
+	using Primitive = typename AccelerationStructureBVH<Dim>::Primitive;
 
 
 
 	VerticeSet(
 		std::vector<Point> vertices,
 		std::vector<Node> nodes,
-		std::vector<uint32_t> primitiveIndices,
+		std::vector<Primitive> primitives,
 		float radius)
 		: vertices(vertices),
 		  nodes(nodes),
-		  primitiveIndices(primitiveIndices),
+		  primitives(primitives),
 		  radius(radius)
 	{
 		if (!this->nodes.empty())
@@ -148,7 +149,7 @@ public:
 
 	std::vector<Point> vertices;
 	std::vector<Node> nodes;
-	std::vector<uint32_t> primitiveIndices;
+	std::vector<Primitive> primitives;
 	float radius;
 
 private:
@@ -158,7 +159,7 @@ private:
 
 	void packBVHData()
 	{
-		m_packedData.reserve(nodes.size() * 12 + vertices.size() * 4 + primitiveIndices.size() * 4);
+		m_packedData.reserve(nodes.size() * 12 + vertices.size() * 4 + primitives.size() * 4);
 		const auto appendTexel = [this](float x, float y, float z, float w)
 		{
 			m_packedData.insert(m_packedData.end(), { x, y, z, w });
@@ -178,8 +179,8 @@ private:
 		for (const Point& vertex : vertices)
 			appendTexel(vertex[0], vertex[1], vertex[2], radius);
 
-		for (uint32_t primitiveIndex : primitiveIndices)
-			appendTexel(static_cast<float>(primitiveIndex), 0.0f, 0.0f, 0.0f);
+		for (const Primitive& primitive : primitives)
+			appendTexel(static_cast<float>(primitive.index), 0.0f, 0.0f, 0.0f);
 	}
 
 	void ensureBVHBuffer() const

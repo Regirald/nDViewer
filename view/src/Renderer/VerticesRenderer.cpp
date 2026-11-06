@@ -1,5 +1,5 @@
 #include "VerticesRenderer.h"
-#include "AccelerationStructureBVH.h"
+#include "model/AccelerationStructureBVH.h"
 #include "model/VerticeSet.h"
 #include <utility>
 #include <vector>
@@ -13,15 +13,11 @@ void VerticesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 
 	constexpr float radius = 0.25f;
 
-	PolytopeAccelerationStructure<Dim> accelerationStructure(m_poly, radius);
+	AccelerationStructureBVH<Dim> accelerationStructure(m_poly, radius);
 	accelerationStructure.build();
 
-	std::vector<uint32_t> primitiveIndices;
-	primitiveIndices.reserve(accelerationStructure.primitives().size());
-	for (const auto& primitive : accelerationStructure.primitives())
-		primitiveIndices.push_back(primitive.cellIndex);
 
-	auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, accelerationStructure.nodes(), std::move(primitiveIndices), radius);
+	auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, accelerationStructure.nodes(), accelerationStructure.primitives(), radius);
 	m_renderer = std::make_unique<RenderImplicitFunction<Dim>>(std::move(verticeSet));
 	m_renderer->initializeGLResources();
 }

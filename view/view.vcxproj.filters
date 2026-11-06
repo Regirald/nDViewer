@@ -116,9 +116,6 @@
     <ClInclude Include="include\view\Renderer\PolytopeEdgeLightRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\view\AccelerationStructureBVH.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\view\ParamsWidget.h">

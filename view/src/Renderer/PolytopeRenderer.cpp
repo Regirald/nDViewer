@@ -97,7 +97,7 @@ void PolytopeRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 		m_facesRenderer->initializeGLResources();
 	}
 
-	m_accelerationStructure = std::make_unique<PolytopeAccelerationStructure<Dim>>(m_polytope);
+	m_accelerationStructure = std::make_unique<AccelerationStructureBVH<Dim>>(m_polytope, 0.25f);
 	m_accelerationStructure->build();
 
 	m_initialized = true;
