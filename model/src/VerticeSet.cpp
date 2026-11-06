@@ -23,8 +23,8 @@ VerticeSet<Dim>::VerticeSet(
 			rootBoundsMax[i] = root.bounds.max[i];
 		}
 
-		ImplicitFunction<Dim>::m_boundsMin = rootBoundsMin;
-		ImplicitFunction<Dim>::m_boundsMax = rootBoundsMax;
+		ImplicitFunction<Dim>::m_boundsMin = rootBoundsMin * 4;
+		ImplicitFunction<Dim>::m_boundsMax = rootBoundsMax * 4;
 	}
 
 	packBVHData();
@@ -102,7 +102,7 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 	ctx.append("	int vertexIndex = u_primitiveToutchedIndex;");
 
 	ctx.append("	int vertexOffset = vertexIndex * 5;");
-	ctx.append("	vec4 vertex = vec4(		texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);");
+	ctx.append("	vec4 vertex = vec4(texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);");
 	ctx.append("	vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
 	ctx.append("	float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;");
 	ctx.append("	bestDistance = min(bestDistance, length(p - vertex3d) - vertexRadius);");
