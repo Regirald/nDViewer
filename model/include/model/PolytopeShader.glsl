@@ -19,22 +19,15 @@ uniform float u_maxDistance;
 uniform int u_maxSteps;
 uniform float u_epsilon;
 
+int u_primitiveToutchedIndex = 0;
+
+
 /*__POLYTOPE_UNIFORMS__*/
-#ifdef POLYTOPE_VERTEX_BVH
-uniform samplerBuffer u_bvhData;
-uniform int u_bvhNodeCount;
-uniform int u_bvhVertexOffset;
-uniform int u_bvhPrimitiveOffset;
-#endif
+
 /*__POLYTOPE_SDF_CODE__*/
-#ifdef POLYTOPE_VERTEX_BVH
-float sampleSDF(vec3 p)
-{
-	return sampleVertexBVH(p);
-}
-#else
+
 /*__POLYTOPE_SDF_ENTRY__*/
-#endif
+
 
 bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
 {
@@ -56,9 +49,9 @@ vec3 estimateNormal(vec3 p)
 	float e = 0.002;
 
 	return normalize(vec3(
-		sampleSDF(p + vec3(e, 0, 0)) - sampleSDF(p - vec3(e, 0, 0)),
-		sampleSDF(p + vec3(0, e, 0)) - sampleSDF(p - vec3(0, e, 0)),
-		sampleSDF(p + vec3(0, 0, e)) - sampleSDF(p - vec3(0, 0, e))
+		SDFonPrimitive(p + vec3(e, 0, 0)) - SDFonPrimitive(p - vec3(e, 0, 0)),
+		SDFonPrimitive(p + vec3(0, e, 0)) - SDFonPrimitive(p - vec3(0, e, 0)),
+		SDFonPrimitive(p + vec3(0, 0, e)) - SDFonPrimitive(p - vec3(0, 0, e))
 	));
 }
 

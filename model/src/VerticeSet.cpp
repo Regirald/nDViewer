@@ -64,33 +64,48 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 {
 	const std::string vectorType = "vec" + std::to_string(Dim);
 	const std::string dim = std::to_string(Dim);
-	const std::string functionName = "sampleVertexBVH";
+	const std::string functionName = "sampleVertexBruteForce";
 
-	ctx.uniforms.append("uniform samplerBuffer u_bvhData;");
-	ctx.uniforms.append("uniform int u_bvhNodeCount;");
-	ctx.uniforms.append("uniform int u_bvhVertexCount;");
-	ctx.uniforms.append("uniform int u_bvhVertexOffset;");
-	ctx.uniforms.append("uniform int u_bvhPrimitiveOffset;");
+	ctx.uniforms.append("uniform samplerBuffer u_bvhData;\n");
+	ctx.uniforms.append("uniform int u_bvhVertexCount;\n");
+
 
 	// BVH bounds distance.
 
 	// Main BVH traversal.
 
-	ctx.append("float " + functionName + "(" + vectorType + " p) {");
+	ctx.append("float " + functionName + "(vec3 p) {");
 
 	ctx.append("	float bestDistance = 1e10;");
 	ctx.append("	for (int vertexIndex = 0; vertexIndex < u_bvhVertexCount; ++vertexIndex)");
 	ctx.append("	{");
 
-	ctx.append("		int vertexOffset = u_bvhVertexOffset + vertexIndex * " + std::to_string(Dim + 1) + ";");
-	ctx.append("		" + vectorType + " vertex;");
-	ctx.append("		for (int i = 0; i < " + dim + "; ++i)");
-	ctx.append("			{");
-	ctx.append("				vertex[i] = texelFetch(u_bvhData, vertexOffset + i).r;");
-	ctx.append("				float vertexRadius = texelFetch(u_bvhData, vertexOffset + " + dim + ").r;");
-	ctx.append("				bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);");
-	ctx.append("		    }");
+	ctx.append("		int vertexOffset = vertexIndex * 5;");
+	ctx.append("		vec4 vertex = vec4(		texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);");
+	ctx.append("		vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
+	ctx.append("		float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;");
+	ctx.append("		float newDistance = length(p - vertex3d) - vertexRadius;");
+	ctx.append("		if(newDistance < bestDistance)");
+	ctx.append("		{");
+	ctx.append("			u_primitiveToutchedIndex = vertexIndex;");
+	ctx.append("			bestDistance = newDistance;");
+	ctx.append("		}");
 	ctx.append("	}");
+
+	ctx.append("    return bestDistance;");
+	ctx.append("}");
+
+
+	ctx.append("float SDFonPrimitive(vec3 p) {");
+
+	ctx.append("	float bestDistance = 1e10;");
+	ctx.append("	int vertexIndex = u_primitiveToutchedIndex;");
+
+	ctx.append("	int vertexOffset = vertexIndex * 5;");
+	ctx.append("	vec4 vertex = vec4(		texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);");
+	ctx.append("	vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
+	ctx.append("	float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;");
+	ctx.append("	bestDistance = min(bestDistance, length(p - vertex3d) - vertexRadius);");
 
 	ctx.append("    return bestDistance;");
 	ctx.append("}");
@@ -113,10 +128,7 @@ void VerticeSet<Dim>::setGLUniforms(QOpenGLShaderProgram& program) const
 		gl->glActiveTexture(GL_TEXTURE0);
 	}
 	program.setUniformValue("u_bvhData", textureUnit);
-	program.setUniformValue("u_bvhNodeCount", static_cast<int>(nodes.size()));
-	program.setUniformValue("u_bvhVertexCount", static_cast<int>(nodes.size() * (Dim * 2 + 5)));
-	program.setUniformValue("u_bvhVertexOffset", static_cast<int>(nodes.size() * (Dim * 2 + 5)));
-	program.setUniformValue("u_bvhPrimitiveOffset", static_cast<int>(nodes.size() * (Dim * 2 + 5) + vertices.size() * (Dim + 1)));
+	program.setUniformValue("u_bvhVertexCount", static_cast<int>(vertices.size()));
 }
 
 template <size_t Dim>
@@ -132,10 +144,7 @@ void VerticeSet<Dim>::packBVHData()
 {
 	m_packedData.clear();
 
-	m_packedData.reserve(
-		nodes.size() * (Dim * 2 + 5) +
-		vertices.size() * (Dim + 1) +
-		primitives.size()
+	m_packedData.reserve(vertices.size() * (Dim + 1) 
 	);
 
 	const auto appendTexel = [this](Point p)
@@ -144,17 +153,7 @@ void VerticeSet<Dim>::packBVHData()
 				m_packedData.push_back(p[i]);
 		};
 
-	for (const Node& node : nodes)
-	{
-		appendTexel(node.bounds.min);
-		appendTexel(node.bounds.max);
 
-		m_packedData.push_back(node.primitiveCount == 0	? static_cast<float>(node.leftChild) : -1.0f);
-		m_packedData.push_back(node.primitiveCount == 0	? static_cast<float>(node.rightChild) : -1.0f);
-		m_packedData.push_back(static_cast<float>(node.firstPrimitive));
-		m_packedData.push_back(static_cast<float>(node.primitiveCount));
-		m_packedData.push_back(radius);
-	}
 
 	for (const Point& vertex : vertices)
 	{
@@ -162,8 +161,7 @@ void VerticeSet<Dim>::packBVHData()
 		m_packedData.push_back(radius);
 	}
 
-	for (const Primitive& primitive : primitives)
-		m_packedData.push_back(static_cast<float>(primitive.index));
+
 }
 
 template <size_t Dim>

@@ -33,7 +33,7 @@ inline std::string buildPolytopeFragmentShader(
 
 
 	const std::string sdfEntry =
-		"float sampleSDF(/*__VECTOR_DIM__*/ p)\n"
+		"float sampleSDF(vec3 p)\n"
 		"{\n"
 		"    return " + rootFunc + "(p);\n"
 		"}\n";
@@ -66,8 +66,6 @@ inline std::string buildPolytopeFragmentShader(
 	replaceMarker("/*__POLYTOPE_SDF_CODE__*/", ctx.code);
 	replaceMarker("/*__POLYTOPE_SDF_ENTRY__*/", sdfEntry);
 	replaceMarker("/*__POLYTOPE_HIT_SHADER__*/", shadingFunction);
-	replaceMarker("/*__VECTOR_DIM__*/", vectorType);
-	replaceMarker("/*__VECTOR_SIZE__*/", std::to_string(Dim));
 
 	return shader;
 }
