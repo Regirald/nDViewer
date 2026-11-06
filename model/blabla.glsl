@@ -22,56 +22,20 @@ uniform float u_maxDistance;
 uniform int u_maxSteps;
 uniform float u_epsilon;
 
-uniform samplerBuffer u_bvhData;uniform int u_bvhNodeCount;uniform int u_bvhVertexOffset;uniform int u_bvhPrimitiveOffset;
+uniform samplerBuffer u_bvhData;uniform int u_bvhNodeCount;uniform int u_bvhVertexCount;uniform int u_bvhVertexOffset;uniform int u_bvhPrimitiveOffset;
 
-float bvhBoundsDistance(vec4 p, int nodeOffset) {
-    vec4 boundsMin;
-    vec4 boundsMax;
-    for (int i = 0; i < 4; ++i) {
-        boundsMin[i] = texelFetch(u_bvhData, nodeOffset + i).r;
-        boundsMax[i] = texelFetch(u_bvhData, nodeOffset + 4 + i).r;
-    }
-    vec4 outside = max(max(boundsMin - p, p - boundsMax), vec4(0.0));
-    float nodeRadius = texelFetch(u_bvhData, nodeOffset + 12).r;
-    return length(outside) - nodeRadius;
-}
 float sampleVertexBVH(vec4 p) {
-    if (u_bvhNodeCount == 0) return 1e20;
-    int stack[64];
-    int stackSize = 1;
-    int visited = 0;
-    float bestDistance = 1e20;
-    stack[0] = 0;
-    while (stackSize > 0 && visited < u_bvhNodeCount) {
-        int nodeIndex = stack[--stackSize];
-        ++visited;
-        int nodeOffset = nodeIndex * 13;
-        if (bvhBoundsDistance(p, nodeOffset) > bestDistance) continue;
-        int metadataOffset = nodeOffset + 8;
-        int leftChild = int(texelFetch(u_bvhData, metadataOffset).r);
-        int rightChild = int(texelFetch(u_bvhData, metadataOffset + 1).r);
-        int firstPrimitive = int(texelFetch(u_bvhData, metadataOffset + 2).r);
-        int primitiveCount = int(texelFetch(u_bvhData, metadataOffset + 3).r);
-        if (primitiveCount > 0) {
-            for (int i = 0; i < primitiveCount; ++i) {
-                int primitiveOffset = u_bvhPrimitiveOffset + firstPrimitive + i;
-                int vertexIndex = int(texelFetch(u_bvhData, primitiveOffset).r);
+                float bestDistance = 1e10;
+                for (int vertexIndex = 0; vertexIndex < u_bvhVertexCount; ++vertexIndex)
                 int vertexOffset = u_bvhVertexOffset + vertexIndex * 5;
                 vec4 vertex;
                 for (int i = 0; i < 4; ++i)
+                {
                     vertex[i] = texelFetch(u_bvhData, vertexOffset + i).r;
-                float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;
-                bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);
-            }
-        } else {
-            int leftOffset = leftChild * 13;
-            int rightOffset = rightChild * 13;
-            if (leftChild >= 0 && bvhBoundsDistance(p, leftOffset) <= bestDistance && stackSize < 64)
-                stack[stackSize++] = leftChild;
-            if (rightChild >= 0 && bvhBoundsDistance(p, rightOffset) <= bestDistance && stackSize < 64)
-                stack[stackSize++] = rightChild;
-        }
-    }
+					float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;
+					bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);
+                }
+                }
     return bestDistance;
 }
 
@@ -94,7 +58,7 @@ vec4 cameraToGeometry(vec3 v)
 #elif POLYTOPE_DIMENSION == 3
     return v;
 #elif POLYTOPE_DIMENSION == 4
-    return vec4(v, 0.0);
+    return vec4(v, v.x);
 #endif
 }
 
@@ -106,7 +70,7 @@ vec3 geometryToWorld(vec4 p)
 #elif POLYTOPE_DIMENSION == 3
     return p;
 #elif POLYTOPE_DIMENSION == 4
-    return p.xyz; // Valid for a fixed-W 3D slice
+    return p.xyz / (3.0 - p.w);
 #endif
 }
 

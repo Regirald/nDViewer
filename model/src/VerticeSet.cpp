@@ -68,77 +68,30 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 
 	ctx.uniforms.append("uniform samplerBuffer u_bvhData;");
 	ctx.uniforms.append("uniform int u_bvhNodeCount;");
+	ctx.uniforms.append("uniform int u_bvhVertexCount;");
 	ctx.uniforms.append("uniform int u_bvhVertexOffset;");
 	ctx.uniforms.append("uniform int u_bvhPrimitiveOffset;");
 
 	// BVH bounds distance.
 
-	ctx.append("float bvhBoundsDistance(" + vectorType + " p, int nodeOffset) {");
-	ctx.append("    " + vectorType + " boundsMin;");
-	ctx.append("    " + vectorType + " boundsMax;");
-	ctx.append("    for (int i = 0; i < " + dim + "; ++i) {");
-	ctx.append("        boundsMin[i] = texelFetch(u_bvhData, nodeOffset + i).r;");
-	ctx.append("        boundsMax[i] = texelFetch(u_bvhData, nodeOffset + " + dim + " + i).r;");
-	ctx.append("    }");
-	ctx.append("    " + vectorType + " outside = max(max(boundsMin - p, p - boundsMax), " + vectorType + "(0.0));");
-	ctx.append("    float nodeRadius = texelFetch(u_bvhData, nodeOffset + " + std::to_string(Dim * 2 + 4) + ").r;");
-	ctx.append("    return length(outside) - nodeRadius;");
-	ctx.append("}");
-
 	// Main BVH traversal.
 
 	ctx.append("float " + functionName + "(" + vectorType + " p) {");
-	ctx.append("    if (u_bvhNodeCount == 0) return 1e20;");
-	ctx.append("    int stack[64];");
-	ctx.append("    int stackSize = 1;");
-	ctx.append("    int visited = 0;");
-	ctx.append("    float bestDistance = 1e20;");
-	ctx.append("    stack[0] = 0;");
-	ctx.append("    while (stackSize > 0 && visited < u_bvhNodeCount) {");
-	ctx.append("        int nodeIndex = stack[--stackSize];");
-	ctx.append("        ++visited;");
 
-	// Each node occupies (2 * Dim + 5) floats.
+	ctx.append("	float bestDistance = 1e10;");
+	ctx.append("	for (int vertexIndex = 0; vertexIndex < u_bvhVertexCount; ++vertexIndex)");
+	ctx.append("	{");
 
-	ctx.append("        int nodeOffset = nodeIndex * " + std::to_string(Dim * 2 + 5) + ";");
-	ctx.append("        if (bvhBoundsDistance(p, nodeOffset) > bestDistance) continue;");
+	ctx.append("		int vertexOffset = u_bvhVertexOffset + vertexIndex * " + std::to_string(Dim + 1) + ";");
+	ctx.append("		" + vectorType + " vertex;");
+	ctx.append("		for (int i = 0; i < " + dim + "; ++i)");
+	ctx.append("			{");
+	ctx.append("				vertex[i] = texelFetch(u_bvhData, vertexOffset + i).r;");
+	ctx.append("				float vertexRadius = texelFetch(u_bvhData, vertexOffset + " + dim + ").r;");
+	ctx.append("				bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);");
+	ctx.append("		    }");
+	ctx.append("	}");
 
-	// Node metadata.
-
-	ctx.append("        int metadataOffset = nodeOffset + " + std::to_string(Dim * 2) + ";");
-	ctx.append("        int leftChild = int(texelFetch(u_bvhData, metadataOffset).r);");
-	ctx.append("        int rightChild = int(texelFetch(u_bvhData, metadataOffset + 1).r);");
-	ctx.append("        int firstPrimitive = int(texelFetch(u_bvhData, metadataOffset + 2).r);");
-	ctx.append("        int primitiveCount = int(texelFetch(u_bvhData, metadataOffset + 3).r);");
-	ctx.append("        if (primitiveCount > 0) {");
-	ctx.append("            for (int i = 0; i < primitiveCount; ++i) {");
-
-	// Primitive index.
-
-	ctx.append("                int primitiveOffset = u_bvhPrimitiveOffset + firstPrimitive + i;");
-	ctx.append("                int vertexIndex = int(texelFetch(u_bvhData, primitiveOffset).r);");  // here vertexIndex = primitive.index
-
-	// Vertex data.
-
-	ctx.append("                int vertexOffset = u_bvhVertexOffset + vertexIndex * " + std::to_string(Dim + 1) + ";");
-	ctx.append("                " + vectorType + " vertex;");
-	ctx.append("                for (int i = 0; i < " + dim + "; ++i)");
-	ctx.append("                    vertex[i] = texelFetch(u_bvhData, vertexOffset + i).r;");
-	ctx.append("                float vertexRadius = texelFetch(u_bvhData, vertexOffset + " + dim + ").r;");
-	ctx.append("                bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);");
-	ctx.append("            }");
-	ctx.append("        } else {");
-
-	// Child nodes.
-
-	ctx.append("            int leftOffset = leftChild * " + std::to_string(Dim * 2 + 5) + ";");
-	ctx.append("            int rightOffset = rightChild * " + std::to_string(Dim * 2 + 5) + ";");
-	ctx.append("            if (leftChild >= 0 && bvhBoundsDistance(p, leftOffset) <= bestDistance && stackSize < 64)");
-	ctx.append("                stack[stackSize++] = leftChild;");
-	ctx.append("            if (rightChild >= 0 && bvhBoundsDistance(p, rightOffset) <= bestDistance && stackSize < 64)");
-	ctx.append("                stack[stackSize++] = rightChild;");
-	ctx.append("        }");
-	ctx.append("    }");
 	ctx.append("    return bestDistance;");
 	ctx.append("}");
 
@@ -161,6 +114,7 @@ void VerticeSet<Dim>::setGLUniforms(QOpenGLShaderProgram& program) const
 	}
 	program.setUniformValue("u_bvhData", textureUnit);
 	program.setUniformValue("u_bvhNodeCount", static_cast<int>(nodes.size()));
+	program.setUniformValue("u_bvhVertexCount", static_cast<int>(nodes.size() * (Dim * 2 + 5)));
 	program.setUniformValue("u_bvhVertexOffset", static_cast<int>(nodes.size() * (Dim * 2 + 5)));
 	program.setUniformValue("u_bvhPrimitiveOffset", static_cast<int>(nodes.size() * (Dim * 2 + 5) + vertices.size() * (Dim + 1)));
 }
