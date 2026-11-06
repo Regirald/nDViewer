@@ -14,11 +14,17 @@ VerticeSet<Dim>::VerticeSet(
 	if (!this->nodes.empty())
 	{
 		const Node& root = this->nodes.front();
-		Point rootBoundsMin = root.bounds.min;
-		Point rootBoundsMax = root.bounds.max;
 
-		ImplicitFunction<Dim>::m_boundsMin = QVector3D(rootBoundsMin[0], rootBoundsMin[1], rootBoundsMin[2]);
-		ImplicitFunction<Dim>::m_boundsMax = QVector3D(rootBoundsMax[0], rootBoundsMax[1], rootBoundsMax[2]);
+		QVector3D rootBoundsMin;
+		QVector3D rootBoundsMax;
+		for (int i = 0; i < std::min((int)Dim, 3); ++i)
+		{
+			rootBoundsMin[i] = root.bounds.min[i];
+			rootBoundsMax[i] = root.bounds.max[i];
+		}
+
+		ImplicitFunction<Dim>::m_boundsMin = rootBoundsMin;
+		ImplicitFunction<Dim>::m_boundsMax = rootBoundsMax;
 	}
 
 	packBVHData();
@@ -164,7 +170,7 @@ const std::string VerticeSet<Dim>::getFragmentShader() const
 {
 	GLSLContext ctx;
 	const std::string rootFunction = buildGLSL(ctx);
-	return buildPolytopeFragmentShader(ctx, rootFunction, PolytopeShaderStyle::Node);
+	return buildPolytopeFragmentShader(ctx, rootFunction, PolytopeShaderStyle::Node, Dim);
 }
 
 template <size_t Dim>

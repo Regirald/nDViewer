@@ -21,8 +21,8 @@ inline std::string buildPolytopeFragmentShader(
 #include "PolytopeShader.glsl"
 		;
 
-	std::string vectorType;
 
+	std::string vectorType;
 	switch (Dim)
 	{
 	case 2: vectorType = "vec2"; break;
@@ -67,6 +67,7 @@ inline std::string buildPolytopeFragmentShader(
 	replaceMarker("/*__POLYTOPE_SDF_ENTRY__*/", sdfEntry);
 	replaceMarker("/*__POLYTOPE_HIT_SHADER__*/", shadingFunction);
 	replaceMarker("/*__VECTOR_DIM__*/", vectorType);
+	replaceMarker("/*__VECTOR_SIZE__*/", std::to_string(Dim));
 
 	return shader;
 }
