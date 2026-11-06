@@ -21,6 +21,9 @@
     <ClCompile Include="src\ToddCoxeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\VerticeSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\model\ImplicitFunction.h">
