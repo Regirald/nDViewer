@@ -231,7 +231,7 @@ void main()
 
         if (abs(d) < u_epsilon)
         {
-            FragColor = /*__POLYTOPE_HIT_SHADER__*/;
+            gl_FragColor = /*__POLYTOPE_HIT_SHADER__*/;
 
             // Depth projection remains entirely 3D.
 
