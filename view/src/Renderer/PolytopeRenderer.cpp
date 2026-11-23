@@ -74,9 +74,19 @@ void PolytopeRendererProxy::render(const ndv::RenderContext& context)
 
 template <size_t Dim>
 PolytopeRenderer<Dim>::PolytopeRenderer(PolytopeGeometry<Dim>* polytope)
-	: m_polytope(polytope)
+	: m_projection(Vec<Dim, float>{}, 0.0f, Vec<Dim, float>{}),
+	  m_polytope(polytope)
 {
 	m_initialized = false;
+
+	m_projection.center[Dim - 1] = 2.0f; // Set the projection center along the last dimension
+	m_projection.normal[Dim - 1] = 1.0f; // Set the projection normal along the last dimension
+	m_projection.offset = 1.0f; // Set the projection offset
+
+	//for (auto& vertex : m_polytope->vertices)
+	//{
+	//	vertex = m_projection.Project(vertex);
+	//}
 }
 
 
@@ -124,8 +134,7 @@ void PolytopeRenderer<Dim>::render(const ndv::RenderContext& context)
 
 
 
-
-
 template class PolytopeRenderer<2>;
 template class PolytopeRenderer<3>;
 template class PolytopeRenderer<4>;
+

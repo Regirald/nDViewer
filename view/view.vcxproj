@@ -183,6 +183,7 @@
   <ItemGroup>
     <ClInclude Include="include\view\Camera\Camera.h" />
     <QtMoc Include="include\view\MainWindow.h" />
+    <ClInclude Include="include\view\ProjectionSystem.h" />
     <ClInclude Include="include\view\Renderer\EdgesRenderer.h" />
     <ClInclude Include="include\view\Renderer\ExampleTriangleRenderer.h" />
     <ClInclude Include="include\view\Renderer\FacesRenderer.h" />

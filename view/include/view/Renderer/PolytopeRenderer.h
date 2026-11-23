@@ -2,6 +2,7 @@
 
 
 #include "Renderer/Renderer.h"
+#include "ProjectionSystem.h"
 #include "Renderer/VerticesRenderer.h"
 #include "Renderer/EdgesRenderer.h"
 #include "Renderer/FacesRenderer.h"
@@ -48,7 +49,7 @@ public:
 
 
 
-
+	SchlegelProjection<Dim> m_projection;
 	PolytopeGeometry<Dim>* m_polytope;
 	std::unique_ptr<VerticesRenderer<Dim>> m_verticesRenderer;
 	std::unique_ptr<EdgesRenderer<Dim>> m_edgesRenderer;
