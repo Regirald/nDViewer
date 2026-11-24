@@ -22,34 +22,33 @@ uniform float u_epsilon;
 int u_primitiveToutchedIndex = 0;
 
 
-uniform samplerBuffer u_bvhData;
+#extension GL_ARB_shader_storage_buffer_object : require
+layout(std430, binding = 0) buffer VerticeSetData { vec4 u_vertices[]; };
 uniform int u_bvhVertexCount;
+uniform float u_radius;
 
 
 float sampleVertexBruteForce(vec3 p) {
 	float bestDistance = 1e10;
 	for (int vertexIndex = 0; vertexIndex < u_bvhVertexCount; ++vertexIndex)
 	{
-		int vertexOffset = vertexIndex * 5;
-		vec4 vertex = vec4(		texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);
+		vec4 vertex = u_vertices[vertexIndex];
 		vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);
-		float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;
-		float newDistance = length(p - vertex3d) - vertexRadius;
+		float newDistance = length(p - vertex3d) - u_radius;
 		if(newDistance < bestDistance)
 		{
 			u_primitiveToutchedIndex = vertexIndex;
 			bestDistance = newDistance;
 		}
+	}
     return bestDistance;
 }
 float SDFonPrimitive(vec3 p) {
 	float bestDistance = 1e10;
 	int vertexIndex = u_primitiveToutchedIndex;
-	int vertexOffset = vertexIndex * 5;
-	vec4 vertex = vec4(		texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);
+	vec4 vertex = u_vertices[vertexIndex];
 	vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);
-	float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;
-	bestDistance = min(bestDistance, length(p - vertex3d) - vertexRadius);
+	bestDistance = min(bestDistance, length(p - vertex3d) - u_radius);
     return bestDistance;
 }
 

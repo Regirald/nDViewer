@@ -1,49 +1,41 @@
 #include "VerticeSet.h"
 
+#include <unordered_map>
+
+namespace
+{
+template <size_t Dim>
+std::unordered_map<const VerticeSet<Dim>*, GLuint>& verticeSetBuffers()
+{
+	static std::unordered_map<const VerticeSet<Dim>*, GLuint> buffers;
+	return buffers;
+}
+}
+
 template <size_t Dim>
 VerticeSet<Dim>::VerticeSet(
 	std::vector<Point> vertices,
-	std::vector<Node> nodes,
-	std::vector<Primitive> primitives,
 	float radius)
 	: vertices(vertices),
-	  nodes(nodes),
-	  primitives(primitives),
 	  radius(radius)
 {
-	if (!this->nodes.empty())
-	{
-		const Node& root = this->nodes.front();
 
-		QVector3D rootBoundsMin;
-		QVector3D rootBoundsMax;
-		for (int i = 0; i < std::min((int)Dim, 3); ++i)
+	QVector3D rootBoundsMin;
+	QVector3D rootBoundsMax;
+	for (auto vertex : vertices)
+	{
+		for (size_t i = 0; i < 3; ++i)
 		{
-			rootBoundsMin[i] = root.bounds.min[i];
-			rootBoundsMax[i] = root.bounds.max[i];
+			rootBoundsMin[i] = std::min(rootBoundsMin[i], vertex[i] - radius);
+			rootBoundsMax[i] = std::max(rootBoundsMax[i], vertex[i] + radius);
 		}
 
-		ImplicitFunction<Dim>::m_boundsMin = rootBoundsMin * 4;
-		ImplicitFunction<Dim>::m_boundsMax = rootBoundsMax * 4;
 	}
 
-	packBVHData();
+	ImplicitFunction<Dim>::m_boundsMin = rootBoundsMin;
+	ImplicitFunction<Dim>::m_boundsMax = rootBoundsMax;
 }
 
-template <size_t Dim>
-VerticeSet<Dim>::~VerticeSet()
-{
-	QOpenGLContext* context = QOpenGLContext::currentContext();
-	if (!context)
-		return;
-
-	QOpenGLExtraFunctions* gl = context->extraFunctions();
-	gl->initializeOpenGLFunctions();
-	if (m_bvhTexture)
-		gl->glDeleteTextures(1, &m_bvhTexture);
-	if (m_bvhBuffer)
-		gl->glDeleteBuffers(1, &m_bvhBuffer);
-}
 
 template <size_t Dim>
 float VerticeSet<Dim>::evaluateSDF(const Point& p) const
@@ -66,8 +58,10 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 	const std::string dim = std::to_string(Dim);
 	const std::string functionName = "sampleVertexBruteForce";
 
-	ctx.uniforms.append("uniform samplerBuffer u_bvhData;\n");
+	ctx.uniforms.append("#extension GL_ARB_shader_storage_buffer_object : require\n");
+	ctx.uniforms.append("layout(std430, binding = 0) buffer VerticeSetData { vec4 u_vertices[]; };\n");
 	ctx.uniforms.append("uniform int u_bvhVertexCount;\n");
+	ctx.uniforms.append("uniform float u_radius;\n");
 
 
 	// BVH bounds distance.
@@ -76,21 +70,19 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 
 	ctx.append("float " + functionName + "(vec3 p) {");
 
-	ctx.append("	float bestDistance = 1e10;");
-	ctx.append("	for (int vertexIndex = 0; vertexIndex < u_bvhVertexCount; ++vertexIndex)");
-	ctx.append("	{");
+	ctx.append("\tfloat bestDistance = 1e10;");
+	ctx.append("\tfor (int vertexIndex = 0; vertexIndex < u_bvhVertexCount; ++vertexIndex)");
+	ctx.append("\t{");
 
-	ctx.append("		int vertexOffset = vertexIndex * 5;");
-	ctx.append("		vec4 vertex = vec4(		texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);");
-	ctx.append("		vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
-	ctx.append("		float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;");
-	ctx.append("		float newDistance = length(p - vertex3d) - vertexRadius;");
-	ctx.append("		if(newDistance < bestDistance)");
-	ctx.append("		{");
-	ctx.append("			u_primitiveToutchedIndex = vertexIndex;");
-	ctx.append("			bestDistance = newDistance;");
-	ctx.append("		}");
-	ctx.append("	}");
+	ctx.append("\t\tvec4 vertex = u_vertices[vertexIndex];");
+	ctx.append("\t\tvec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
+	ctx.append("\t\tfloat newDistance = length(p - vertex3d) - u_radius;");
+	ctx.append("\t\tif(newDistance < bestDistance)");
+	ctx.append("\t\t{");
+	ctx.append("\t\t\tu_primitiveToutchedIndex = vertexIndex;");
+	ctx.append("\t\t\tbestDistance = newDistance;");
+	ctx.append("\t\t}");
+	ctx.append("\t}");
 
 	ctx.append("    return bestDistance;");
 	ctx.append("}");
@@ -98,14 +90,12 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 
 	ctx.append("float SDFonPrimitive(vec3 p) {");
 
-	ctx.append("	float bestDistance = 1e10;");
-	ctx.append("	int vertexIndex = u_primitiveToutchedIndex;");
+	ctx.append("\tfloat bestDistance = 1e10;");
+	ctx.append("\tint vertexIndex = u_primitiveToutchedIndex;");
 
-	ctx.append("	int vertexOffset = vertexIndex * 5;");
-	ctx.append("	vec4 vertex = vec4(texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);");
-	ctx.append("	vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
-	ctx.append("	float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;");
-	ctx.append("	bestDistance = min(bestDistance, length(p - vertex3d) - vertexRadius);");
+	ctx.append("\tvec4 vertex = u_vertices[vertexIndex];");
+	ctx.append("\tvec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
+	ctx.append("\tbestDistance = min(bestDistance, length(p - vertex3d) - u_radius);");
 
 	ctx.append("    return bestDistance;");
 	ctx.append("}");
@@ -117,19 +107,60 @@ template <size_t Dim>
 void VerticeSet<Dim>::setGLUniforms(QOpenGLShaderProgram& program) const
 {
 	ImplicitFunction<Dim>::setGLUniforms(program);
-	ensureBVHBuffer();
 
-	constexpr int textureUnit = 5;
-	if (QOpenGLContext::currentContext())
+
+
+
+	std::vector<float> verticesFlattenData;
+	verticesFlattenData.reserve(vertices.size() * 4);
+	for (const auto& vertex : vertices)
 	{
-		QOpenGLExtraFunctions* gl = QOpenGLContext::currentContext()->extraFunctions();
-		gl->glActiveTexture(GL_TEXTURE0 + textureUnit);
-		gl->glBindTexture(GL_TEXTURE_BUFFER, m_bvhTexture);
-		gl->glActiveTexture(GL_TEXTURE0);
+		verticesFlattenData.push_back(vertex[0]);
+		verticesFlattenData.push_back(vertex[1]);
+		verticesFlattenData.push_back(vertex[2]);
+		if constexpr (Dim > 3)
+			verticesFlattenData.push_back(vertex[3]);
+		else
+			verticesFlattenData.push_back(0.0f);
+
 	}
-	program.setUniformValue("u_bvhData", textureUnit);
+
+	QOpenGLContext* context = QOpenGLContext::currentContext();
+	if (!context)
+		return;
+	QOpenGLExtraFunctions* gl = context->extraFunctions();
+	gl->initializeOpenGLFunctions();
+
+	auto& buffers = verticeSetBuffers<Dim>();
+	auto previousBuffer = buffers.find(this);
+	if (previousBuffer != buffers.end())
+	{
+		gl->glDeleteBuffers(1, &previousBuffer->second);
+		buffers.erase(previousBuffer);
+	}
+
+	GLuint ssbo = 0;
+	gl->glGenBuffers(1, &ssbo);
+
+	gl->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+
+	gl->glBufferData(
+		GL_SHADER_STORAGE_BUFFER,
+		verticesFlattenData.size() * sizeof(float),
+		verticesFlattenData.data(),
+		GL_DYNAMIC_DRAW
+	);
+
+	// Bind to binding point 0. The shader reads one vec4 per vertex.
+	gl->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+	gl->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	buffers.emplace(this, ssbo);
+
+	program.setUniformValue("u_radius", radius);
 	program.setUniformValue("u_bvhVertexCount", static_cast<int>(vertices.size()));
+
 }
+
 
 template <size_t Dim>
 const std::string VerticeSet<Dim>::getFragmentShader() const
@@ -139,55 +170,7 @@ const std::string VerticeSet<Dim>::getFragmentShader() const
 	return buildPolytopeFragmentShader(ctx, rootFunction, PolytopeShaderStyle::Node, Dim);
 }
 
-template <size_t Dim>
-void VerticeSet<Dim>::packBVHData()
-{
-	m_packedData.clear();
 
-	m_packedData.reserve(vertices.size() * (Dim + 1) 
-	);
-
-	const auto appendTexel = [this](Point p)
-		{
-			for (size_t i = 0; i < Dim; ++i)
-				m_packedData.push_back(p[i]);
-		};
-
-
-
-	for (const Point& vertex : vertices)
-	{
-		appendTexel(vertex);
-		m_packedData.push_back(radius);
-	}
-
-
-}
-
-template <size_t Dim>
-void VerticeSet<Dim>::ensureBVHBuffer() const
-{
-	if (m_bvhBuffer || m_packedData.empty())
-		return;
-
-	QOpenGLContext* context = QOpenGLContext::currentContext();
-	if (!context)
-		return;
-
-	QOpenGLExtraFunctions* gl = context->extraFunctions();
-	gl->initializeOpenGLFunctions();
-	gl->glGenBuffers(1, &m_bvhBuffer);
-	gl->glBindBuffer(GL_TEXTURE_BUFFER, m_bvhBuffer);
-	gl->glBufferData(
-		GL_TEXTURE_BUFFER,
-		static_cast<GLsizeiptr>(m_packedData.size() * sizeof(float)),
-		m_packedData.data(),GL_STATIC_DRAW);
-	gl->glGenTextures(1, &m_bvhTexture);
-	gl->glBindTexture(GL_TEXTURE_BUFFER, m_bvhTexture);
-	gl->glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, m_bvhBuffer);
-	gl->glBindTexture(GL_TEXTURE_BUFFER, 0);
-	gl->glBindBuffer(GL_TEXTURE_BUFFER, 0);
-}
 
 template class VerticeSet<2>;
 template class VerticeSet<3>;

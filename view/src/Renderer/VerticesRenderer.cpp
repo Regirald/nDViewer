@@ -1,5 +1,4 @@
 #include "VerticesRenderer.h"
-#include "model/AccelerationStructureBVH.h"
 #include "model/VerticeSet.h"
 #include <utility>
 #include <vector>
@@ -13,11 +12,8 @@ void VerticesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 
 	constexpr float radius = 0.25f;
 
-	AccelerationStructureBVH<Dim> accelerationStructure(m_poly, radius);
-	accelerationStructure.build();
 
-
-	auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, accelerationStructure.nodes(), accelerationStructure.primitives(), radius);
+	auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, radius);
 	m_renderer = std::make_unique<RenderImplicitFunction<Dim>>(std::move(verticeSet));
 	m_renderer->initializeGLResources();
 }
