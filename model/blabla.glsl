@@ -32,11 +32,9 @@ float bvhBoundsDistance(vec3 p, int nodeOffset) {
         boundsMax[i] = texelFetch(u_bvhData, nodeOffset + 3 + i).r;
     }
     vec3 outside = max(max(boundsMin - p, p - boundsMax), vec3(0.0));
-    float nodeRadius = texelFetch(u_bvhData, nodeOffset + 7).r;
+    float nodeRadius = texelFetch(u_bvhData, nodeOffset + 10).r;
     return length(outside) - nodeRadius;
 }
-
-
 float sampleVertexBVH(vec3 p) {
     if (u_bvhNodeCount == 0) return 1e20;
     int stack[64];
@@ -47,7 +45,7 @@ float sampleVertexBVH(vec3 p) {
     while (stackSize > 0 && visited < u_bvhNodeCount) {
         int nodeIndex = stack[--stackSize];
         ++visited;
-        int nodeOffset = nodeIndex * 7;
+        int nodeOffset = nodeIndex * 11;
         if (bvhBoundsDistance(p, nodeOffset) > bestDistance) continue;
         int metadataOffset = nodeOffset + 6;
         int leftChild = int(texelFetch(u_bvhData, metadataOffset).r);
@@ -66,8 +64,8 @@ float sampleVertexBVH(vec3 p) {
                 bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);
             }
         } else {
-            int leftOffset = leftChild * 7;
-            int rightOffset = rightChild * 7;
+            int leftOffset = leftChild * 11;
+            int rightOffset = rightChild * 11;
             if (leftChild >= 0 && bvhBoundsDistance(p, leftOffset) <= bestDistance && stackSize < 64)
                 stack[stackSize++] = leftChild;
             if (rightChild >= 0 && bvhBoundsDistance(p, rightOffset) <= bestDistance && stackSize < 64)

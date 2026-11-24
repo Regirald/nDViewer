@@ -120,7 +120,11 @@ std::string VerticeSet::buildGLSL(GLSLContext& ctx) const
 	ctx.append("                for (int i = 0; i < 3; ++i)");
 	ctx.append("                    vertex[i] = texelFetch(u_bvhData, vertexOffset + i).r;");
 	ctx.append("                float vertexRadius = texelFetch(u_bvhData, vertexOffset + 3).r;");
-	ctx.append("                bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);");
+	ctx.append("                float newDistance = length(p - vertex) - vertexRadius;");
+	ctx.append("                if(bestDistance > newDistance) {");
+	ctx.append("                    bestDistance = newDistance;");
+	ctx.append("                    u_primitiveToutchedIndex = vertexIndex;");
+	ctx.append("                }");
 	ctx.append("            }");
 	ctx.append("        } else {");
 
@@ -134,6 +138,21 @@ std::string VerticeSet::buildGLSL(GLSLContext& ctx) const
 	ctx.append("                stack[stackSize++] = rightChild;");
 	ctx.append("        }");
 	ctx.append("    }");
+	ctx.append("    return bestDistance;");
+	ctx.append("}");
+
+	// Function to compute the SDF on a specific primitive (vertex) given its index.
+	ctx.append("float SDFonPrimitive(vec3 p) {");
+
+	ctx.append("	float bestDistance = 1e10;");
+	ctx.append("	int vertexIndex = u_primitiveToutchedIndex;");
+
+	ctx.append("	int vertexOffset = u_bvhVertexOffset + vertexIndex * 4;");
+	ctx.append("	vec4 vertex = vec4(texelFetch(u_bvhData, vertexOffset + 0).r, texelFetch(u_bvhData, vertexOffset + 1).r,texelFetch(u_bvhData, vertexOffset + 2).r,	texelFetch(u_bvhData, vertexOffset + 3).r	);");
+	ctx.append("	vec3 vertex3d = vertex.xyz / (1 - 0.3 * vertex.w);");
+	ctx.append("	float vertexRadius = texelFetch(u_bvhData, vertexOffset + 4).r;");
+	ctx.append("	bestDistance = min(bestDistance, length(p - vertex3d) - vertexRadius);");
+
 	ctx.append("    return bestDistance;");
 	ctx.append("}");
 

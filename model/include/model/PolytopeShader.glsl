@@ -49,9 +49,9 @@ vec3 estimateNormal(vec3 p)
 	float e = 0.002;
 
 	return normalize(vec3(
-		sampleSDF(p + vec3(e, 0, 0)) - sampleSDF(p - vec3(e, 0, 0)),
-		sampleSDF(p + vec3(0, e, 0)) - sampleSDF(p - vec3(0, e, 0)),
-		sampleSDF(p + vec3(0, 0, e)) - sampleSDF(p - vec3(0, 0, e))
+		SDFonPrimitive(p + vec3(e, 0, 0)) - SDFonPrimitive(p - vec3(e, 0, 0)),
+		SDFonPrimitive(p + vec3(0, e, 0)) - SDFonPrimitive(p - vec3(0, e, 0)),
+		SDFonPrimitive(p + vec3(0, 0, e)) - SDFonPrimitive(p - vec3(0, 0, e))
 	));
 }
 
