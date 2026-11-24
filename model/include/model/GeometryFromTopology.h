@@ -42,13 +42,13 @@ struct PolytopeGeometry : public AbstractPolytopeGeometry
     {}
 
     template<size_t HigherDim>
-    constexpr PolytopeGeometry(const PolytopeGeometry<HigherDim>& other, ProjectionSystem<Dim> projection)
+    constexpr PolytopeGeometry(const PolytopeGeometry<HigherDim>& other, ProjectionSystem<HigherDim>* projection)
     {
 
 		for (auto vertice : other.vertices)
 		{
 			Vec<Dim, float> newVertice(vertice);
-			vertices.push_back(projection.project(newVertice));
+			vertices.push_back(projection->project(newVertice));
 		}
 
 		edges = other.edges;

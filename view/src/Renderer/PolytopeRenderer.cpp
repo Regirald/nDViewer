@@ -40,27 +40,30 @@ void PolytopeRendererProxy::render(const ndv::RenderContext& context)
 		);
 		switch (m_dim)
 		{
-		case PolytopeRendererProxy::Dim2:
-		{
-			auto polytope2D = dynamic_cast<PolytopeGeometry<2>*>(m_polytopeAbstract);
-			m_polytope3D = new PolytopeGeometry<3>(polytope2D);
+			case PolytopeRendererProxy::Dim2:
+			{
+				auto polytope2D = dynamic_cast<PolytopeGeometry<2>*>(m_polytopeAbstract);
+				m_polytope3D = new PolytopeGeometry<3>(*polytope2D);
+				break;
 
-		}
-		case PolytopeRendererProxy::Dim3:
-		{
-			auto polytope3D = dynamic_cast<PolytopeGeometry<3>*>(m_polytopeAbstract);
-			m_polytope3D = new PolytopeGeometry<3>(polytope3D);
+			}
+			case PolytopeRendererProxy::Dim3:
+			{
+				auto polytope3D = dynamic_cast<PolytopeGeometry<3>*>(m_polytopeAbstract);
+				m_polytope3D = new PolytopeGeometry<3>(*polytope3D);
+				break;
 
-		}
-		case PolytopeRendererProxy::Dim4:
-		{
-			auto polytope4D = dynamic_cast<PolytopeGeometry<4>*>(m_polytopeAbstract);
-			m_polytope3D = new PolytopeGeometry<3>(polytope4D, m_schlegelProjection);
+			}
+			case PolytopeRendererProxy::Dim4:
+			{
+				auto polytope4D = dynamic_cast<PolytopeGeometry<4>*>(m_polytopeAbstract);
+				m_polytope3D = new PolytopeGeometry<3>(*polytope4D, m_schlegelProjection);
+				break;
 
 
-		}
-		default:
-			break;
+			}
+			default:
+				return;
 		}
 	}
 	if (!m_polytopeRenderer)
