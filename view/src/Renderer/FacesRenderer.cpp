@@ -2,8 +2,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
 
-template <size_t Dim>
-void FacesRenderer<Dim>::initializeGLResources()
+void FacesRenderer::initializeGLResources()
 {
 	if (!m_poly)
 		return;
@@ -26,8 +25,7 @@ void FacesRenderer<Dim>::initializeGLResources()
 	}
 }
 
-template <size_t Dim>
-void FacesRenderer<Dim>::render(const ndv::RenderContext& context)
+void FacesRenderer::render(const ndv::RenderContext& context)
 {
 	if (m_renderers.empty())
 		return;
@@ -38,7 +36,3 @@ void FacesRenderer<Dim>::render(const ndv::RenderContext& context)
 			r->render(context);
 	}
 }
-
-template class FacesRenderer<2>;
-template class FacesRenderer<3>;
-template class FacesRenderer<4>;

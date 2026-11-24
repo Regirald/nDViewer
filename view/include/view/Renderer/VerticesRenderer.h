@@ -4,15 +4,14 @@
 #include "model/GeometryFromTopology.h"
 #include <memory>
 
-template <size_t Dim>
 class VerticesRenderer : public Renderer
 {
 public:
-	VerticesRenderer(PolytopeGeometry<Dim>* poly) : m_poly(poly) {}
+	VerticesRenderer(PolytopeGeometry<3>* poly) : m_poly(poly) {}
 	void initializeGLResources(bool fullShadedRendering = true);
 	void render(const ndv::RenderContext& context) override;
 
 private:
-	PolytopeGeometry<Dim>* m_poly = nullptr;
-	std::unique_ptr<RenderImplicitFunction<Dim>> m_renderer;
+	PolytopeGeometry<3>* m_poly = nullptr;
+	std::unique_ptr<RenderImplicitFunction<3>> m_renderer;
 };

@@ -2,10 +2,10 @@
 
 
 #include "Renderer/Renderer.h"
-#include "ProjectionSystem.h"
 #include "Renderer/VerticesRenderer.h"
 #include "Renderer/EdgesRenderer.h"
 #include "Renderer/FacesRenderer.h"
+#include "model/ProjectionSystem.h"
 #include "model/GeometryFromTopology.h"
 #include "model/AccelerationStructureBVH.h"
 
@@ -24,13 +24,17 @@ class PolytopeRendererProxy : public Renderer
 
 enum InternalDimension { Dim2, Dim3, Dim4, Unknown };
 public:
-	PolytopeRendererProxy(AbstractPolytopeGeometry* polytope = nullptr) : m_polytope(polytope) { defineDimension(); }
+	PolytopeRendererProxy(AbstractPolytopeGeometry* polytopeAbstract = nullptr) : m_polytopeAbstract(polytopeAbstract) { defineDimension(); }
 	void defineDimension();
 
 	void render(const ndv::RenderContext& context);
 
 	InternalDimension m_dim = Unknown;
-	AbstractPolytopeGeometry* m_polytope = nullptr;
+
+	AbstractPolytopeGeometry* m_polytopeAbstract = nullptr;
+	PolytopeGeometry<3>* m_polytope3D = nullptr;
+	SchlegelProjection<4>* m_schlegelProjection = nullptr;
+
 	std::unique_ptr<AbstractPolytopeRenderer> m_polytopeRenderer = nullptr;
 
 
@@ -38,22 +42,20 @@ public:
 
 
 
-template <size_t Dim>
 class PolytopeRenderer : public AbstractPolytopeRenderer
 {
 public:
-	PolytopeRenderer(PolytopeGeometry<Dim>* polytope);
+	PolytopeRenderer(PolytopeGeometry<3>* polytope);
 
 	void initializeGLResources(bool fullShadedRendering = true);
 	void render(const ndv::RenderContext& context) override;
 
 
 
-	SchlegelProjection<Dim> m_projection;
-	PolytopeGeometry<Dim>* m_polytope;
-	std::unique_ptr<VerticesRenderer<Dim>> m_verticesRenderer;
-	std::unique_ptr<EdgesRenderer<Dim>> m_edgesRenderer;
-	std::unique_ptr<FacesRenderer<Dim>> m_facesRenderer;
+	PolytopeGeometry<3>* m_polytope;
+	std::unique_ptr<VerticesRenderer> m_verticesRenderer;
+	std::unique_ptr<EdgesRenderer> m_edgesRenderer;
+	std::unique_ptr<FacesRenderer> m_facesRenderer;
 
-	std::unique_ptr<AccelerationStructureBVH<Dim>> m_accelerationStructure;
+	std::unique_ptr<AccelerationStructureBVH> m_accelerationStructure;
 };

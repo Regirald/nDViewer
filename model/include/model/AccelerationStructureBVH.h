@@ -7,13 +7,12 @@
 
 #include "model/GeometryFromTopology.h"
 
-template <size_t Dim>
 class AccelerationStructureBVH
 {
 public:
 
     using Scalar = float;
-    using Vector = Vec<Dim, Scalar>;
+    using Vector = Vec<3, Scalar>;
 
     struct AABB
     {
@@ -45,7 +44,7 @@ public:
     };
 
     explicit AccelerationStructureBVH(
-        const PolytopeGeometry<Dim>* polytope,
+        const PolytopeGeometry<3>* polytope,
         Scalar primitivePadding = 0.0f)
         : m_polytope(polytope), m_primitivePadding(primitivePadding)
     {
@@ -93,7 +92,7 @@ public:
 
 private:
 
-    const PolytopeGeometry<Dim>* m_polytope = nullptr;
+    const PolytopeGeometry<3>* m_polytope = nullptr;
     Scalar m_primitivePadding = 0.0f;
 
     std::vector<Node> m_nodes;
@@ -128,7 +127,7 @@ private:
 
             primitive.centroid = vertex;
 
-            for (size_t d = 0; d < Dim; ++d)
+            for (size_t d = 0; d < 3; ++d)
             {
                 primitive.bounds.min[d] -= m_primitivePadding;
                 primitive.bounds.max[d] += m_primitivePadding;
@@ -144,7 +143,7 @@ private:
 
     static void initializeAABB(AABB& bounds)
     {
-        for (size_t d = 0; d < Dim; ++d)
+        for (size_t d = 0; d < 3; ++d)
         {
             bounds.min[d] =
                 std::numeric_limits<Scalar>::max();
@@ -158,7 +157,7 @@ private:
         AABB& bounds,
         const Vector& point)
     {
-        for (size_t d = 0; d < Dim; ++d)
+        for (size_t d = 0; d < 3; ++d)
         {
             bounds.min[d] =
                 std::min(bounds.min[d], point[d]);
@@ -180,7 +179,7 @@ private:
             const AABB& primitiveBounds =
                 m_primitives[i].bounds;
 
-            for (size_t d = 0; d < Dim; ++d)
+            for (size_t d = 0; d < 3; ++d)
             {
                 bounds.min[d] = std::min(
                     bounds.min[d],
@@ -206,7 +205,7 @@ private:
         Vector minCentroid;
         Vector maxCentroid;
 
-        for (size_t d = 0; d < Dim; ++d)
+        for (size_t d = 0; d < 3; ++d)
         {
             minCentroid[d] =
                 std::numeric_limits<Scalar>::max();
@@ -220,7 +219,7 @@ private:
             const Vector& centroid =
                 m_primitives[i].centroid;
 
-            for (size_t d = 0; d < Dim; ++d)
+            for (size_t d = 0; d < 3; ++d)
             {
                 minCentroid[d] = std::min(
                     minCentroid[d], centroid[d]);
@@ -233,7 +232,7 @@ private:
         size_t bestAxis = 0;
         Scalar bestExtent = 0;
 
-        for (size_t d = 0; d < Dim; ++d)
+        for (size_t d = 0; d < 3; ++d)
         {
             Scalar extent =
                 maxCentroid[d] - minCentroid[d];
@@ -299,9 +298,3 @@ private:
         return nodeIndex;
     }
 };
-
-
-
-template class AccelerationStructureBVH<2>;
-template class AccelerationStructureBVH<3>;
-template class AccelerationStructureBVH<4>;

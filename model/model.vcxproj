@@ -155,6 +155,7 @@
     <ClInclude Include="include\model\PolytopeFace.h" />
     <ClInclude Include="include\model\PolytopeNode.h" />
     <ClInclude Include="include\model\PolytopeShader.h" />
+    <ClInclude Include="include\model\ProjectionSystem.h" />
     <ClInclude Include="include\model\VerticeSet.h" />
     <None Include="include\model\PolytopeShader.glsl" />
     <ClInclude Include="include\model\spheres.h" />

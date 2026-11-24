@@ -7,16 +7,15 @@
 #include <memory>
 #include <vector>
 
-template <size_t Dim>
 class EdgesRenderer : public Renderer
 {
 public:
-	EdgesRenderer(PolytopeGeometry<Dim>* poly) : m_poly(poly) {}
+	EdgesRenderer(PolytopeGeometry<3>* poly) : m_poly(poly) {}
 	void initializeGLResources(bool fullShadedRendering = true);
 	void render(const ndv::RenderContext& context) override;
 
 private:
-	PolytopeGeometry<Dim>* m_poly = nullptr;
+	PolytopeGeometry<3>* m_poly = nullptr;
 	// Each renderer will own a renderer instance (either full SDF renderer or a lightweight renderer).
 	std::vector<std::unique_ptr<Renderer>> m_renderers;
 };

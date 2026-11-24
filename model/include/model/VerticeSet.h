@@ -17,13 +17,12 @@
 #include <utility>
 #include <vector>
 
-template <size_t Dim>
-class VerticeSet : public ImplicitFunction<Dim>
+class VerticeSet : public ImplicitFunction<3>
 {
 public:
-	using Point = typename ImplicitFunction<Dim>::Point;
-	using Node = typename AccelerationStructureBVH<Dim>::Node;
-	using Primitive = typename AccelerationStructureBVH<Dim>::Primitive;
+	using Point = typename ImplicitFunction<3>::Point;
+	using Node = typename AccelerationStructureBVH::Node;
+	using Primitive = typename AccelerationStructureBVH::Primitive;
 
 
 

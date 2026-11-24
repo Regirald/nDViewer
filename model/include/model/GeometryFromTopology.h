@@ -3,6 +3,7 @@
 #include <math.h>
 
 
+#include "ProjectionSystem.h"
 #include "CoxeterPresentation.h"
 #include "ToddCoxeter.h"
 #include "Mesh.h"
@@ -29,6 +30,47 @@ struct PolytopeGeometry : public AbstractPolytopeGeometry
 
     // ranks >= 4
     std::vector<std::vector<std::vector<int>>> higherRanks;
+
+	PolytopeGeometry() = default;
+
+    constexpr PolytopeGeometry(const PolytopeGeometry<Dim>& other)
+		: vertices(other.vertices),
+		edges(other.edges),
+		faces(other.faces),
+		cells(other.cells),
+		higherRanks(other.higherRanks)
+    {}
+
+    template<size_t HigherDim>
+    constexpr PolytopeGeometry(const PolytopeGeometry<HigherDim>& other, ProjectionSystem<Dim> projection)
+    {
+
+		for (auto vertice : other.vertices)
+		{
+			Vec<Dim, float> newVertice(vertice);
+			vertices.push_back(projection.project(newVertice));
+		}
+
+		edges = other.edges;
+		faces = other.faces;
+		cells = other.cells;
+		higherRanks = other.higherRanks;
+    }
+
+
+    template<size_t LowerDim>
+    constexpr PolytopeGeometry(const PolytopeGeometry<LowerDim>& other)
+    {
+		for (auto vertice : other.vertices)
+		{
+			Vec<Dim, float> newVertice(vertice);
+			vertices.push_back(newVertice);
+		}
+        edges = other.edges;
+        faces = other.faces;
+        cells = other.cells;
+        higherRanks = other.higherRanks;
+    }
 };
 
 

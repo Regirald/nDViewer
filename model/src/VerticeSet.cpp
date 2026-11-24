@@ -1,7 +1,6 @@
 #include "VerticeSet.h"
 
-template <size_t Dim>
-VerticeSet<Dim>::VerticeSet(
+VerticeSet::VerticeSet(
 	std::vector<Point> vertices,
 	std::vector<Node> nodes,
 	std::vector<Primitive> primitives,
@@ -17,21 +16,21 @@ VerticeSet<Dim>::VerticeSet(
 
 		QVector3D rootBoundsMin;
 		QVector3D rootBoundsMax;
-		for (int i = 0; i < std::min((int)Dim, 3); ++i)
+		for (int i = 0; i < 3; ++i)
 		{
 			rootBoundsMin[i] = root.bounds.min[i];
 			rootBoundsMax[i] = root.bounds.max[i];
 		}
 
-		ImplicitFunction<Dim>::m_boundsMin = rootBoundsMin;
-		ImplicitFunction<Dim>::m_boundsMax = rootBoundsMax;
+		ImplicitFunction<3>::m_boundsMin = rootBoundsMin;
+		ImplicitFunction<3>::m_boundsMax = rootBoundsMax;
 	}
 
 	packBVHData();
 }
 
-template <size_t Dim>
-VerticeSet<Dim>::~VerticeSet()
+
+VerticeSet::~VerticeSet()
 {
 	QOpenGLContext* context = QOpenGLContext::currentContext();
 	if (!context)
@@ -45,8 +44,7 @@ VerticeSet<Dim>::~VerticeSet()
 		gl->glDeleteBuffers(1, &m_bvhBuffer);
 }
 
-template <size_t Dim>
-float VerticeSet<Dim>::evaluateSDF(const Point& p) const
+float VerticeSet::evaluateSDF(const Point& p) const
 {
 	float distance = std::numeric_limits<float>::max();
 	for (const Point& vertex : vertices)
@@ -59,11 +57,8 @@ float VerticeSet<Dim>::evaluateSDF(const Point& p) const
 	return distance;
 }
 
-template <size_t Dim>
-std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
+std::string VerticeSet::buildGLSL(GLSLContext& ctx) const
 {
-	const std::string vectorType = "vec" + std::to_string(Dim);
-	const std::string dim = std::to_string(Dim);
 	const std::string functionName = "sampleVertexBVH";
 
 	ctx.uniforms.append("uniform samplerBuffer u_bvhData;");
@@ -73,21 +68,21 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 
 	// BVH bounds distance.
 
-	ctx.append("float bvhBoundsDistance(" + vectorType + " p, int nodeOffset) {");
-	ctx.append("    " + vectorType + " boundsMin;");
-	ctx.append("    " + vectorType + " boundsMax;");
-	ctx.append("    for (int i = 0; i < " + dim + "; ++i) {");
+	ctx.append("float bvhBoundsDistance(vec3 p, int nodeOffset) {");
+	ctx.append("    vec3 boundsMin;");
+	ctx.append("    vec3 boundsMax;");
+	ctx.append("    for (int i = 0; i < 3; ++i) {");
 	ctx.append("        boundsMin[i] = texelFetch(u_bvhData, nodeOffset + i).r;");
-	ctx.append("        boundsMax[i] = texelFetch(u_bvhData, nodeOffset + " + dim + " + i).r;");
+	ctx.append("        boundsMax[i] = texelFetch(u_bvhData, nodeOffset + 3 + i).r;");
 	ctx.append("    }");
-	ctx.append("    " + vectorType + " outside = max(max(boundsMin - p, p - boundsMax), " + vectorType + "(0.0));");
-	ctx.append("    float nodeRadius = texelFetch(u_bvhData, nodeOffset + " + std::to_string(Dim * 2 + 4) + ").r;");
+	ctx.append("    vec3 outside = max(max(boundsMin - p, p - boundsMax), vec3(0.0));");
+	ctx.append("    float nodeRadius = texelFetch(u_bvhData, nodeOffset + 10).r;");
 	ctx.append("    return length(outside) - nodeRadius;");
 	ctx.append("}");
 
 	// Main BVH traversal.
 
-	ctx.append("float " + functionName + "(" + vectorType + " p) {");
+	ctx.append("float " + functionName + "(vec3 p) {");
 	ctx.append("    if (u_bvhNodeCount == 0) return 1e20;");
 	ctx.append("    int stack[64];");
 	ctx.append("    int stackSize = 1;");
@@ -100,12 +95,12 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 
 	// Each node occupies (2 * Dim + 5) floats.
 
-	ctx.append("        int nodeOffset = nodeIndex * " + std::to_string(Dim * 2 + 5) + ";");
+	ctx.append("        int nodeOffset = nodeIndex * 11;");
 	ctx.append("        if (bvhBoundsDistance(p, nodeOffset) > bestDistance) continue;");
 
 	// Node metadata.
 
-	ctx.append("        int metadataOffset = nodeOffset + " + std::to_string(Dim * 2) + ";");
+	ctx.append("        int metadataOffset = nodeOffset + 6;");
 	ctx.append("        int leftChild = int(texelFetch(u_bvhData, metadataOffset).r);");
 	ctx.append("        int rightChild = int(texelFetch(u_bvhData, metadataOffset + 1).r);");
 	ctx.append("        int firstPrimitive = int(texelFetch(u_bvhData, metadataOffset + 2).r);");
@@ -120,19 +115,19 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 
 	// Vertex data.
 
-	ctx.append("                int vertexOffset = u_bvhVertexOffset + vertexIndex * " + std::to_string(Dim + 1) + ";");
-	ctx.append("                " + vectorType + " vertex;");
-	ctx.append("                for (int i = 0; i < " + dim + "; ++i)");
+	ctx.append("                int vertexOffset = u_bvhVertexOffset + vertexIndex * 4;");
+	ctx.append("                vec3 vertex;");
+	ctx.append("                for (int i = 0; i < 3; ++i)");
 	ctx.append("                    vertex[i] = texelFetch(u_bvhData, vertexOffset + i).r;");
-	ctx.append("                float vertexRadius = texelFetch(u_bvhData, vertexOffset + " + dim + ").r;");
+	ctx.append("                float vertexRadius = texelFetch(u_bvhData, vertexOffset + 3).r;");
 	ctx.append("                bestDistance = min(bestDistance, length(p - vertex) - vertexRadius);");
 	ctx.append("            }");
 	ctx.append("        } else {");
 
 	// Child nodes.
 
-	ctx.append("            int leftOffset = leftChild * " + std::to_string(Dim * 2 + 5) + ";");
-	ctx.append("            int rightOffset = rightChild * " + std::to_string(Dim * 2 + 5) + ";");
+	ctx.append("            int leftOffset = leftChild * 11;");
+	ctx.append("            int rightOffset = rightChild * 11;");
 	ctx.append("            if (leftChild >= 0 && bvhBoundsDistance(p, leftOffset) <= bestDistance && stackSize < 64)");
 	ctx.append("                stack[stackSize++] = leftChild;");
 	ctx.append("            if (rightChild >= 0 && bvhBoundsDistance(p, rightOffset) <= bestDistance && stackSize < 64)");
@@ -145,10 +140,9 @@ std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
 	return functionName;
 }
 
-template <size_t Dim>
-void VerticeSet<Dim>::setGLUniforms(QOpenGLShaderProgram& program) const
+void VerticeSet::setGLUniforms(QOpenGLShaderProgram& program) const
 {
-	ImplicitFunction<Dim>::setGLUniforms(program);
+	ImplicitFunction<3>::setGLUniforms(program);
 	ensureBVHBuffer();
 
 	constexpr int textureUnit = 5;
@@ -161,32 +155,30 @@ void VerticeSet<Dim>::setGLUniforms(QOpenGLShaderProgram& program) const
 	}
 	program.setUniformValue("u_bvhData", textureUnit);
 	program.setUniformValue("u_bvhNodeCount", static_cast<int>(nodes.size()));
-	program.setUniformValue("u_bvhVertexOffset", static_cast<int>(nodes.size() * (Dim * 2 + 5)));
-	program.setUniformValue("u_bvhPrimitiveOffset", static_cast<int>(nodes.size() * (Dim * 2 + 5) + vertices.size() * (Dim + 1)));
+	program.setUniformValue("u_bvhVertexOffset", static_cast<int>(nodes.size() * (3 * 2 + 5)));
+	program.setUniformValue("u_bvhPrimitiveOffset", static_cast<int>(nodes.size() * (3 * 2 + 5) + vertices.size() * (3 + 1)));
 }
 
-template <size_t Dim>
-const std::string VerticeSet<Dim>::getFragmentShader() const
+const std::string VerticeSet::getFragmentShader() const
 {
 	GLSLContext ctx;
 	const std::string rootFunction = buildGLSL(ctx);
-	return buildPolytopeFragmentShader(ctx, rootFunction, PolytopeShaderStyle::Node, Dim);
+	return buildPolytopeFragmentShader(ctx, rootFunction, PolytopeShaderStyle::Node);
 }
 
-template <size_t Dim>
-void VerticeSet<Dim>::packBVHData()
+void VerticeSet::packBVHData()
 {
 	m_packedData.clear();
 
 	m_packedData.reserve(
-		nodes.size() * (Dim * 2 + 5) +
-		vertices.size() * (Dim + 1) +
+		nodes.size() * (3 * 2 + 5) +
+		vertices.size() * (3 + 1) +
 		primitives.size()
 	);
 
 	const auto appendTexel = [this](Point p)
 		{
-			for (size_t i = 0; i < Dim; ++i)
+			for (size_t i = 0; i < 3; ++i)
 				m_packedData.push_back(p[i]);
 		};
 
@@ -212,8 +204,7 @@ void VerticeSet<Dim>::packBVHData()
 		m_packedData.push_back(static_cast<float>(primitive.index));
 }
 
-template <size_t Dim>
-void VerticeSet<Dim>::ensureBVHBuffer() const
+void VerticeSet::ensureBVHBuffer() const
 {
 	if (m_bvhBuffer || m_packedData.empty())
 		return;
@@ -237,6 +228,3 @@ void VerticeSet<Dim>::ensureBVHBuffer() const
 	gl->glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
-template class VerticeSet<2>;
-template class VerticeSet<3>;
-template class VerticeSet<4>;
