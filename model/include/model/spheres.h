@@ -63,10 +63,6 @@ public:
 		return fname;
 	}
 
-	const std::string getGLSL_parameters() const override
-	{
-		return std::string();
-	}
 
 	void setGLUniforms(QOpenGLShaderProgram& program) const override
 	{

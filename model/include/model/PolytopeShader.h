@@ -22,15 +22,6 @@ inline std::string buildPolytopeFragmentShader(
 		;
 
 
-	std::string vectorType;
-	switch (Dim)
-	{
-	case 2: vectorType = "vec2"; break;
-	case 3: vectorType = "vec3"; break;
-	case 4: vectorType = "vec4"; break;
-	default: throw std::invalid_argument("Unsupported dimension");
-	}
-
 
 	const std::string sdfEntry =
 		"float sampleSDF(vec3 p)\n"

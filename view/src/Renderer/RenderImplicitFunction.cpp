@@ -38,24 +38,10 @@ void RenderImplicitFunction<Dim>::initializeGLResources()
                 gl_Position = vec4(a_position, 0.0, 1.0);
             }
            )";
-        // Build fragment shader by inserting parameter declarations right
-        // after the #version directive provided by the fragment template.
+
+
         std::string fs = m_implicitFunction->getFragmentShader();
-        const std::string params = m_implicitFunction->getGLSL_parameters();
-        const std::string versionStr = "#version 330 core";
-        size_t vpos = fs.find(versionStr);
-        if (vpos != std::string::npos)
-        {
-            size_t newline = fs.find('\n', vpos);
-            size_t insertPos = (newline != std::string::npos) ? newline + 1 : vpos + versionStr.size();
-            fs.insert(insertPos, params);
-        }
-        else
-        {
-            // Fallback: prefix version and params
-            fs = versionStr + std::string("\n") + params + fs;
-        }
-        
+
 
         bool flag0 = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
         bool flag1 = m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs.c_str());

@@ -44,6 +44,19 @@ bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
 	return tmax > max(tmin, 0.0);
 }
 
+bool intersectSphere(vec3 ro, vec3 rd, vec3 center, float r)
+{
+	vec3 V = center - ro;
+
+	float projection = dot(V, rd);
+
+	float perpendicularSq =
+		dot(V, V) - projection * projection;
+
+	return 	projection >= 0.0f  // condition must be forward
+			&& perpendicularSq <= r * r;	// condition must be inside the sphere
+}
+
 vec3 estimateNormal(vec3 p)
 {
 	float e = 0.002;
@@ -115,7 +128,7 @@ void main()
 
 		if (abs(d) < u_epsilon)
 		{
-			FragColor = /*__POLYTOPE_HIT_SHADER__*/;
+			gl_FragColor = /*__POLYTOPE_HIT_SHADER__*/;
 
 			vec4 clip = u_projection * u_view * vec4(p, 1.0);
 			float ndcDepth = clip.z / clip.w;

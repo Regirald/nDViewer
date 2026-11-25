@@ -49,7 +49,6 @@ public:
 
     virtual const std::string getFragmentShader() const;
     virtual std::string buildGLSL(GLSLContext& ctx) const;
-    virtual const std::string getGLSL_parameters() const;
     virtual void setGLUniforms(QOpenGLShaderProgram& program) const;
 
     QVector3D m_boundsMin;
@@ -70,12 +69,6 @@ inline std::string ImplicitFunction<Dim>::buildGLSL(GLSLContext& ctx) const
     return std::string(sdf);
 };
 
-
-template <size_t Dim>
-inline const std::string ImplicitFunction<Dim>::getGLSL_parameters() const
-{
-    return std::string();
-}
 
 template <size_t Dim>
 inline void ImplicitFunction<Dim>::setGLUniforms(QOpenGLShaderProgram& m_program) const

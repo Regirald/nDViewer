@@ -4,6 +4,8 @@
 #include <QVector3D>
 
 
+/// DEPRECIATED FUNCTION
+
 class Sphere : public ImplicitFunction<3> {
 public:
 	Sphere(Vec<3, float> center = { 0.f, 0.f, 0.f }, float radius = 1.f)
@@ -33,16 +35,13 @@ public:
             u_center = ctx.makeUniformUnique("u_center", "vec3");
 
             ctx.append("float " + fname + "(vec3 p) {");
+            ctx.append("float " + fname + "(vec3 p) {");
             ctx.append("    return length(p - " + u_center + ") - " + u_radius + ";");
             ctx.append("}");
 
             return fname;
        }
 
-    const std::string getGLSL_parameters() const override
-    {
-        return std::string("uniform vec3 center;\nuniform float radius;\n");
-    }
 
     void setGLUniforms(QOpenGLShaderProgram& program) const override
     {

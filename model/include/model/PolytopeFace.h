@@ -199,11 +199,6 @@ public:
 	}
 
 
-	const std::string getGLSL_parameters() const override
-	{
-		return std::string();
-	}
-
 
 	// -------------------------------------------------------------------------
 	// Uniform upload
