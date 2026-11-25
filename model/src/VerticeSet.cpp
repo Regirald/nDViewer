@@ -52,7 +52,7 @@ float VerticeSet<Dim>::evaluateSDF(const Point& p) const
 }
 
 template <size_t Dim>
-std::string VerticeSet<Dim>::buildGLSL(GLSLContext& ctx) const
+std::string VerticeSet<Dim>::buildSDF(GLSLContext& ctx) const
 {
 	const std::string vectorType = "vec" + std::to_string(Dim);
 	const std::string dim = std::to_string(Dim);
@@ -165,9 +165,8 @@ void VerticeSet<Dim>::setGLUniforms(QOpenGLShaderProgram& program) const
 template <size_t Dim>
 const std::string VerticeSet<Dim>::getFragmentShader() const
 {
-	GLSLContext ctx;
-	const std::string rootFunction = buildGLSL(ctx);
-	return buildPolytopeFragmentShader(ctx, rootFunction, PolytopeShaderStyle::Node, Dim);
+	const std::string dstFunction = buildDistanceFunction();
+	return PolytopeShaderBuilder::buildFragmentShader(ctx, dstFunction, PolytopeShaderBuilder::PolytopeShaderStyle::Node, Dim);
 }
 
 

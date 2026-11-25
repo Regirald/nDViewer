@@ -1,6 +1,33 @@
 #pragma once
 #include "ImplicitFunction.h"
 
+
+static struct GLSLContext
+{
+    int counter = 0;
+
+    std::string makeName(const std::string& base)
+    {
+        return base + "_" + std::to_string(counter++);
+    }
+
+    std::string makeUniformUnique(std::string& uniforms, const std::string& base, const std::string& type)
+    {
+        std::string name = makeName(base);
+        uniforms += "uniform " + type + " " + name + ";\n";
+        return name;
+    }
+
+    std::string makeUniform(std::string& uniforms, const std::string& base, const std::string& type)
+    {
+        uniforms += "uniform " + type + " " + base + ";\n";
+        return base;
+    }
+
+
+};
+
+
 // helper smooth min implementation used by several operators
 static inline float smoothMinFloat(float a, float b, float k)
 {
@@ -42,10 +69,16 @@ public:
         return std::min(d1, d2);
     }
 
-    std::string buildGLSL(GLSLContext& ctx) const override
+    std::string buildSDF() const override
     {
-        std::string fA = m_a->buildGLSL(ctx);
-        std::string fB = m_b->buildGLSL(ctx);
+        //TODO buildUNiform/bulidSDF!!
+        GLSLContext::makeName(m_a->m_dstFunctionName);
+
+        std::string uA = m_a->buildUniforms();
+        std::string uB = m_b->buildUniforms();
+
+        std::string fA = m_a->buildSDF();
+        std::string fB = m_b->buildSDF();
 
         std::string fname = ctx.makeName("sdf_union");
 
@@ -126,10 +159,10 @@ public:
         return std::max(d1, d2);
     }
 
-    std::string buildGLSL(GLSLContext& ctx) const override
+    std::string buildSDF(GLSLContext& ctx) const override
     {
-        std::string fA = m_a->buildGLSL(ctx);
-        std::string fB = m_b->buildGLSL(ctx);
+        std::string fA = m_a->buildSDF(ctx);
+        std::string fB = m_b->buildSDF(ctx);
 
         std::string fname = ctx.makeName("sdf_intersection");
 
@@ -212,10 +245,10 @@ public:
         return std::max(d1, -d2);
     }
 
-    std::string buildGLSL(GLSLContext& ctx) const override
+    std::string buildSDF(GLSLContext& ctx) const override
     {
-        std::string fA = m_a->buildGLSL(ctx);
-        std::string fB = m_b->buildGLSL(ctx);
+        std::string fA = m_a->buildSDF(ctx);
+        std::string fB = m_b->buildSDF(ctx);
 
         std::string fname = ctx.makeName("sdf_difference");
 

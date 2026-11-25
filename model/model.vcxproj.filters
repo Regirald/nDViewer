@@ -74,10 +74,10 @@
     <ClInclude Include="include\model\PolytopeNodeLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\PolytopeShader.h">
+    <ClInclude Include="include\model\PolytopeShaderBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <None Include="include\model\PolytopeShader.glsl">
+    <None Include="include\model\PolytopeFragmentShader.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <ClInclude Include="include\model\VerticeSet.h">
@@ -88,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="include\model\AccelerationStructureBVH.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ShaderBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\GeneralFragmentShader.glsl">
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 #pragma once
 #include "ImplicitFunction.h"
-#include "PolytopeShader.h"
+#include "PolytopeShaderBuilder.h"
 #include <vector>
 #include <string>
 #include <limits>
@@ -43,7 +43,7 @@ public:
 		return dist - radius;
 	}
 
-	std::string buildGLSL(GLSLContext& ctx) const override
+	std::string buildSDF(GLSLContext& ctx) const override
 	{
 		std::string fname = ctx.makeName("sdf_edge");
 
@@ -81,8 +81,8 @@ public:
 	const std::string getFragmentShader() const override
 	{
 		GLSLContext ctx;
-		std::string rootFunc = buildGLSL(ctx);
-		return buildPolytopeFragmentShader(ctx, rootFunc, PolytopeShaderStyle::Edge);
+		std::string rootFunc = buildSDF(ctx);
+		return PolytopeShaderBuilder::buildFragmentShader(ctx, rootFunc, PolytopeShaderBuilder::PolytopeShaderStyle::Edge);
 	}
 
 	Point a;

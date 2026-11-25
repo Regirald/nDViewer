@@ -38,7 +38,7 @@ public:
 		return d;
 	}
 
-	std::string buildGLSL(GLSLContext& ctx) const override
+	std::string buildSDF(GLSLContext& ctx) const override
 	{
 		std::string fname = ctx.makeName("sdf_spheres");
 
@@ -83,7 +83,7 @@ public:
 	{
 		GLSLContext ctx;
 
-		std::string rootFunc = buildGLSL(ctx);
+		std::string rootFunc = buildSDF(ctx);
 
 		std::string sdfEntry =
 			"float sampleSDF(vec3 p)\n"
@@ -209,7 +209,7 @@ public:
 	std::vector<Point> centers;
 	std::vector<float> radii;
 
-	// mutable only so setGLUniforms can use them (buildGLSL is const)
+	// mutable only so setGLUniforms can use them (buildSDF is const)
 	mutable std::vector<std::string> mutable_u_centers;
 	mutable std::vector<std::string> mutable_u_radii;
 };

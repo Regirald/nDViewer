@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ImplicitFunction.h"
-#include "PolytopeShader.h"
+#include "PolytopeShaderBuilder.h"
 
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
@@ -31,7 +31,7 @@ public:
 
 	float evaluateSDF(const Point& p) const override;
 
-	std::string buildGLSL(GLSLContext& ctx) const override;
+	std::string buildSDF(GLSLContext& ctx) const override;
 
 	void setGLUniforms(QOpenGLShaderProgram& program) const override;
 

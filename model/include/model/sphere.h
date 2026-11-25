@@ -27,14 +27,13 @@ public:
     mutable std::string u_center;
 
 
-    std::string buildGLSL(GLSLContext& ctx) const override
+    std::string buildSDF(GLSLContext& ctx) const override
     {
 
             std::string fname = ctx.makeName("sdf_sphere");
             u_radius = ctx.makeUniformUnique("u_radius", "float");
             u_center = ctx.makeUniformUnique("u_center", "vec3");
 
-            ctx.append("float " + fname + "(vec3 p) {");
             ctx.append("float " + fname + "(vec3 p) {");
             ctx.append("    return length(p - " + u_center + ") - " + u_radius + ";");
             ctx.append("}");

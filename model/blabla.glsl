@@ -2,7 +2,7 @@
 #version 330 core
 
 in vec2 v_uv;
-out vec4 FragColor;
+out vec4 gl_FragColor;
 
 uniform vec3 u_cameraPos;
 uniform vec3 u_lightDir;
@@ -75,6 +75,19 @@ bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
 	return tmax > max(tmin, 0.0);
 }
 
+bool intersectSphere(vec3 ro, vec3 rd, vec3 center, float r)
+{
+	vec3 V = center - ro;
+
+	float projection = dot(V, rd);
+
+	float perpendicularSq =
+		dot(V, V) - projection * projection;
+
+	return 	projection >= 0.0f  // condition must be forward
+			&& perpendicularSq <= r * r;	// condition must be inside the sphere
+}
+
 vec3 estimateNormal(vec3 p)
 {
 	float e = 0.002;
@@ -86,6 +99,33 @@ vec3 estimateNormal(vec3 p)
 	));
 }
 
+vec4 shadeFace(vec3 p, vec3 rayDir)
+{
+	vec3 n = normalize(u_face_normal);
+	vec3 v = normalize(-rayDir);
+	vec3 l = normalize(u_lightDir);
+	vec3 r = reflect(-v, n);
+	float facingLight = max(dot(r, l), 0.0);
+	float broad = pow(facingLight, 8.0);
+	float sharp = pow(facingLight, 64.0);
+	vec3 baseColor = vec3(0.025, 0.08, 0.50);
+	vec3 reflectedColor = vec3(0.55, 0.72, 1.0);
+	vec3 color = baseColor;
+	color += reflectedColor * broad * 0.45;
+	color += vec3(0.9, 0.95, 1.0) * sharp * 0.5;
+	return vec4(color, 0.5);
+}
+
+vec4 shadeEdge(vec3 p, vec3 rayDir)
+{
+	vec3 n = estimateNormal(p);
+	vec3 rayDirReflected = reflect(rayDir, n);
+	float intensity = dot(u_lightDir, rayDirReflected);
+	vec3 white = vec3(0.85);
+	vec3 grey = vec3(0.75);
+	vec3 color = grey * (1.0 - intensity) + white * intensity;
+	return vec4(color, 1.0);
+}
 
 vec4 shadeNode(vec3 p, vec3 rayDir)
 {
