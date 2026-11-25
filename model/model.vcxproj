@@ -145,7 +145,6 @@
     <ClCompile Include="src\VerticeSet.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Circle.h" />
     <ClInclude Include="blabla.glsl" />
     <ClInclude Include="include\model\AccelerationStructureBVH.h" />
     <ClInclude Include="include\model\GeneralFragmentShader.glsl" />
@@ -161,13 +160,9 @@
     <ClInclude Include="include\model\ShaderBuilder.h" />
     <ClInclude Include="include\model\VerticeSet.h" />
     <None Include="include\model\PolytopeFragmentShader.glsl" />
-    <ClInclude Include="include\model\spheres.h" />
-    <ClInclude Include="include\model\TestFile.h" />
     <ClInclude Include="include\model\ToddCoxeter.h" />
     <ClInclude Include="include\model\ImplicitFunction.h" />
     <ClInclude Include="include\model\ImplicitFunctionOperator.h" />
-    <ClInclude Include="include\model\LevelSet.h" />
-    <ClInclude Include="include\model\Manifold.h" />
     <ClInclude Include="include\model\Mesh.h" />
     <ClInclude Include="include\model\sphere.h" />
   </ItemGroup>

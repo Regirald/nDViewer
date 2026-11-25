@@ -18,7 +18,6 @@
 
 #include "model/CoxeterPresentation.h"
 #include "model/ToddCoxeter.h"
-#include "model/TestFile.h"
 
 #include "core/SimplexGrid.h"
 #include "core/Resolution.h"
