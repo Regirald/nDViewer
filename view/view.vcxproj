@@ -172,6 +172,7 @@
     <ClCompile Include="src\Renderer\PolytopeNodeLightRenderer.cpp" />
     <ClCompile Include="src\Renderer\RenderBackground.cpp" />
     <ClCompile Include="src\Renderer\RenderImplicitFunction.cpp" />
+    <ClCompile Include="src\Renderer\RenderImplicitFunctionSet.cpp" />
     <ClCompile Include="src\Renderer\RenderingManager.cpp" />
     <ClCompile Include="src\Renderer\RenderMesh.cpp" />
     <ClCompile Include="src\Renderer\PolytopeRenderer.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="include\view\Renderer\RenderBackground.h" />
     <ClInclude Include="include\view\Renderer\RenderContext.h" />
     <ClInclude Include="include\view\Renderer\Renderer.h" />
+    <ClInclude Include="include\view\Renderer\RenderImplicitFunctionSet.h" />
     <ClInclude Include="include\view\Renderer\RenderingManager.h" />
     <ClInclude Include="include\view\Renderer\RenderMesh.h" />
     <ClInclude Include="include\view\Renderer\PolytopeRenderer.h" />

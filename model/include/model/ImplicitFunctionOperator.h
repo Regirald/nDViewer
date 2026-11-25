@@ -49,7 +49,8 @@ public:
         std::shared_ptr<ImplicitFunction<Dim>> b,
         bool smooth = false,
         float k = 0.0f)
-        : m_a(a), m_b(b), m_smooth(smooth), m_k(k) {
+        : m_a(a), m_b(b), m_smooth(smooth), m_k(k) 
+    {
         this->m_boundsMin = QVector3D(
             std::min(a->m_boundsMin.x(), b->m_boundsMin.x()),
             std::min(a->m_boundsMin.y(), b->m_boundsMin.y()),
@@ -58,6 +59,21 @@ public:
             std::max(a->m_boundsMax.x(), b->m_boundsMax.x()),
             std::max(a->m_boundsMax.y(), b->m_boundsMax.y()),
             std::max(a->m_boundsMax.z(), b->m_boundsMax.z()));
+
+        m_a->m_dstFunctionName = GLSLContext::makeName(m_a->m_dstFunctionName);
+        m_b->m_dstFunctionName = GLSLContext::makeName(m_b->m_dstFunctionName);
+        this->m_dstFunctionName = GLSLContext::makeName("sdf_union");
+
+        this->m_uniformsNames.push_back(GLSLContext::makeName("u_k"));
+
+        for (auto& name : m_a->m_uniformsNames)
+            name = GLSLContext::makeName(name);
+
+        for (auto& name : m_b->m_uniformsNames)
+            name = GLSLContext::makeName(name);
+
+        for (auto& name : this->m_uniformsNames)
+            name = GLSLContext::makeName(name);
     }
 
     float evaluateSDF(const Point& p) const override
@@ -69,44 +85,49 @@ public:
         return std::min(d1, d2);
     }
 
-    std::string buildSDF() const override
+    inline const std::string buildUniforms() const
     {
-        //TODO buildUNiform/bulidSDF!!
-        GLSLContext::makeName(m_a->m_dstFunctionName);
-
         std::string uA = m_a->buildUniforms();
         std::string uB = m_b->buildUniforms();
+
+		std::string uniforms0 = ImplicitFunction<Dim>::buildUniforms();
+        std::string uniforms1 = "uniform float " + this->m_uniformsNames.back() + ";\n";
+
+        return uA + uB + uniforms0 + uniforms1;
+    };
+
+    std::string buildSDF() const override
+    {
 
         std::string fA = m_a->buildSDF();
         std::string fB = m_b->buildSDF();
 
-        std::string fname = ctx.makeName("sdf_union");
+        std::string unionSDF = "float " + this->m_dstFunctionName + "(vec3 p)\n"
+			"{\n"
+			"    float d1 = " + m_a->m_dstFunctionName + "(p);\n"
+			"    float d2 = " + m_b->m_dstFunctionName + "(p);\n";
 
-        ctx.append("float " + fname + "(vec3 p) {");
-        ctx.append("    float d1 = " + fA + "(p);");
-        ctx.append("    float d2 = " + fB + "(p);");
         if (m_smooth)
         {
-            u_k = ctx.makeUniformUnique("u_k", "float");
-            ctx.append("    float k = " + u_k + ";");
-            ctx.append("    if (k <= 0.0) return min(d1, d2);");
-            ctx.append("    float h = clamp(0.5 + 0.5*(d2 - d1)/k, 0.0, 1.0);");
-            ctx.append("    return mix(d2, d1, h) - k*h*(1.0 - h);");
+            unionSDF.append("    float k = float " + this->m_uniformsNames.back() + ";\n");
+            unionSDF.append("    if (k <= 0.0) return min(d1, d2);\n");
+            unionSDF.append("    float h = clamp(0.5 + 0.5*(d2 - d1)/k, 0.0, 1.0);\n");
+            unionSDF.append("    return mix(d2, d1, h) - k*h*(1.0 - h);\n");
         }
         else
         {
-            ctx.append("    return min(d1, d2);");
+            unionSDF.append("    return min(d1, d2);\n");
         }
-        ctx.append("}");
+        unionSDF.append("}\n");
 
-        return fname;
+        return fA + fB + unionSDF;
     }
     void setGLUniforms(QOpenGLShaderProgram& program) const override
     {
         m_a->setGLUniforms(program);
         m_b->setGLUniforms(program);
         if (m_smooth)
-            program.setUniformValue(u_k.c_str(), m_k);
+            program.setUniformValue(this->m_uniformsNames.back(), m_k);
         ImplicitFunction<3>::setGLUniforms(program); //overwrite the boundaries
 
     }
@@ -115,7 +136,6 @@ private:
     std::shared_ptr<ImplicitFunction<Dim>> m_a, m_b;
     bool m_smooth = false;
     float m_k = 0.0f;
-    mutable std::string u_k;
 };
 
 template <size_t Dim>
@@ -148,6 +168,21 @@ public:
             std::max(a->m_boundsMax.x(), b->m_boundsMax.x()),
             std::max(a->m_boundsMax.y(), b->m_boundsMax.y()),
             std::max(a->m_boundsMax.z(), b->m_boundsMax.z()));
+
+        m_a->m_dstFunctionName = GLSLContext::makeName(m_a->m_dstFunctionName);
+        m_b->m_dstFunctionName = GLSLContext::makeName(m_b->m_dstFunctionName);
+        this->m_dstFunctionName = GLSLContext::makeName("sdf_intersection");
+
+        this->m_uniformsNames.push_back(GLSLContext::makeName("u_k"));
+
+        for (auto& name : m_a->m_uniformsNames)
+            name = GLSLContext::makeName(name);
+
+        for (auto& name : m_b->m_uniformsNames)
+            name = GLSLContext::makeName(name);
+
+        for (auto& name : this->m_uniformsNames)
+            name = GLSLContext::makeName(name);
     }
 
     float evaluateSDF(const Point& p) const override
@@ -159,33 +194,42 @@ public:
         return std::max(d1, d2);
     }
 
-    std::string buildSDF(GLSLContext& ctx) const override
+    inline const std::string buildUniforms() const override
     {
-        std::string fA = m_a->buildSDF(ctx);
-        std::string fB = m_b->buildSDF(ctx);
+        std::string uA = m_a->buildUniforms();
+        std::string uB = m_b->buildUniforms();
 
-        std::string fname = ctx.makeName("sdf_intersection");
+        std::string uniforms0 = ImplicitFunction<Dim>::buildUniforms();
+        std::string uniforms1 = "uniform float " + this->m_uniformsNames.back() + ";\n";
 
-        ctx.append("float " + fname + "(vec3 p) {");
-        ctx.append("    float d1 = " + fA + "(p);");
-        ctx.append("    float d2 = " + fB + "(p);");
+        return uA + uB + uniforms0 + uniforms1;
+    }
+
+    std::string buildSDF() const override
+    {
+        std::string fA = m_a->buildSDF();
+        std::string fB = m_b->buildSDF();
+
+        std::string intersectionSDF = "float " + this->m_dstFunctionName + "(vec3 p)\n"
+            "{\n"
+            "    float d1 = " + m_a->m_dstFunctionName + "(p);\n"
+            "    float d2 = " + m_b->m_dstFunctionName + "(p);\n";
         if (m_smooth)
         {
-            u_k = ctx.makeUniformUnique("u_k", "float");
-            ctx.append("    float k = " + u_k + ";");
-            ctx.append("    if (k <= 0.0) return max(d1, d2);");
-            ctx.append("    float nd1 = -d1; float nd2 = -d2;");
-            ctx.append("    float h = clamp(0.5 + 0.5*(nd2 - nd1)/k, 0.0, 1.0);");
-            ctx.append("    float s = mix(nd2, nd1, h) - k*h*(1.0 - h);");
-            ctx.append("    return -s;");
+            intersectionSDF.append("    float k = " + this->m_uniformsNames.back() + ";\n");
+            intersectionSDF.append("    if (k <= 0.0) return max(d1, d2);\n");
+            intersectionSDF.append("    float nd1 = -d1; float nd2 = -d2;\n");
+            intersectionSDF.append("    float h = clamp(0.5 + 0.5*(nd2 - nd1)/k, 0.0, 1.0);\n");
+            intersectionSDF.append("    float s = mix(nd2, nd1, h) - k*h*(1.0 - h);\n");
+            intersectionSDF.append("    return -s;\n");
         }
         else
         {
-            ctx.append("    return max(d1, d2);");
+            intersectionSDF.append("    return max(d1, d2);\n");
         }
-        ctx.append("}");
+        intersectionSDF.append("}\n");
 
-        return fname;
+        return fA + fB + intersectionSDF;
     }
 
     void setGLUniforms(QOpenGLShaderProgram& program) const override
@@ -193,7 +237,7 @@ public:
         m_a->setGLUniforms(program);
         m_b->setGLUniforms(program);
         if (m_smooth)
-            program.setUniformValue(u_k.c_str(), m_k);
+            program.setUniformValue(this->m_uniformsNames.back().c_str(), m_k);
         ImplicitFunction<3>::setGLUniforms(program);
     }
 
@@ -201,7 +245,6 @@ private:
     std::shared_ptr<ImplicitFunction<Dim>> m_a, m_b;
     bool m_smooth = false;
     float m_k = 0.0f;
-    mutable std::string u_k;
 };
 
 template <size_t Dim>
@@ -245,33 +288,42 @@ public:
         return std::max(d1, -d2);
     }
 
-    std::string buildSDF(GLSLContext& ctx) const override
+    inline const std::string buildUniforms() const override
     {
-        std::string fA = m_a->buildSDF(ctx);
-        std::string fB = m_b->buildSDF(ctx);
+        std::string uA = m_a->buildUniforms();
+        std::string uB = m_b->buildUniforms();
 
-        std::string fname = ctx.makeName("sdf_difference");
+        std::string uniforms0 = ImplicitFunction<Dim>::buildUniforms();
+        std::string uniforms1 = "uniform float " + this->m_uniformsNames.back() + ";\n";
 
-        ctx.append("float " + fname + "(vec3 p) {");
-        ctx.append("    float d1 = " + fA + "(p);");
-        ctx.append("    float d2 = " + fB + "(p);");
+        return uA + uB + uniforms0 + uniforms1;
+    }
+
+    std::string buildSDF() const override
+    {
+        std::string fA = m_a->buildSDF();
+        std::string fB = m_b->buildSDF();
+
+        std::string differenceSDF = "float " + this->m_dstFunctionName + "(vec3 p)\n"
+            "{\n"
+            "    float d1 = " + m_a->m_dstFunctionName + "(p);\n"
+            "    float d2 = " + m_b->m_dstFunctionName + "(p);\n";
         if (m_smooth)
         {
-            u_k = ctx.makeUniformUnique("u_k", "float");
-            ctx.append("    float k = " + u_k + ";");
-            ctx.append("    if (k <= 0.0) return max(d1, -d2);");
-            ctx.append("    float nd1 = -d1; float nd2 = d2;");
-            ctx.append("    float h = clamp(0.5 + 0.5*(nd2 - nd1)/k, 0.0, 1.0);");
-            ctx.append("    float s = mix(nd2, nd1, h) - k*h*(1.0 - h);");
-            ctx.append("    return -s;");
+            differenceSDF.append("    float k = " + this->m_uniformsNames.back() + ";\n");
+            differenceSDF.append("    if (k <= 0.0) return max(d1, -d2);\n");
+            differenceSDF.append("    float nd1 = -d1; float nd2 = d2;\n");
+            differenceSDF.append("    float h = clamp(0.5 + 0.5*(nd2 - nd1)/k, 0.0, 1.0);\n");
+            differenceSDF.append("    float s = mix(nd2, nd1, h) - k*h*(1.0 - h);\n");
+            differenceSDF.append("    return -s;\n");
         }
         else
         {
-            ctx.append("    return max(d1, -d2);");
+            differenceSDF.append("    return max(d1, -d2);\n");
         }
-        ctx.append("}");
+        differenceSDF.append("}\n");
 
-        return fname;
+        return fA + fB + differenceSDF;
     }
 
     void setGLUniforms(QOpenGLShaderProgram& program) const override
@@ -279,7 +331,7 @@ public:
         m_a->setGLUniforms(program);
         m_b->setGLUniforms(program);
         if (m_smooth)
-            program.setUniformValue(u_k.c_str(), m_k);
+            program.setUniformValue(this->m_uniformsNames.back().c_str(), m_k);
         ImplicitFunction<3>::setGLUniforms(program);
     }
 
@@ -287,7 +339,6 @@ private:
     std::shared_ptr<ImplicitFunction<Dim>> m_a, m_b;
     bool m_smooth = false;
     float m_k = 0.0f;
-    mutable std::string u_k;
 };
 
 template <size_t Dim>

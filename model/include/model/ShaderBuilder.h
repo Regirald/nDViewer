@@ -18,15 +18,24 @@ public:
 	};
 
 
-	static std::string buildFragmentShader(	const std::string& dstFunction)
+	static std::string buildVertexShader()
+	{
+		std::string shader =
+#include "GeneralVertexShader.glsl"
+			;
+		return shader;
+	}
+
+	static std::string buildFragmentShader(	const std::string& dstFunction, const std::string& uniforms)
 	{
 		std::string shader =
 #include "GeneralFragmentShader.glsl"
 			;
 
 
+		replaceMarker(shader, "/*__POLYTOPE_UNIFORMS__*/", uniforms);
 		replaceMarker(shader, "/*__POLYTOPE_DST_FUNCTION__*/", dstFunction);
 
 		return shader;
 	}
-};
+

@@ -16,14 +16,15 @@ public:
 
     virtual float evaluateSDF(const Point& p) const = 0;
 
-    virtual const std::string getFragmentShader() const;
-    virtual const std::string getVertexShader() const;
     virtual const std::string buildSDF() const;
     virtual const std::string buildUniforms() const;
+    virtual const std::string getVertexShader() const;
+    virtual const std::string getFragmentShader() const;
     virtual void setGLUniforms(QOpenGLShaderProgram& program) const;
 
     QVector3D m_boundsMin;
     QVector3D m_boundsMax;
+
 	std::string m_dstFunctionName = "sampleSDF";
 	std::vector<std::string> m_uniformsNames = {"u_boundsMin", "u_boundsMax"};
 };
@@ -64,8 +65,17 @@ inline void ImplicitFunction<Dim>::setGLUniforms(QOpenGLShaderProgram& m_program
 
 
 template <size_t Dim>
+inline const std::string ImplicitFunction<Dim>::getVertexShader() const
+{
+    return ShaderBuilder::buildVertexShader();
+}
+
+
+
+template <size_t Dim>
 inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
 {
     std::string dstFunction = buildSDF();
-    return ShaderBuilder::buildFragmentShader(dstFunction);
+    std::string uniforms = buildUniforms();
+    return ShaderBuilder::buildFragmentShader(dstFunction, uniforms);
 }

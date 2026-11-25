@@ -17,27 +17,25 @@
 #include <vector>
 
 template <size_t Dim>
-class VerticeSet : public ImplicitFunction<Dim>
+class VerticeSet : public ImplicitFunction<Dim>  // TODO : IMPLICITSSSS FUNCTIONSSS
 {
 public:
 	using Point = typename ImplicitFunction<Dim>::Point;
 
 
 
-	VerticeSet(
-		std::vector<Point> vertices,
-		float radius);
+	VerticeSet(std::vector<Point> vertices, float radius);
 
 
 	float evaluateSDF(const Point& p) const override;
-
-	std::string buildSDF(GLSLContext& ctx) const override;
-
+	const std::string buildSDF() const override;
+	const std::string buildUniforms() const override;
+	const std::string getFragmentShader() const override;
+	const std::string getVertexShader() const override;
 	void setGLUniforms(QOpenGLShaderProgram& program) const override;
 
-	const std::string getFragmentShader() const override;
 
-	std::vector<Point> vertices;
+	Point vertex;
 	float radius;
 
 };

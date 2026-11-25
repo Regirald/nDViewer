@@ -14,36 +14,17 @@ RenderImplicitFunction<Dim>::RenderImplicitFunction(std::unique_ptr<ImplicitFunc
 template<size_t Dim>
 void RenderImplicitFunction<Dim>::initializeGLResources()
 {
-    if (!m_implicitFunction)
-        return;
-
-    QOpenGLContext* ctx = QOpenGLContext::currentContext();
-    gl = ctx->extraFunctions();
+    gl = QOpenGLContext::currentContext()->extraFunctions();
     gl->initializeOpenGLFunctions();
 
-    // -------------------------
-    // Compile shaders
-    // -------------------------
+
     if (!m_program.isLinked())
     {
-        const char* vs = R"(
-            #version 330 core
-
-            layout(location = 0) in vec2 a_position;
-            out vec2 v_uv;
-
-            void main()
-            {
-                v_uv = a_position * 0.5 + 0.5;
-                gl_Position = vec4(a_position, 0.0, 1.0);
-            }
-           )";
-
-
+        std::string vs = m_implicitFunction->getVertexShader();
         std::string fs = m_implicitFunction->getFragmentShader();
 
 
-        bool flag0 = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
+        bool flag0 = m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs.c_str());
         bool flag1 = m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs.c_str());
         bool flag2 = m_program.link();
 
@@ -84,10 +65,7 @@ void RenderImplicitFunction<Dim>::render(const ndv::RenderContext& context)
     if (!m_initialized)
         initializeGLResources();
 
-    if (!m_initialized)
-        return;
-
-    bool truc = m_program.bind();
+    assert(m_program.bind());
 
 
     // Let implicit function upload its uniforms

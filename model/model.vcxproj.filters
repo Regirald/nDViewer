@@ -95,5 +95,11 @@
     <ClInclude Include="include\model\GeneralFragmentShader.glsl">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\ImplicitFunctionSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\GeneralVertexShader.glsl">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

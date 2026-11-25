@@ -18,6 +18,7 @@ uniform float u_maxDistance;
 uniform int u_maxSteps;
 uniform float u_epsilon;
 
+/*__POLYTOPE_UNIFORMS__*/
 
 /*__POLYTOPE_DST_FUNCTION__*/
 
