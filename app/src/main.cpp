@@ -15,6 +15,7 @@
 #include "model/Sphere.h"
 #include "model/Circle.h"
 #include "model/Mesh.h"
+#include "model/ImplicitFunctionOperator.h"
 
 #include "model/CoxeterPresentation.h"
 #include "model/ToddCoxeter.h"

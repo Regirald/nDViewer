@@ -85,7 +85,7 @@ public:
         return std::min(d1, d2);
     }
 
-    inline const std::string buildUniforms() const
+    inline const std::string buildUniforms() const override
     {
         std::string uA = m_a->buildUniforms();
         std::string uB = m_b->buildUniforms();
@@ -96,7 +96,7 @@ public:
         return uA + uB + uniforms0 + uniforms1;
     };
 
-    std::string buildSDF() const override
+    inline const std::string buildSDF() const override
     {
 
         std::string fA = m_a->buildSDF();
@@ -205,7 +205,7 @@ public:
         return uA + uB + uniforms0 + uniforms1;
     }
 
-    std::string buildSDF() const override
+    inline const std::string buildSDF() const override
     {
         std::string fA = m_a->buildSDF();
         std::string fB = m_b->buildSDF();
@@ -299,7 +299,7 @@ public:
         return uA + uB + uniforms0 + uniforms1;
     }
 
-    std::string buildSDF() const override
+    inline const std::string buildSDF() const override
     {
         std::string fA = m_a->buildSDF();
         std::string fB = m_b->buildSDF();

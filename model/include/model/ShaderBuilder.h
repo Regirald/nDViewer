@@ -26,7 +26,7 @@ public:
 		return shader;
 	}
 
-	static std::string buildFragmentShader(const std::string& uniforms,	const std::string& dstFunction)
+	static std::string buildFragmentShader(const std::string& uniforms, const std::string& dstFunction)
 	{
 		std::string shader =
 #include "GeneralFragmentShader.glsl"
@@ -39,3 +39,4 @@ public:
 		return shader;
 	}
 
+};

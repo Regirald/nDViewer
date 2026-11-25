@@ -3,6 +3,8 @@
 #include "model/ImplicitFunction.h"
 
 #include <string>
+#include <vector>
+#include <memory>
 #include <QOpenGLShaderProgram>
 
 
@@ -24,6 +26,6 @@ public:
 
 
 
-    std::vector<ImplicitFunction> m_implicitFunctions;
+    std::vector<std::shared_ptr<ImplicitFunction<Dim>>> m_implicitFunctions;
 };
 
