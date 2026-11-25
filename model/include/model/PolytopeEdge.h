@@ -14,6 +14,9 @@ public:
 	PolytopeEdge(const std::pair<Point, Point>& segment, float r)
 		: a(segment.first), b(segment.second), radius(r)
 	{
+		m_uniformsNames.push_back("u_p0");
+		m_uniformsNames.push_back("u_p1");
+		m_uniformsNames.push_back("u_radius");
 		// initialize bounds
 		m_boundsMin[0] = std::min(m_boundsMin[0], std::min(a[0], b[0]) - radius);
 		m_boundsMin[1] = std::min(m_boundsMin[1], std::min(a[1], b[1]) - radius);
@@ -43,53 +46,43 @@ public:
 		return dist - radius;
 	}
 
-	std::string buildSDF(GLSLContext& ctx) const override
+	const std::string buildSDF() const override
 	{
-		std::string fname = ctx.makeName("sdf_edge");
+		return "float " + m_dstFunctionName + "(vec3 p) {\n"
+			"    vec3 a = " + m_uniformsNames[2] + ";\n"
+			"    vec3 b = " + m_uniformsNames[3] + ";\n"
+			"    vec3 ab = b - a;\n"
+			"    float c2 = dot(ab, ab);\n"
+			"    float t = c2 > 1e-8 ? clamp(dot(p - a, ab) / c2, 0.0, 1.0) : 0.0;\n"
+			"    return length(p - (a + t * ab)) - " + m_uniformsNames[4] + ";\n"
+			"}\n";
+	}
 
-		mutable_u_p0 = ctx.makeUniformUnique("u_p0", "vec3");
-		mutable_u_p1 = ctx.makeUniformUnique("u_p1", "vec3");
-		mutable_u_r = ctx.makeUniformUnique("u_radius", "float");
-
-		ctx.append("float " + fname + "(vec3 p) {");
-		ctx.append("    vec3 a = " + mutable_u_p0 + ";");
-		ctx.append("    vec3 b = " + mutable_u_p1 + ";");
-		ctx.append("    vec3 ab = b - a;");
-		ctx.append("    vec3 ap = p - a;");
-		ctx.append("    float c1 = dot(ab, ap);");
-		ctx.append("    float c2 = dot(ab, ab);");
-		ctx.append("    float t = 0.0;");
-		ctx.append("    if (c2 > 1e-8) t = clamp(c1 / c2, 0.0, 1.0);");
-		ctx.append("    vec3 proj = a + t * ab;");
-		ctx.append("    float dist = length(p - proj);");
-		ctx.append("    return dist - " + mutable_u_r + ";");
-		ctx.append("}");
-
-		return fname;
+	const std::string buildUniforms() const override
+	{
+		return ImplicitFunction<3>::buildUniforms()
+			+ "uniform vec3 " + m_uniformsNames[2] + ";\n"
+			+ "uniform vec3 " + m_uniformsNames[3] + ";\n"
+			+ "uniform float " + m_uniformsNames[4] + ";\n";
 	}
 
 
 	void setGLUniforms(QOpenGLShaderProgram& program) const override
 	{
 		ImplicitFunction<3>::setGLUniforms(program);
-		program.setUniformValue(mutable_u_p0.c_str(), QVector3D(a[0], a[1], a[2]));
-		program.setUniformValue(mutable_u_p1.c_str(), QVector3D(b[0], b[1], b[2]));
-		program.setUniformValue(mutable_u_r.c_str(), radius);
+		program.setUniformValue(m_uniformsNames[2].c_str(), QVector3D(a[0], a[1], a[2]));
+		program.setUniformValue(m_uniformsNames[3].c_str(), QVector3D(b[0], b[1], b[2]));
+		program.setUniformValue(m_uniformsNames[4].c_str(), radius);
 	}
 
 
 	const std::string getFragmentShader() const override
 	{
-		GLSLContext ctx;
-		std::string rootFunc = buildSDF(ctx);
-		return PolytopeShaderBuilder::buildFragmentShader(ctx, rootFunc, PolytopeShaderBuilder::PolytopeShaderStyle::Edge);
+		return PolytopeShaderBuilder::buildFragmentShader(buildUniforms(), buildSDF(), PolytopeShaderBuilder::PolytopeShaderStyle::Edge);
 	}
 
 	Point a;
 	Point b;
 	float radius;
 
-	mutable std::string mutable_u_p0;
-	mutable std::string mutable_u_p1;
-	mutable std::string mutable_u_r;
 };

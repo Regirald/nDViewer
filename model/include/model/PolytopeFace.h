@@ -54,6 +54,11 @@ public:
 		// Reorder polygon vertices to ensure consistent winding.
 		reorderFaceConvexHull();
 
+		m_uniformsNames.resize(2 + m_faceVertices.size() + 1);
+		for (size_t j = 0; j < m_faceVertices.size(); ++j)
+			m_uniformsNames[2 + j] = "u_face_vertex_" + std::to_string(j);
+		m_uniformsNames.back() = "u_face_normal";
+
 		// Compute face normal (or default if degenerate).
 		if (m_faceVertices.size() < 3)
 		{
@@ -145,57 +150,53 @@ public:
 	// GLSL generation for this face.
 	// -------------------------------------------------------------------------
 
-	std::string buildSDF(GLSLContext& ctx) const override
+	const std::string buildSDF() const override
 	{
-		std::string fname = ctx.makeName("sdf_face");
-
-		// One uniform per vertex.
-		mutable_u_vertices.clear();
-		mutable_u_normal.clear();
-
-		mutable_u_vertices.resize(m_faceVertices.size());
-		for (size_t j = 0; j < m_faceVertices.size(); ++j)
-			mutable_u_vertices[j] = ctx.makeUniformUnique("u_face_vertex", "vec3");
-
-		mutable_u_normal = "u_face_normal";
-
-		ctx.append("float " + fname + "(vec3 p) {");
-		ctx.append("    vec3 n = normalize(" + mutable_u_normal + ");");
-		ctx.append("    vec3 a = " + mutable_u_vertices[0] + ";");
-		ctx.append("    float planeDist = dot(p - a, n);");
-		ctx.append("    vec3 q = p - planeDist * n;");
-		ctx.append("    float edgeDist2 = 1e30;");
-		ctx.append("    bool inside = true;");
+		std::string source = "float " + m_dstFunctionName + "(vec3 p) {\n";
+		source += "    vec3 n = normalize(" + m_uniformsNames.back() + ");\n";
+		source += "    vec3 a = " + m_uniformsNames[2] + ";\n";
+		source += "    float planeDist = dot(p - a, n);\n";
+		source += "    vec3 q = p - planeDist * n;\n";
+		source += "    float edgeDist2 = 1e30;\n";
+		source += "    bool inside = true;\n";
 
 		for (size_t j = 0; j < m_faceVertices.size(); ++j)
 		{
 			size_t next = (j + 1) % m_faceVertices.size();
-			std::string aName = mutable_u_vertices[j];
-			std::string bName = mutable_u_vertices[next];
+			const std::string& aName = m_uniformsNames[2 + j];
+			const std::string& bName = m_uniformsNames[2 + next];
 
-			ctx.append("    {");
-			ctx.append("        vec3 va = " + aName + ";");
-			ctx.append("        vec3 vb = " + bName + ";");
-			ctx.append("        vec3 edge = vb - va;");
-			ctx.append("        vec3 v = q - va;");
-			ctx.append("        float edgeLen2 = dot(edge, edge);");
-			ctx.append("        float t = 0.0;");
-			ctx.append("        if (edgeLen2 > 1e-12)");
-			ctx.append("            t = clamp(dot(v, edge) / edgeLen2, 0.0, 1.0);");
-			ctx.append("        vec3 closest = va + t * edge;");
-			ctx.append("        vec3 diff = q - closest;");
-			ctx.append("        edgeDist2 = min(edgeDist2, dot(diff, diff));");
-			ctx.append("        if (dot(cross(edge, v), n) < -1e-6)");
-			ctx.append("            inside = false;");
-			ctx.append("    }");
+			source += "    {\n";
+			source += "        vec3 va = " + aName + ";\n";
+			source += "        vec3 vb = " + bName + ";\n";
+			source += "        vec3 edge = vb - va;\n";
+			source += "        vec3 v = q - va;\n";
+			source += "        float edgeLen2 = dot(edge, edge);\n";
+			source += "        float t = 0.0;\n";
+			source += "        if (edgeLen2 > 1e-12)\n";
+			source += "            t = clamp(dot(v, edge) / edgeLen2, 0.0, 1.0);\n";
+			source += "        vec3 closest = va + t * edge;\n";
+			source += "        vec3 diff = q - closest;\n";
+			source += "        edgeDist2 = min(edgeDist2, dot(diff, diff));\n";
+			source += "        if (dot(cross(edge, v), n) < -1e-6)\n";
+			source += "            inside = false;\n";
+			source += "    }\n";
 		}
 
-		ctx.append("    if (inside)");
-		ctx.append("        return abs(planeDist);");
-		ctx.append("    return sqrt(planeDist * planeDist + edgeDist2);");
-		ctx.append("}");
+		source += "    if (inside)\n";
+		source += "        return abs(planeDist);\n";
+		source += "    return sqrt(planeDist * planeDist + edgeDist2);\n";
+		source += "}\n";
+		return source;
+	}
 
-		return fname;
+	const std::string buildUniforms() const override
+	{
+		std::string uniforms = ImplicitFunction<3>::buildUniforms();
+		for (size_t j = 0; j < m_faceVertices.size(); ++j)
+			uniforms += "uniform vec3 " + m_uniformsNames[2 + j] + ";\n";
+		uniforms += "uniform vec3 " + m_uniformsNames.back() + ";\n";
+		return uniforms;
 	}
 
 
@@ -212,12 +213,12 @@ public:
 		{
 			const Point& p = m_faceVertices[j];
 			program.setUniformValue(
-				mutable_u_vertices[j].c_str(),
+				m_uniformsNames[2 + j].c_str(),
 				QVector3D(p[0], p[1], p[2]));
 		}
 
 		program.setUniformValue(
-			mutable_u_normal.c_str(),
+			m_uniformsNames.back().c_str(),
 			QVector3D(m_faceNormal[0], m_faceNormal[1], m_faceNormal[2]));
 	}
 
@@ -228,9 +229,8 @@ public:
 
 	const std::string getFragmentShader() const override
 	{
-		GLSLContext ctx;
-		std::string rootFunc = buildSDF(ctx);
-		return PolytopeShaderBuilder::buildFragmentShader(ctx, rootFunc, PolytopeShaderBuilder::PolytopeShaderStyle::Face);
+		return PolytopeShaderBuilder::buildFragmentShader(buildUniforms(), buildSDF(), PolytopeShaderBuilder::PolytopeShaderStyle::Face);
+
 	}
 
 
@@ -243,9 +243,6 @@ private:
 	Point m_faceNormal;
 
 	// Generated GLSL uniform names
-	mutable std::vector<std::string> mutable_u_vertices;
-	mutable std::string mutable_u_normal;
-
 	// Reorder a single face's vertices to follow a planar angular ordering
 	// around the face centroid.
 	void reorderFaceConvexHull()

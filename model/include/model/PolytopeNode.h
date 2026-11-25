@@ -15,6 +15,8 @@ public:
 	PolytopeNode(const Point& node, float radius)
 		: node(node), radius(radius)
 	{
+		m_uniformsNames.push_back("u_node");
+		m_uniformsNames.push_back("u_radius");
 		// initialize m_Bounds
 		m_boundsMin[0] = std::min(m_boundsMin[0], node[0] - radius);
 		m_boundsMin[1] = std::min(m_boundsMin[1], node[1] - radius);
@@ -34,40 +36,35 @@ public:
 		return dist - radius;
 	}
 
-	std::string buildSDF(GLSLContext& ctx) const override
+	const std::string buildSDF() const override
 	{
-		std::string fname = ctx.makeName("sdf_node");
+		return "float " + m_dstFunctionName + "(vec3 p) {\n"
+			"    vec3 delta = p - " + m_uniformsNames[2] + ";\n"
+			"    return length(delta) - " + m_uniformsNames[3] + ";\n"
+			"}\n";
+	}
 
-		mutable_u_p = ctx.makeUniformUnique("u_p", "vec3");
-		mutable_u_r = ctx.makeUniformUnique("u_radius", "float");
-
-		ctx.append("float " + fname + "(vec3 p) {");
-		ctx.append("    vec3 delta = p - " + mutable_u_p + ";");
-		ctx.append("    float r = " + mutable_u_r + ";");
-		ctx.append("    return length(delta) - r;");
-		ctx.append("}");
-
-		return fname;
+	const std::string buildUniforms() const override
+	{
+		return ImplicitFunction<3>::buildUniforms()
+			+ "uniform vec3 " + m_uniformsNames[2] + ";\n"
+			+ "uniform float " + m_uniformsNames[3] + ";\n";
 	}
 
 	void setGLUniforms(QOpenGLShaderProgram& program) const override
 	{
 		ImplicitFunction<3>::setGLUniforms(program);
-		program.setUniformValue(mutable_u_p.c_str(), QVector3D(node[0], node[1], node[2]));
-		program.setUniformValue(mutable_u_r.c_str(), radius);
+		program.setUniformValue(m_uniformsNames[2].c_str(), QVector3D(node[0], node[1], node[2]));
+		program.setUniformValue(m_uniformsNames[3].c_str(), radius);
 	}
 
 
 	const std::string getFragmentShader() const override
 	{
-		GLSLContext ctx;
-		std::string rootFunc = buildSDF(ctx);
-		return PolytopeShaderBuilder::buildFragmentShader(ctx, rootFunc, PolytopeShaderBuilder::PolytopeShaderStyle::Node);
+		return PolytopeShaderBuilder::buildFragmentShader(buildUniforms(), buildSDF(), PolytopeShaderBuilder::PolytopeShaderStyle::Node);
 	}
 
 	Point node;
 	float radius;
 
-	mutable std::string mutable_u_p;
-	mutable std::string mutable_u_r;
 };

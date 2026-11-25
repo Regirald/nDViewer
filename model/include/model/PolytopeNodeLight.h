@@ -1,5 +1,5 @@
 #pragma once
-#include "ImplicitFunction.h"
+#include "core/Vec.h"
 #include <vector>
 #include <string>
 #include <limits>
@@ -8,7 +8,7 @@
 
 class PolytopeNodeLight {
 public:
-	using Point = ImplicitFunction<3>::Point;
+	using Point = Vec<3, float>;
 
 	// Each node is defined by a position and a radius
 	PolytopeNodeLight(const Point& node, float radius)

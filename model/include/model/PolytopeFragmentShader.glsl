@@ -21,6 +21,8 @@ uniform float u_epsilon;
 int u_primitiveToutchedIndex = 0;
 
 
+/*__POLYTOPE_UNIFORMS__*/
+
 /*__POLYTOPE_DST_FUNCTION__*/
 
 

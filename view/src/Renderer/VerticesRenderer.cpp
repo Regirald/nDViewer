@@ -13,8 +13,8 @@ void VerticesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 	constexpr float radius = 0.25f;
 
 
-	auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, radius);
-	m_renderer = std::make_unique<RenderImplicitFunction<Dim>>(std::move(verticeSet));
+	//auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, radius);
+	//m_renderer = std::make_unique<RenderImplicitFunction<Dim>>(std::move(verticeSet));
 	m_renderer->initializeGLResources();
 }
 

@@ -32,6 +32,16 @@ public:
 
 
 template <size_t Dim>
+inline const std::string ImplicitFunction<Dim>::buildUniforms() const
+{
+	std::string uniforms = 
+        "uniform vec3 " + m_uniformsNames[0] + ";\n"
+		"uniform vec3 " + m_uniformsNames[1] + ";\n";
+
+    return uniforms;
+};
+
+template <size_t Dim>
 inline const std::string ImplicitFunction<Dim>::buildSDF() const
 {
 	std::string functionSDF = "float " + m_dstFunctionName + "(vec3 p)\n"
@@ -42,16 +52,6 @@ inline const std::string ImplicitFunction<Dim>::buildSDF() const
     return functionSDF;
 };
 
-
-template <size_t Dim>
-inline const std::string ImplicitFunction<Dim>::buildUniforms() const
-{
-	std::string uniforms = 
-        "uniform vec3 " + m_uniformsNames[0] + ";\n"
-		"uniform vec3 " + m_uniformsNames[1] + ";\n";
-
-    return uniforms;
-};
 
 
 template <size_t Dim>
@@ -77,5 +77,5 @@ inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
 {
     std::string dstFunction = buildSDF();
     std::string uniforms = buildUniforms();
-    return ShaderBuilder::buildFragmentShader(dstFunction, uniforms);
+    return ShaderBuilder::buildFragmentShader(uniforms, dstFunction);
 }

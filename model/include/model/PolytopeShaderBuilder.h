@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ImplicitFunction.h"
 #include "ShaderBuilder.h"
 
 #include <algorithm>
@@ -18,7 +17,7 @@ public:
 	};
 
 
-	static std::string buildFragmentShader(const std::string& dstFunction, PolytopeShaderStyle style, int Dim = 3)
+	static std::string buildFragmentShader(const std::string& uniforms, const std::string& dstFunction, PolytopeShaderStyle style, int Dim = 3)
 	{
 		std::string shader =
 #include "PolytopeFragmentShader.glsl"
@@ -40,7 +39,7 @@ public:
 
 
 
-
+		replaceMarker(shader, "/*__POLYTOPE_UNIFORMS__*/", uniforms);
 		replaceMarker(shader, "/*__POLYTOPE_DST_FUNCTION__*/", dstFunction);
 		replaceMarker(shader, "/*__POLYTOPE_HIT_SHADER__*/", shadingFunction);
 
