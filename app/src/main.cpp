@@ -13,7 +13,6 @@
 #include <memory>
 // Core model / logic includes
 #include "model/Sphere.h"
-#include "model/Circle.h"
 #include "model/Mesh.h"
 #include "model/ImplicitFunctionOperator.h"
 
@@ -47,7 +46,6 @@ int main(int argc, char* argv[])
     auto s1ptr = std::make_shared<Sphere>(sphere1);
 	auto s2ptr = std::make_shared<Sphere>(sphere2);
     auto sphere3 = std::static_pointer_cast<ImplicitFunction<3>>(s0ptr) - std::static_pointer_cast<ImplicitFunction<3>>(s1ptr); // Union of two spheres
-    Circle circle;
 
     // 2. Sample into scalar field
     int res = 5;
@@ -57,7 +55,6 @@ int main(int argc, char* argv[])
     // 3. Extract topology
     SimplexGrid<2> orthoGrid2(resolution2, OrthonormalBasis<2>());
     SimplexGrid<3> orthoGrid3(resolution3, OrthonormalBasis<3>());
-    //Mesh<2> mesh2 = MarchingHyperCubes<2>::extractIsosurface(circle, 0.f, orthoGrid2);
     //Mesh<3> mesh3 = MarchingHyperCubes<3>::extractIsosurface(sphere0, 0.f, orthoGrid3);
     //Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid);
     Mesh<2> gridMesh2 = GridToMesh<2, float>::convert(orthoGrid2);
