@@ -10,11 +10,17 @@ void VerticesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 	if (!m_poly || m_poly->vertices.empty())
 		return;
 
+	//Vertices Conversion to fit dimension 3 TODO: add projection system
+	std::vector<Vec<3, float>> vertices;
+	for (const auto& vertex : m_poly->vertices)
+	{
+		vertices.push_back(vertex);
+	}
+
+
 	constexpr float m_radius = 0.25f;
-
-
-	//auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, m_radius);
-	//m_renderer = std::make_unique<RenderImplicitFunction<Dim>>(std::move(verticeSet));
+	auto verticeSet = std::make_unique<VerticeSet>(vertices, m_radius);
+	m_renderer = std::make_unique<RenderImplicitFunctionSet<3>>(std::move(verticeSet));
 	m_renderer->initializeGLResources();
 }
 

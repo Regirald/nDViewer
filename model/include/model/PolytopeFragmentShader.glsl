@@ -1,8 +1,10 @@
-R"POLYTOPE(
+R"POLY_FRAG_SHADER(
 #version 330 core
+
 
 in vec2 v_uv;
 
+// Camera
 uniform vec3 u_cameraPos;
 uniform vec3 u_lightDir;
 uniform vec3 u_face_normal;
@@ -11,133 +13,148 @@ uniform mat4 u_invView;
 uniform mat4 u_projection;
 uniform mat4 u_invProjection;
 
-uniform vec3 u_boundsMin;
-uniform vec3 u_boundsMax;
+// Sphere selection
+uniform int u_currentSphereIndex;
+uniform float u_radius;
 
-uniform float u_maxDistance;
-uniform int u_maxSteps;
-uniform float u_epsilon;
-
-int u_primitiveToutchedIndex = 0;
-
-
-/*__POLYTOPE_UNIFORMS__*/
-
-/*__POLYTOPE_DST_FUNCTION__*/
-
-
-bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
+// Sphere data
+layout(std430, binding = 0) readonly buffer VerticeSetData
 {
-	vec3 invDir = 1.0 / rd;
-	vec3 t0 = (u_boundsMin - ro) * invDir;
-	vec3 t1 = (u_boundsMax - ro) * invDir;
+    vec4 u_vertices[];
+};
 
-	vec3 tsmaller = min(t0, t1);
-	vec3 tbigger = max(t0, t1);
+// --------------------------------------------------
+// Sphere center
+// --------------------------------------------------
 
-	tmin = max(max(tsmaller.x, tsmaller.y), tsmaller.z);
-	tmax = min(min(tbigger.x, tbigger.y), tbigger.z);
+vec3 getSphereCenter()
+{
+    vec4 vertex = u_vertices[u_currentSphereIndex];
 
-	return tmax > max(tmin, 0.0);
+    return vertex.xyz / (1.0 - 0.3 * vertex.w);
 }
 
-bool intersectSphere(vec3 ro, vec3 rd, vec3 center, float r)
+
+// --------------------------------------------------
+// Ray / sphere intersection
+// --------------------------------------------------
+
+bool intersectSphere(
+    vec3 ro,
+    vec3 rd,
+    vec3 center,
+    float radius,
+    out float t
+)
 {
-	vec3 V = center - ro;
+    vec3 oc = ro - center;
 
-	float projection = dot(V, rd);
+    float b = dot(oc, rd);
+    float c = dot(oc, oc) - radius * radius;
 
-	float perpendicularSq =
-		dot(V, V) - projection * projection;
+    float h = b * b - c;
 
-	return 	projection >= 0.0f  // condition must be forward
-			&& perpendicularSq <= r * r;	// condition must be inside the sphere
+    if (h < 0.0)
+        return false;
+
+    float s = sqrt(h);
+
+    float tNear = -b - s;
+    float tFar  = -b + s;
+
+    // Camera outside or inside the sphere
+    t = (tNear > 0.0) ? tNear : tFar;
+
+    return t > 0.0;
 }
 
-vec3 estimateNormal(vec3 p)
-{
-	float e = 0.002;
 
-	return normalize(vec3(
-		SDFonPrimitive(p + vec3(e, 0, 0)) - SDFonPrimitive(p - vec3(e, 0, 0)),
-		SDFonPrimitive(p + vec3(0, e, 0)) - SDFonPrimitive(p - vec3(0, e, 0)),
-		SDFonPrimitive(p + vec3(0, 0, e)) - SDFonPrimitive(p - vec3(0, 0, e))
-	));
+// --------------------------------------------------
+// Ray reconstruction
+// --------------------------------------------------
+
+vec3 reconstructRayDirection()
+{
+	vec2 ndc = v_uv * 2.0 - 1.0;
+
+    vec4 rayClip = vec4(ndc, -1.0, 1.0);
+
+    vec4 rayView = u_invProjection * rayClip;
+
+    rayView /= rayView.w;
+
+    return normalize(
+        (u_invView * vec4(rayView.xyz, 0.0)).xyz
+    );
 }
 
-vec4 shadeFace(vec3 p, vec3 rayDir)
+
+// --------------------------------------------------
+// Sphere shading
+// --------------------------------------------------
+
+vec4 shadeSphere(vec3 p, vec3 center, vec3 rayDir)
 {
-	vec3 n = normalize(u_face_normal);
-	vec3 v = normalize(-rayDir);
-	vec3 l = normalize(u_lightDir);
-	vec3 r = reflect(-v, n);
-	float facingLight = max(dot(r, l), 0.0);
-	float broad = pow(facingLight, 8.0);
-	float sharp = pow(facingLight, 64.0);
-	vec3 baseColor = vec3(0.025, 0.08, 0.50);
-	vec3 reflectedColor = vec3(0.55, 0.72, 1.0);
-	vec3 color = baseColor;
-	color += reflectedColor * broad * 0.45;
-	color += vec3(0.9, 0.95, 1.0) * sharp * 0.5;
-	return vec4(color, 0.5);
+    vec3 normal = normalize(p - center);
+
+    vec3 reflected = reflect(rayDir, normal);
+
+    float intensity = clamp(
+        dot(u_lightDir, reflected),
+        0.0,
+        1.0
+    );
+
+    vec3 white = vec3(0.85);
+    vec3 yellow = vec3(0.75, 0.75, 0.0);
+
+    vec3 color = mix(yellow, white, intensity);
+
+    return vec4(color, 1.0);
 }
 
-vec4 shadeEdge(vec3 p, vec3 rayDir)
-{
-	vec3 n = estimateNormal(p);
-	vec3 rayDirReflected = reflect(rayDir, n);
-	float intensity = dot(u_lightDir, rayDirReflected);
-	vec3 white = vec3(0.85);
-	vec3 grey = vec3(0.75);
-	vec3 color = grey * (1.0 - intensity) + white * intensity;
-	return vec4(color, 1.0);
-}
 
-vec4 shadeNode(vec3 p, vec3 rayDir)
-{
-	vec3 n = estimateNormal(p);
-	vec3 rayDirReflected = reflect(rayDir, n);
-	float intensity = dot(u_lightDir, rayDirReflected);
-	vec3 white = vec3(0.85);
-	vec3 yellow = vec3(0.75, 0.75, 0.0);
-	vec3 color = yellow * (1.0 - intensity) + white * intensity;
-	return vec4(color, 1.0);
-}
+// --------------------------------------------------
+// Main
+// --------------------------------------------------
 
 void main()
 {
-	vec2 ndc = v_uv * 2.0 - 1.0;
-	vec4 rayClip = vec4(ndc, -1.0, 1.0);
-	vec4 rayView = u_invProjection * rayClip;
-	rayView /= rayView.w;
-	vec3 rayDir = normalize((u_invView * vec4(rayView.xyz, 0.0)).xyz);
-	vec3 rayOrigin = u_cameraPos;
+    vec3 center = getSphereCenter();
 
-	float tmin, tmax;
-	if (!intersectAABB(rayOrigin, rayDir, tmin, tmax))
-		discard;
+    vec3 rayOrigin = u_cameraPos;
+    vec3 rayDir = reconstructRayDirection();
 
-	float t = max(tmin, 0.0);
-	for (int i = 0; i < u_maxSteps; ++i)
-	{
-		vec3 p = rayOrigin + t * rayDir;
-		float d = sampleSDF(p);
+    // Exact ray / sphere intersection
+    float t;
 
-		if (abs(d) < u_epsilon)
-		{
-			gl_FragColor = /*__POLYTOPE_HIT_SHADER__*/;
+    if (!intersectSphere(
+        rayOrigin,
+        rayDir,
+        center,
+        u_radius,
+        t
+    ))
+    {
+        discard;
+    }
 
-			vec4 clip = u_projection * u_view * vec4(p, 1.0);
-			float ndcDepth = clip.z / clip.w;
-			gl_FragDepth = ndcDepth * 0.5 + 0.5;
-			return;
-		}
+    // Exact intersection position
+    vec3 hitPosition = rayOrigin + t * rayDir;
 
-		t += max(abs(d) * 0.7, 0.001);
-		if (t > tmax || t > u_maxDistance)
-			break;
-	}
+    // Project the actual sphere intersection
+    vec4 clip = u_projection * u_view * vec4(hitPosition, 1.0);
 
-	discard;
+    float ndcDepth = clip.z / clip.w;
+
+    float depth = ndcDepth * 0.5 + 0.5;
+
+    if (depth < 0.0 || depth > 1.0)
+        discard;
+
+    // Write actual sphere depth, not bounding cube depth
+    gl_FragDepth = depth;
+
+    FragColor = shadeSphere(hitPosition, center, rayDir);
 }
-)POLYTOPE"
+)POLY_FRAG_SHADER"

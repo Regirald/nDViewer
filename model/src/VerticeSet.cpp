@@ -39,11 +39,13 @@ void VerticeSet::setGLUniforms(QOpenGLShaderProgram& program, int indexCurrentPr
 
 }
 
-
+const std::string VerticeSet::getVertexShader() const
+{
+	return PolytopeShaderBuilder::buildVertexShader();
+}
 
 const std::string VerticeSet::getFragmentShader() const
 {
-	return PolytopeShaderBuilder::buildFragmentShader(buildUniforms(), buildSDF(), PolytopeShaderBuilder::PolytopeShaderStyle::Node);
-
+	return PolytopeShaderBuilder::buildFragmentShader();
 }
 

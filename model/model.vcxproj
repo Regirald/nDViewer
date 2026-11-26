@@ -165,6 +165,7 @@
     <ClInclude Include="include\model\ImplicitFunctionOperator.h" />
     <ClInclude Include="include\model\Mesh.h" />
     <ClInclude Include="include\model\sphere.h" />
+    <None Include="include\model\PolytopeVertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />

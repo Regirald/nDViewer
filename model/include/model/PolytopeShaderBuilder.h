@@ -16,32 +16,39 @@ public:
 		Face
 	};
 
+	static std::string buildVertexShader()
+	{
+		std::string shader =
+#include "PolytopeVertexShader.glsl"
+			;
+		return shader;
+	}
 
-	static std::string buildFragmentShader(const std::string& uniforms, const std::string& dstFunction, PolytopeShaderStyle style, int Dim = 3)
+	static std::string buildFragmentShader()
 	{
 		std::string shader =
 #include "PolytopeFragmentShader.glsl"
 			;
 
-		std::string shadingFunction;
-		switch (style)
-		{
-		case PolytopeShaderStyle::Face:
-			shadingFunction = "shadeFace(p, rayDir)";
-			break;
-		case PolytopeShaderStyle::Edge:
-			shadingFunction = "shadeEdge(p, rayDir)";
-			break;
-		case PolytopeShaderStyle::Node:
-			shadingFunction = "shadeNode(p, rayDir)";
-			break;
-		}
+		//std::string shadingFunction;
+		//switch (style)
+		//{
+		//case PolytopeShaderStyle::Face:
+		//	shadingFunction = "shadeFace(p, rayDir)";
+		//	break;
+		//case PolytopeShaderStyle::Edge:
+		//	shadingFunction = "shadeEdge(p, rayDir)";
+		//	break;
+		//case PolytopeShaderStyle::Node:
+		//	shadingFunction = "shadeNode(p, rayDir)";
+		//	break;
+		//}
 
 
 
-		replaceMarker(shader, "/*__POLYTOPE_UNIFORMS__*/", uniforms);
-		replaceMarker(shader, "/*__POLYTOPE_DST_FUNCTION__*/", dstFunction);
-		replaceMarker(shader, "/*__POLYTOPE_HIT_SHADER__*/", shadingFunction);
+		//replaceMarker(shader, "/*__POLYTOPE_UNIFORMS__*/", uniforms);
+		//replaceMarker(shader, "/*__POLYTOPE_DST_FUNCTION__*/", dstFunction);
+		//replaceMarker(shader, "/*__POLYTOPE_HIT_SHADER__*/", shadingFunction);
 
 		return shader;
 	}

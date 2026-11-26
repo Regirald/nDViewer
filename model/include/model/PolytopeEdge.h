@@ -78,7 +78,7 @@ public:
 
 	const std::string getFragmentShader() const override
 	{
-		return PolytopeShaderBuilder::buildFragmentShader(buildUniforms(), buildSDF(), PolytopeShaderBuilder::PolytopeShaderStyle::Edge);
+		return PolytopeShaderBuilder::buildFragmentShader();
 	}
 
 	Point a;

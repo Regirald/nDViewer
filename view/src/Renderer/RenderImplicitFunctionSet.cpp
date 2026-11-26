@@ -68,9 +68,6 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
     assert(m_program.bind());
 
 
-    // Let implicit function upload its uniforms
-    if (m_implicitFunctionSet)
-        m_implicitFunctionSet->setGLUniforms(m_program, 0);
 
     // Camera
     m_program.setUniformValue("u_cameraPos", context.cameraPosition);
@@ -99,10 +96,9 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
 
     for (int i = 0; i < m_implicitFunctionSetCount; ++i)
     {
-		m_implicitFunctionSet->setGLUniforms(m_program, 0);
-        m_program.setUniformValue("u_currentSphereIndex", i);
+		m_implicitFunctionSet->setGLUniforms(m_program, i);
 
-        //glBindVertexArray(cubeVAO);
+        gl->glBindVertexArray(m_fullscreenVAO);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }

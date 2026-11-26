@@ -19,8 +19,7 @@ public:
 
     virtual float evaluateSDF(const Point& p) const = 0;
 
-    virtual const std::string buildUniforms() const;
-    virtual const std::string buildSDF() const;
+
     virtual const std::string getFragmentShader() const;
     virtual const std::string getVertexShader() const;
     virtual void setGLUniforms(QOpenGLShaderProgram& program, int indexCurrentPrimitive) const;

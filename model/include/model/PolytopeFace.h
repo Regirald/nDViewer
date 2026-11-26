@@ -229,7 +229,7 @@ public:
 
 	const std::string getFragmentShader() const override
 	{
-		return PolytopeShaderBuilder::buildFragmentShader(buildUniforms(), buildSDF(), PolytopeShaderBuilder::PolytopeShaderStyle::Face);
+		return PolytopeShaderBuilder::buildFragmentShader();
 
 	}
 

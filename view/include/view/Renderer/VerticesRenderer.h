@@ -1,6 +1,6 @@
 #pragma once
 #include "Renderer/Renderer.h"
-#include "Renderer/RenderImplicitFunction.h"
+#include "Renderer/RenderImplicitFunctionSet.h"
 #include "model/GeometryFromTopology.h"
 #include <memory>
 
@@ -14,5 +14,5 @@ public:
 
 private:
 	PolytopeGeometry<Dim>* m_poly = nullptr;
-	std::unique_ptr<RenderImplicitFunction<Dim>> m_renderer;
+	std::unique_ptr<RenderImplicitFunctionSet<3>> m_renderer;
 };

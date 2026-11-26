@@ -87,4 +87,9 @@
       <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="include\model\PolytopeVertexShader.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
