@@ -24,26 +24,35 @@ layout(std430, binding = 0) buffer VerticeSetData
 
 void main()
 {
-    vec4 vertex = u_vertices[u_currentSphereIndex];
+    vec3 centerWorld = u_vertices[u_currentSphereIndex].xyz;
 
-    vec3 centerWorld = vertex.xyz;
+    // Direction from camera to sphere center
+    vec3 viewDir = normalize(centerWorld - u_cameraPos);
 
-    vec3 toCenter = centerWorld - u_cameraPos;
-    float d = length(toCenter);
+    float d = length(centerWorld - u_cameraPos);
+    float r = u_radius;
 
-    // Prevent invalid geometry when the camera enters the sphere.
-    float safeD = max(d, u_radius * 1.001);
+    if (d - r < 0.0)
+    {
+        gl_Position = vec4(a_quadPosition, 0.0, 1.0);
+        v_uv = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
+        return; 
+    }
 
-    // Perspective-correct billboard radius.
-    float billboardRadius = u_radius * safeD / sqrt(safeD * safeD - u_radius * u_radius);
+    d = max(d, r * 1.01);
+    float billboardRadius = r * d / sqrt(d * d - r * r);
 
-    // Camera-facing basis.
-    vec3 right = u_invView[0].xyz;
-    vec3 up = u_invView[1].xyz;
+    // Camera-facing orthonormal basis
+    vec3 right = normalize(cross(viewDir, normalize(u_invView[1].xyz)));
+    vec3 up = normalize(cross(right, viewDir));
 
+    // Construct billboard vertex
     vec3 worldPosition = centerWorld + (right * a_quadPosition.x + up * a_quadPosition.y) * billboardRadius;
+    if (inside)
+        worldPosition = viewDir * billboardRadius;
 
     gl_Position = u_viewProjection * vec4(worldPosition, 1.0);
 
     v_uv = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
+}
 

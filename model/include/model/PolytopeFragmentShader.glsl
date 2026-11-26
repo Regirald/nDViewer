@@ -63,8 +63,11 @@ bool intersectSphere(
     float tNear = -b - s;
     float tFar  = -b + s;
 
-    // Camera outside or inside the sphere
-    t = (tNear > 0.0) ? tNear : tFar;
+    bool inside = c < 0.0;
+
+    // Outside: front surface
+    // Inside: exit surface
+    t = inside ? tFar : tNear;
 
     return t > 0.0;
 }
@@ -137,8 +140,7 @@ void main()
 
     float depth = ndcDepth * 0.5 + 0.5;
 
-    if (depth < 0.0 || depth > 1.0)
-        discard;
+
 
     // Write actual sphere depth, not bounding cube depth
     gl_FragDepth = depth;

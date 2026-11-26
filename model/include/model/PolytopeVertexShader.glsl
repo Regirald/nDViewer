@@ -32,22 +32,22 @@ void main()
     float d = length(centerWorld - u_cameraPos);
     float r = u_radius;
 
-    // Avoid invalid tangent geometry
-    float safeD = max(d, r * 1.001);
+    if (d - r < 0.0) // Camera is inside the sphere -> quad go full scree
+    {
+        gl_Position = vec4(a_quadPosition, 0.0, 1.0);
+        v_uv = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
+        return; 
+    }
 
-    // Projected sphere silhouette radius
-    float billboardRadius =
-        r * safeD / sqrt(safeD * safeD - r * r);
+    d = max(d, r * 1.01);
+    float billboardRadius = r * d / sqrt(d * d - r * r);
 
     // Camera-facing orthonormal basis
     vec3 right = normalize(cross(viewDir, normalize(u_invView[1].xyz)));
     vec3 up = normalize(cross(right, viewDir));
 
     // Construct billboard vertex
-    vec3 worldPosition =
-        centerWorld +
-        (right * a_quadPosition.x +
-         up * a_quadPosition.y) * billboardRadius;
+    vec3 worldPosition = centerWorld + (right * a_quadPosition.x + up * a_quadPosition.y) * billboardRadius;
 
     gl_Position = u_viewProjection * vec4(worldPosition, 1.0);
 
