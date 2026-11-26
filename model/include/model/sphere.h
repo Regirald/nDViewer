@@ -3,26 +3,26 @@
 #include <QVector3D>
 
 
-/// DEPRECIATED FUNCTION
-
 class Sphere : public ImplicitFunction<3> {
 public:
 	Sphere(Vec<3, float> center = { 0.f, 0.f, 0.f }, float radius = 1.f)
-        : center(center), radius(radius){
+        : m_center(center), m_radius(radius){
         initializeUniformNames();
-        m_boundsMin = QVector3D(center[0] - radius, center[1] - radius, center[2] - radius);
-        m_boundsMax = QVector3D(center[0] + radius, center[1] + radius, center[2] + radius);
+        m_boundsMin = QVector3D(m_center[0] - m_radius, m_center[1] - m_radius, m_center[2] - m_radius);
+        m_boundsMax = QVector3D(m_center[0] + m_radius, m_center[1] + m_radius, m_center[2] + m_radius);
     }
 
     float evaluateSDF(const Point& p) const override {
-        return std::sqrt((p[0] - center[0]) * (p[0] - center[0]) +
-            (p[1] - center[1]) * (p[1] - center[1]) +
-            (p[2] - center[2]) * (p[2] - center[2])) -
-            radius;
+        return std::sqrt((p[0] - m_center[0]) * (p[0] - m_center[0]) +
+            (p[1] - m_center[1]) * (p[1] - m_center[1]) +
+            (p[2] - m_center[2]) * (p[2] - m_center[2])) -
+            m_radius;
     }
 
-    Vec<3, float> center = { 0.f, 0.f, 0.f };
-    float radius = 1.f;
+    Vec<3, float> m_center = { 0.f, 0.f, 0.f };
+    float m_radius = 1.f;
+
+
     const std::string buildSDF() const override
     {
         return "float " + m_dstFunctionName + "(vec3 p)\n"
@@ -42,8 +42,8 @@ public:
     void setGLUniforms(QOpenGLShaderProgram& program) const override
     {
 		ImplicitFunction<3>::setGLUniforms(program);
-        program.setUniformValue(m_uniformsNames[3].c_str(), QVector3D(center[0], center[1], center[2]));
-        program.setUniformValue(m_uniformsNames[2].c_str(), radius);
+        program.setUniformValue(m_uniformsNames[3].c_str(), QVector3D(m_center[0], m_center[1], m_center[2]));
+        program.setUniformValue(m_uniformsNames[2].c_str(), m_radius);
     }
 
 private:

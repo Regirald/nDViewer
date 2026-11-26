@@ -10,10 +10,10 @@ void VerticesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 	if (!m_poly || m_poly->vertices.empty())
 		return;
 
-	constexpr float radius = 0.25f;
+	constexpr float m_radius = 0.25f;
 
 
-	//auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, radius);
+	//auto verticeSet = std::make_unique<VerticeSet<Dim>>(m_poly->vertices, m_radius);
 	//m_renderer = std::make_unique<RenderImplicitFunction<Dim>>(std::move(verticeSet));
 	m_renderer->initializeGLResources();
 }

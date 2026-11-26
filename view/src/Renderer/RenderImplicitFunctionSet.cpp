@@ -70,7 +70,7 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
 
     // Let implicit function upload its uniforms
     if (m_implicitFunctionSet)
-        m_implicitFunctionSet->setGLUniforms(m_program);
+        m_implicitFunctionSet->setGLUniforms(m_program, 0);
 
     // Camera
     m_program.setUniformValue("u_cameraPos", context.cameraPosition);
@@ -85,13 +85,27 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
     m_program.setUniformValue("u_maxSteps", 128);
     m_program.setUniformValue("u_epsilon", 0.001f);
 
-    // Draw fullscreen
-    gl->glEnable(GL_DEPTH_TEST);
-    gl->glEnable(GL_BLEND);
-    gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl->glBindVertexArray(m_fullscreenVAO);
-    gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    gl->glBindVertexArray(0);
+	// Draw primitives
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+
+    // Important: disable face culling.
+    // We want the proxy cube to rasterize its projected coverage.
+    glDisable(GL_CULL_FACE);
+
+    // Clear depth only once before processing all spheres.
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    for (int i = 0; i < m_implicitFunctionSetCount; ++i)
+    {
+		m_implicitFunctionSet->setGLUniforms(m_program, 0);
+        m_program.setUniformValue("u_currentSphereIndex", i);
+
+        //glBindVertexArray(cubeVAO);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     m_program.release();
 }

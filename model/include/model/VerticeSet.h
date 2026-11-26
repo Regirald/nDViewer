@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ImplicitFunctionSet.h"
+#include "ImplicitFunction.h"
 #include "PolytopeShaderBuilder.h"
 
 #include <QOpenGLContext>
@@ -16,11 +17,10 @@
 #include <utility>
 #include <vector>
 
-template <size_t Dim>
-class VerticeSet : public ImplicitFunctionSet<Dim>  // TODO : IMPLICITSSSS FUNCTIONSSS
+class VerticeSet : public ImplicitFunctionSet<3>
 {
 public:
-	using Point = typename ImplicitFunctionSet<Dim>::Point;
+	using Point = typename ImplicitFunctionSet<3>::Point;
 
 
 
@@ -28,11 +28,10 @@ public:
 
 
 	float evaluateSDF(const Point& p) const override;
-	const std::string buildSDF() const override;
-	const std::string buildUniforms() const override;
+
+	void setGLUniforms(QOpenGLShaderProgram& program, int indexCurrentPrimitive) const override;
 	const std::string getFragmentShader() const override;
 	const std::string getVertexShader() const override;
-	void setGLUniforms(QOpenGLShaderProgram& program) const override;
 
 
 	std::vector<Point> vertices;

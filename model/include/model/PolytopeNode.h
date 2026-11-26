@@ -11,19 +11,19 @@ class PolytopeNode : public ImplicitFunction<3> {
 public:
 	using Point = ImplicitFunction<3>::Point;
 
-	// Each node is defined by a position and a radius
-	PolytopeNode(const Point& node, float radius)
-		: node(node), radius(radius)
+	// Each node is defined by a position and a m_radius
+	PolytopeNode(const Point& node, float m_radius)
+		: node(node), m_radius(m_radius)
 	{
 		m_uniformsNames.push_back("u_node");
 		m_uniformsNames.push_back("u_radius");
 		// initialize m_Bounds
-		m_boundsMin[0] = std::min(m_boundsMin[0], node[0] - radius);
-		m_boundsMin[1] = std::min(m_boundsMin[1], node[1] - radius);
-		m_boundsMin[2] = std::min(m_boundsMin[2], node[2] - radius);
-		m_boundsMax[0] = std::max(m_boundsMax[0], node[0] + radius);
-		m_boundsMax[1] = std::max(m_boundsMax[1], node[1] + radius);
-		m_boundsMax[2] = std::max(m_boundsMax[2], node[2] + radius);
+		m_boundsMin[0] = std::min(m_boundsMin[0], node[0] - m_radius);
+		m_boundsMin[1] = std::min(m_boundsMin[1], node[1] - m_radius);
+		m_boundsMin[2] = std::min(m_boundsMin[2], node[2] - m_radius);
+		m_boundsMax[0] = std::max(m_boundsMax[0], node[0] + m_radius);
+		m_boundsMax[1] = std::max(m_boundsMax[1], node[1] + m_radius);
+		m_boundsMax[2] = std::max(m_boundsMax[2], node[2] + m_radius);
 	}
 
 
@@ -33,7 +33,7 @@ public:
 		float dy = p[1] - node[1];
 		float dz = p[2] - node[2];
 		float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-		return dist - radius;
+		return dist - m_radius;
 	}
 
 	const std::string buildSDF() const override
@@ -55,7 +55,7 @@ public:
 	{
 		ImplicitFunction<3>::setGLUniforms(program);
 		program.setUniformValue(m_uniformsNames[2].c_str(), QVector3D(node[0], node[1], node[2]));
-		program.setUniformValue(m_uniformsNames[3].c_str(), radius);
+		program.setUniformValue(m_uniformsNames[3].c_str(), m_radius);
 	}
 
 
@@ -65,6 +65,6 @@ public:
 	}
 
 	Point node;
-	float radius;
+	float m_radius;
 
 };

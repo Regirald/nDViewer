@@ -74,7 +74,7 @@ void RenderTargetSphere::initializeGLResources()
 
     const int stacks = 8;
     const int slices = 16;
-    const float radius = 0.05f;
+    const float m_radius = 0.05f;
 
     std::vector<float> vertices;
     std::vector<uint32_t> indices;
@@ -93,9 +93,9 @@ void RenderTargetSphere::initializeGLResources()
             float cosTheta = std::cos(theta);
             float sinTheta = std::sin(theta);
 
-            float x = radius * sinPhi * cosTheta;
-            float y = radius * cosPhi;
-            float z = radius * sinPhi * sinTheta;
+            float x = m_radius * sinPhi * cosTheta;
+            float y = m_radius * cosPhi;
+            float z = m_radius * sinPhi * sinTheta;
 
             vertices.push_back(x);
             vertices.push_back(y);
@@ -161,7 +161,7 @@ void RenderTargetSphere::render(const ndv::RenderContext& context)
     program.setUniformValue("u_projection", projectionMatrix);
     program.setUniformValue("u_color", QVector3D(1.0f, 0.2f, 0.2f));
 
-    // Use camera target as center
+    // Use camera target as m_center
     program.setUniformValue("u_center", context.targetPosition);
 
     int posLoc = program.attributeLocation("a_position");

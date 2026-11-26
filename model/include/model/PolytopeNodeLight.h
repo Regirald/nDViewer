@@ -10,7 +10,7 @@ class PolytopeNodeLight {
 public:
 	using Point = Vec<3, float>;
 
-	// Each node is defined by a position and a radius
+	// Each node is defined by a position and a m_radius
 	PolytopeNodeLight(const Point& node, float radius)
 		: node(node), radius(radius)
 	{}

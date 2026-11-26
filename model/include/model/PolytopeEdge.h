@@ -10,7 +10,7 @@ class PolytopeEdge : public ImplicitFunction<3> {
 public:
 	using Point = ImplicitFunction<3>::Point;
 
-	// A single cylinder defined by two endpoints and a radius
+	// A single cylinder defined by two endpoints and a m_radius
 	PolytopeEdge(const std::pair<Point, Point>& segment, float r)
 		: a(segment.first), b(segment.second), radius(r)
 	{

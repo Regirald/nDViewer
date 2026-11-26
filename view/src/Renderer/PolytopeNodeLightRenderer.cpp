@@ -43,7 +43,7 @@ void PolytopeNodeLightRenderer::render(const ndv::RenderContext& context)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	// Draw a simple point. Size is constant; radius in the model is ignored for this simple display.
+	// Draw a simple point. Size is constant; m_radius in the model is ignored for this simple display.
 	glPointSize(8.0f);
 	glColor3f(1.0f, 1.0f, 0.0f);
 	glBegin(GL_POINTS);
