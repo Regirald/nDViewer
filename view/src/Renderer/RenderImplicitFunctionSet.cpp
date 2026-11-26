@@ -87,13 +87,8 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
-
-    // Important: disable face culling.
-    // We want the proxy cube to rasterize its projected coverage.
     glDisable(GL_CULL_FACE);
 
-    // Clear depth only once before processing all spheres.
-    glClear(GL_DEPTH_BUFFER_BIT);
 
     for (int i = 0; i < m_implicitFunctionSet->m_primitiveCount; ++i)
     {
