@@ -125,8 +125,7 @@ void main()
 
     if (!intersectSphere(rayOrigin, rayDir, center, u_radius, t))
     {
-        gl_FragColor = vec4(1.0);
-        return;
+        discard;
     }
     // Exact intersection position
     vec3 hitPosition = rayOrigin + t * rayDir;
