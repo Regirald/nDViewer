@@ -25,6 +25,7 @@ public:
 
 
 	VerticeSet(std::vector<Point> vertices, float radius);
+	~VerticeSet() override;
 
 
 	float evaluateSDF(const Point& p) const override;
@@ -33,9 +34,11 @@ public:
 	const std::string getFragmentShader() const override;
 	const std::string getVertexShader() const override;
 
+	void initializeVerticeSetBuffer() const;
 
 	std::vector<Point> vertices;
 	float radius;
+	mutable GLuint m_verticeSetBuffer = 0;
 
 };
 

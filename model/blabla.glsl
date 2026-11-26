@@ -2,7 +2,7 @@
 #version 330 core
 
 
-in vec2 v_uv;
+noperspective in vec2 v_uv;
 
 // Camera
 uniform vec3 u_cameraPos;
@@ -18,7 +18,8 @@ uniform int u_currentSphereIndex;
 uniform float u_radius;
 
 // Sphere data
-layout(std430, binding = 0) readonly buffer VerticeSetData
+#extension GL_ARB_shader_storage_buffer_object : require
+layout(std430, binding = 0) buffer VerticeSetData
 {
     vec4 u_vertices[];
 };
@@ -128,17 +129,12 @@ void main()
     // Exact ray / sphere intersection
     float t;
 
-    if (!intersectSphere(
-        rayOrigin,
-        rayDir,
-        center,
-        u_radius,
-        t
-    ))
+    if (!intersectSphere(rayOrigin, rayDir, center, u_radius, t))
     {
-        discard;
+        gl_FragColor = vec4(1.0)
     }
-
+    else
+    {
     // Exact intersection position
     vec3 hitPosition = rayOrigin + t * rayDir;
 
@@ -155,5 +151,6 @@ void main()
     // Write actual sphere depth, not bounding cube depth
     gl_FragDepth = depth;
 
-    FragColor = shadeSphere(hitPosition, center, rayDir);
+    gl_FragColor = shadeSphere(hitPosition, center, rayDir);
+    }
 }

@@ -16,7 +16,6 @@ public:
 	void render(const ndv::RenderContext& context) override;
 
 	std::unique_ptr<ImplicitFunctionSet<Dim>> m_implicitFunctionSet;
-	int m_implicitFunctionSetCount = 0;
 
 	QOpenGLShaderProgram m_program;
 	QOpenGLExtraFunctions* gl = nullptr;

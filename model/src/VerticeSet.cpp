@@ -6,8 +6,57 @@ VerticeSet::VerticeSet(std::vector<Point> vertices, float radius)
 	vertices(vertices),
 	radius(radius)
 {
+	m_primitiveCount = static_cast<int>(this->vertices.size());
+	initializeVerticeSetBuffer();
+}
 
+VerticeSet::~VerticeSet()
+{
+	if (m_verticeSetBuffer == 0)
+		return;
 
+	QOpenGLContext* context = QOpenGLContext::currentContext();
+	if (context)
+	{
+		QOpenGLExtraFunctions* gl = context->extraFunctions();
+		gl->initializeOpenGLFunctions();
+		gl->glDeleteBuffers(1, &m_verticeSetBuffer);
+	}
+}
+
+void VerticeSet::initializeVerticeSetBuffer() const
+{
+	QOpenGLContext* context = QOpenGLContext::currentContext();
+	if (!context)
+		return;
+
+	QOpenGLExtraFunctions* gl = context->extraFunctions();
+	gl->initializeOpenGLFunctions();
+
+	if (m_verticeSetBuffer == 0)
+	{
+		std::vector<float> vertexData;
+		vertexData.reserve(vertices.size() * 4);
+
+		for (const Point& vertex : vertices)
+		{
+			vertexData.push_back(vertex[0]);
+			vertexData.push_back(vertex[1]);
+			vertexData.push_back(vertex[2]);
+			vertexData.push_back(0.0f);
+		}
+
+		gl->glGenBuffers(1, &m_verticeSetBuffer);
+		gl->glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_verticeSetBuffer);
+		gl->glBufferData(
+			GL_SHADER_STORAGE_BUFFER,
+			static_cast<GLsizeiptr>(vertexData.size() * sizeof(float)),
+			vertexData.data(),
+			GL_STATIC_DRAW);
+	}
+
+	gl->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_verticeSetBuffer);
+	gl->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 
@@ -27,13 +76,9 @@ float VerticeSet::evaluateSDF(const Point& p) const
 
 void VerticeSet::setGLUniforms(QOpenGLShaderProgram& program, int indexCurrentPrimitive) const
 {
-	const Point& vertex = vertices[indexCurrentPrimitive];
-	auto sphere = dynamic_cast<Sphere*>(m_refPrimitive.get());
+	program.setUniformValue("u_currentSphereIndex", indexCurrentPrimitive);
 
-	sphere->m_boundsMin = QVector3D(vertex[0] - radius, vertex[1] - radius, vertex[2] - radius);
-	sphere->m_boundsMax = QVector3D(vertex[0] + radius, vertex[1] + radius, vertex[2] + radius);
-	sphere->m_center = vertex;
-	sphere->m_radius = radius;
+	dynamic_cast<Sphere*>(m_refPrimitive.get())->m_radius = radius;
 
 	m_refPrimitive->setGLUniforms(program);
 

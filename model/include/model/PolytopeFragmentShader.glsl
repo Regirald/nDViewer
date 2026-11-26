@@ -2,7 +2,7 @@ R"POLY_FRAG_SHADER(
 #version 330 core
 
 
-in vec2 v_uv;
+noperspective in vec2 v_uv;
 
 // Camera
 uniform vec3 u_cameraPos;
@@ -18,7 +18,8 @@ uniform int u_currentSphereIndex;
 uniform float u_radius;
 
 // Sphere data
-layout(std430, binding = 0) readonly buffer VerticeSetData
+#extension GL_ARB_shader_storage_buffer_object : require
+layout(std430, binding = 0) buffer VerticeSetData
 {
     vec4 u_vertices[];
 };
@@ -31,7 +32,7 @@ vec3 getSphereCenter()
 {
     vec4 vertex = u_vertices[u_currentSphereIndex];
 
-    return vertex.xyz / (1.0 - 0.3 * vertex.w);
+    return vertex.xyz;
 }
 
 
@@ -83,9 +84,7 @@ vec3 reconstructRayDirection()
 
     rayView /= rayView.w;
 
-    return normalize(
-        (u_invView * vec4(rayView.xyz, 0.0)).xyz
-    );
+    return normalize((u_invView * vec4(rayView.xyz, 0.0)).xyz);
 }
 
 
@@ -99,11 +98,7 @@ vec4 shadeSphere(vec3 p, vec3 center, vec3 rayDir)
 
     vec3 reflected = reflect(rayDir, normal);
 
-    float intensity = clamp(
-        dot(u_lightDir, reflected),
-        0.0,
-        1.0
-    );
+    float intensity = clamp(dot(u_lightDir, reflected), 0.0, 1.0);
 
     vec3 white = vec3(0.85);
     vec3 yellow = vec3(0.75, 0.75, 0.0);
@@ -128,17 +123,11 @@ void main()
     // Exact ray / sphere intersection
     float t;
 
-    if (!intersectSphere(
-        rayOrigin,
-        rayDir,
-        center,
-        u_radius,
-        t
-    ))
+    if (!intersectSphere(rayOrigin, rayDir, center, u_radius, t))
     {
-        discard;
+        gl_FragColor = vec4(1.0);
+        return;
     }
-
     // Exact intersection position
     vec3 hitPosition = rayOrigin + t * rayDir;
 
@@ -155,6 +144,6 @@ void main()
     // Write actual sphere depth, not bounding cube depth
     gl_FragDepth = depth;
 
-    FragColor = shadeSphere(hitPosition, center, rayDir);
+    gl_FragColor = shadeSphere(hitPosition, center, rayDir);
 }
 )POLY_FRAG_SHADER"

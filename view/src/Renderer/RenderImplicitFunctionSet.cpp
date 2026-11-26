@@ -32,11 +32,11 @@ void RenderImplicitFunctionSet<Dim>::initializeGLResources()
     }
 
     // -------------------------
-    // Fullscreen quad
+    // Per-primitive quad
     // -------------------------
     if (!m_fullscreenVAO)
     {
-        float quad[] = {
+        const float quad[] = {
             -1.f, -1.f,
              1.f, -1.f,
             -1.f,  1.f,
@@ -76,6 +76,7 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
     m_program.setUniformValue("u_invView", context.view.inverted());
     m_program.setUniformValue("u_projection", context.projection);
     m_program.setUniformValue("u_invProjection", context.projection.inverted());
+    m_program.setUniformValue("u_viewProjection", context.projection * context.view);
 
     // Parameters
     m_program.setUniformValue("u_maxDistance", 100.0f);
@@ -94,13 +95,13 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
     // Clear depth only once before processing all spheres.
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    for (int i = 0; i < m_implicitFunctionSetCount; ++i)
+    for (int i = 0; i < m_implicitFunctionSet->m_primitiveCount; ++i)
     {
 		m_implicitFunctionSet->setGLUniforms(m_program, i);
 
         gl->glBindVertexArray(m_fullscreenVAO);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
     m_program.release();
