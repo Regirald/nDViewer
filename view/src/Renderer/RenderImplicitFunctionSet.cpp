@@ -98,6 +98,7 @@ void RenderImplicitFunctionSet<Dim>::render(const ndv::RenderContext& context)
 
         gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
+    gl->glBindVertexArray(0);
 
     m_program.release();
 }
