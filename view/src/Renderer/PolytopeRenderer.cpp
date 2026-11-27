@@ -87,10 +87,15 @@ void PolytopeRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 		return;
 
 	m_verticesRenderer = std::make_unique<VerticesRenderer<Dim>>(m_polytope);
-
+	m_edgesRenderer = std::make_unique<EdgesRenderer<Dim>>(m_polytope);
+	m_facesRenderer = std::make_unique<FacesRenderer<Dim>>(m_polytope);
 
 	m_verticesRenderer->initializeGLResources(fullShadedRendering);
-
+	m_edgesRenderer->initializeGLResources(fullShadedRendering);
+	if (fullShadedRendering)
+	{
+		m_facesRenderer->initializeGLResources();
+	}
 
 	m_initialized = true;
 }
@@ -105,6 +110,11 @@ void PolytopeRenderer<Dim>::render(const ndv::RenderContext& context)
 		return;
 
 	m_verticesRenderer->render(context);
+	m_edgesRenderer->render(context);
+	if (context.fullShadedRendering)
+	{
+		m_facesRenderer->render(context);
+	}
 
 }
 

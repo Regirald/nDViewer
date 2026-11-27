@@ -58,6 +58,12 @@ public:
 		program.setUniformValue(m_uniformsNames[2].c_str(), m_radius);
 	}
 
+	void setRadius(float radius) {
+		m_radius = radius;
+		m_boundsMin = QVector3D(std::min(m_a[0], m_b[0]) - m_radius, std::min(m_a[1], m_b[1]) - m_radius, std::min(m_a[2], m_b[2]) - m_radius);
+		m_boundsMax = QVector3D(std::max(m_a[0], m_b[0]) + m_radius, std::max(m_a[1], m_b[1]) + m_radius, std::max(m_a[2], m_b[2]) + m_radius);
+	}
+
 private:
 	void initializeUniformNames() {
 		ImplicitFunction<3>::initializeUniformNames();

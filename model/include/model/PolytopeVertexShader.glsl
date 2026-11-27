@@ -15,22 +15,45 @@ uniform vec3 u_cameraPos;
 // Sphere selection
 uniform int u_currentSphereIndex;
 uniform float u_radius;
+uniform bool u_isEdge;
 
-// Sphere data
+// Vertex-set data
 layout(std430, binding = 0) buffer VerticeSetData
 {
     vec4 u_vertices[];
 };
 
+// Edge endpoint data: two consecutive vec4 values per edge
+layout(std430, binding = 1) buffer PolytopeEdgeData
+{
+    vec4 u_edgeVertices[];
+};
+
 void main()
 {
-    vec3 centerWorld = u_vertices[u_currentSphereIndex].xyz;
+    vec3 centerWorld;
+    float boundingRadius = u_radius;
+
+    if (u_isEdge)
+    {
+        int edgeOffset = u_currentSphereIndex * 2;
+        vec3 a = u_edgeVertices[edgeOffset].xyz;
+        vec3 b = u_edgeVertices[edgeOffset + 1].xyz;
+        vec3 halfEdge = (b - a) * 0.5;
+
+        centerWorld = (a + b) * 0.5;
+        boundingRadius = sqrt(dot(halfEdge, halfEdge) + u_radius * u_radius);
+    }
+    else
+    {
+        centerWorld = u_vertices[u_currentSphereIndex].xyz;
+    }
 
     // Direction from camera to sphere center
     vec3 viewDir = normalize(centerWorld - u_cameraPos);
 
     float d = length(centerWorld - u_cameraPos);
-    float r = u_radius;
+    float r = boundingRadius;
 
     if (d - r < 0.0) // Camera is inside the sphere -> quad go full scree
     {

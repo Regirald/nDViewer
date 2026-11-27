@@ -77,6 +77,7 @@ float VerticeSet::evaluateSDF(const Point& p) const
 void VerticeSet::setGLUniforms(QOpenGLShaderProgram& program, int indexCurrentPrimitive) const
 {
 	program.setUniformValue("u_currentSphereIndex", indexCurrentPrimitive);
+	program.setUniformValue("u_isEdge", false);
 
 	dynamic_cast<Sphere*>(m_refPrimitive.get())->setRadius(radius);
 

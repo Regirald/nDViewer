@@ -76,11 +76,6 @@ int main(int argc, char* argv[])
 
 
     MainWindow* mainWidget = new MainWindow();
-	Viewer* viewer = mainWidget->getViewer();
-    viewer->setImplicitFunction<3>(s0ptr);
-    viewer->setImplicitFunction<3>(s1ptr);
-    viewer->setImplicitFunction<3>(s2ptr);
-    viewer->setImplicitFunction<3>(sphere3);
     mainWidget->resize(1200, 800);
     mainWidget->show();
 

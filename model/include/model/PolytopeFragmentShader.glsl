@@ -1,6 +1,7 @@
 R"POLY_FRAG_SHADER(
 #version 330 core
 
+#extension GL_ARB_shader_storage_buffer_object : require
 
 noperspective in vec2 v_uv;
 
@@ -16,12 +17,18 @@ uniform mat4 u_invProjection;
 // Sphere selection
 uniform int u_currentSphereIndex;
 uniform float u_radius;
+uniform bool u_isEdge;
 
-// Sphere data
-#extension GL_ARB_shader_storage_buffer_object : require
+// Vertex-set data
 layout(std430, binding = 0) buffer VerticeSetData
 {
     vec4 u_vertices[];
+};
+
+// Edge endpoint data: two consecutive vec4 values per edge
+layout(std430, binding = 1) buffer PolytopeEdgeData
+{
+    vec4 u_edgeVertices[];
 };
 
 // --------------------------------------------------
@@ -30,9 +37,18 @@ layout(std430, binding = 0) buffer VerticeSetData
 
 vec3 getSphereCenter()
 {
-    vec4 vertex = u_vertices[u_currentSphereIndex];
+    vec4 vertex = u_isEdge
+        ? u_edgeVertices[u_currentSphereIndex * 2]
+        : u_vertices[u_currentSphereIndex];
 
     return vertex.xyz;
+}
+
+void getEdgeEndpoints(out vec3 a, out vec3 b)
+{
+    int edgeOffset = u_currentSphereIndex * 2;
+    a = u_edgeVertices[edgeOffset].xyz;
+    b = u_edgeVertices[edgeOffset + 1].xyz;
 }
 
 
@@ -75,44 +91,106 @@ bool intersectSphere(
 
 
 // --------------------------------------------------
-// Ray / sphere Cylinder
+// Ray / capsule intersection
 // --------------------------------------------------
 
-bool intersectSphere(
+bool intersectSphereAt(
+    vec3 ro,
+    vec3 rd,
+    vec3 center,
+    float radius,
+    out float t
+)
+{
+    vec3 oc = ro - center;
+    float b = dot(oc, rd);
+    float c = dot(oc, oc) - radius * radius;
+    float h = b * b - c;
+
+    if (h < 0.0)
+        return false;
+
+    float s = sqrt(h);
+    float tNear = -b - s;
+    float tFar = -b + s;
+    t = tNear > 0.0 ? tNear : tFar;
+    return t > 0.0;
+}
+
+bool intersectCapsule(
     vec3 ro,
     vec3 rd,
     vec3 a,
     vec3 b,
     float radius,
-    out float t
+    out float t,
+    out vec3 normal
 )
 {
+    vec3 ba = b - a;
+    vec3 oa = ro - a;
+    float baba = dot(ba, ba);
+    float bestT = 1e30;
+    vec3 bestNormal = vec3(0.0);
+    bool hit = false;
 
-    vec3 ab = b - a;
-    vec3 ao = ro - a;
-    float abLengthSq = dot(ab, ab);
-    float abDotAo = dot(ab, ao);
-    float abDotRd = dot(ab, rd);
-    float aCoeff = abLengthSq - abDotRd * abDotRd;
-    float bCoeff = abLengthSq * dot(ao, rd) - abDotAo * abDotRd;
-    float cCoeff = abLengthSq * dot(ao, ao) - abDotAo * abDotAo - radius * radius * abLengthSq;
-    float discriminant = bCoeff * bCoeff - aCoeff * cCoeff;
-    if (discriminant < 0.0)
+    if (baba > 1e-8)
+    {
+        float bard = dot(ba, rd);
+        float baoa = dot(ba, oa);
+        float rdoa = dot(rd, oa);
+        float oaoa = dot(oa, oa);
+        float qa = baba - bard * bard;
+        float qb = baba * rdoa - baoa * bard;
+        float qc = baba * oaoa - baoa * baoa - radius * radius * baba;
+
+        if (abs(qa) > 1e-8)
+        {
+            float h = qb * qb - qa * qc;
+            if (h >= 0.0)
+            {
+                float sqrtH = sqrt(h);
+                float t0 = (-qb - sqrtH) / qa;
+                float t1 = (-qb + sqrtH) / qa;
+
+                for (int i = 0; i < 2; ++i)
+                {
+                    float candidateT = i == 0 ? t0 : t1;
+                    float y = baoa + candidateT * bard;
+                    if (candidateT > 0.0 && y >= 0.0 && y <= baba && candidateT < bestT)
+                    {
+                        vec3 hitPoint = ro + candidateT * rd;
+                        vec3 axisPoint = a + (y / baba) * ba;
+                        bestT = candidateT;
+                        bestNormal = normalize(hitPoint - axisPoint);
+                        hit = true;
+                    }
+                }
+            }
+        }
+    }
+
+    float capT;
+    if (intersectSphereAt(ro, rd, a, radius, capT) && capT < bestT)
+    {
+        bestT = capT;
+        bestNormal = normalize(ro + capT * rd - a);
+        hit = true;
+    }
+
+    if (intersectSphereAt(ro, rd, b, radius, capT) && capT < bestT)
+    {
+        bestT = capT;
+        bestNormal = normalize(ro + capT * rd - b);
+        hit = true;
+    }
+
+    if (!hit)
         return false;
-    float sqrtDiscriminant = sqrt(discriminant);
-    float t1 = (-bCoeff - sqrtDiscriminant) / aCoeff;
-    float t2 = (-bCoeff + sqrtDiscriminant) / aCoeff;
-    // Check if the intersection points are within the cylinder's height
-    float y1 = dot(ab, (ro + t1 * rd) - a);
-    float y2 = dot(ab, (ro + t2 * rd) - a);
-    if ((y1 < 0.0 || y1 > abLengthSq) && (y2 < 0.0 || y2 > abLengthSq))
-        return false;
-    // Choose the closest valid intersection point
-    if (y1 >= 0.0 && y1 <= abLengthSq)
-        t = t1;
-    else
-        t = t2;
-    return t > 0.0;
+
+    t = bestT;
+    normal = bestNormal;
+    return true;
 }
 
 // --------------------------------------------------
@@ -137,10 +215,8 @@ vec3 reconstructRayDirection()
 // Sphere shading
 // --------------------------------------------------
 
-vec4 shadeSphere(vec3 p, vec3 center, vec3 rayDir)
+vec4 shadeSurface(vec3 normal, vec3 rayDir)
 {
-    vec3 normal = normalize(p - center);
-
     vec3 reflected = reflect(rayDir, normal);
 
     float intensity = clamp(dot(u_lightDir, reflected), 0.0, 1.0);
@@ -151,6 +227,16 @@ vec4 shadeSphere(vec3 p, vec3 center, vec3 rayDir)
     vec3 color = mix(yellow, white, intensity);
 
     return vec4(color, 1.0);
+}
+
+vec4 shadeSphere(vec3 p, vec3 center, vec3 rayDir)
+{
+    return shadeSurface(normalize(p - center), rayDir);
+}
+
+vec4 shadeEdge(vec3 normal, vec3 rayDir)
+{
+    return shadeSurface(normal, rayDir);
 }
 
 
@@ -165,14 +251,30 @@ void main()
     vec3 rayOrigin = u_cameraPos;
     vec3 rayDir = reconstructRayDirection();
 
-    // Exact ray / sphere intersection
+    // Intersect the actual primitive represented by this quad.
     float t;
+    vec3 normal;
 
-    if (!intersectSphere(rayOrigin, rayDir, center, u_radius, t))
+    if (u_isEdge)
     {
-        discard;
+        vec3 a;
+        vec3 b;
+        getEdgeEndpoints(a, b);
+        if (!intersectCapsule(rayOrigin, rayDir, a, b, u_radius, t, normal))
+        {
+            gl_FragColor = vec4(1.0);
+            return;
+        }
     }
-    // Exact intersection position
+    else
+    {
+        if (!intersectSphere(rayOrigin, rayDir, center, u_radius, t))
+        {
+            discard;
+        }
+        normal = normalize(rayOrigin + t * rayDir - center);
+    }
+
     vec3 hitPosition = rayOrigin + t * rayDir;
 
     // Project the actual sphere intersection
@@ -187,6 +289,8 @@ void main()
     // Write actual sphere depth, not bounding cube depth
     gl_FragDepth = depth;
 
-    gl_FragColor = shadeSphere(hitPosition, center, rayDir);
+    gl_FragColor = u_isEdge
+        ? shadeEdge(normal, rayDir)
+        : shadeSphere(hitPosition, center, rayDir);
 }
 )POLY_FRAG_SHADER"

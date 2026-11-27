@@ -62,7 +62,7 @@ void PolytopeEdge::initializePolytopeEdgeBuffer() const
 			GL_STATIC_DRAW);
 	}
 
-	gl->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_polytopeEdgeBuffer);
+	gl->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_polytopeEdgeBuffer);
 	gl->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
@@ -94,10 +94,12 @@ float PolytopeEdge::evaluateSDF(const Point& p) const
 
 void PolytopeEdge::setGLUniforms(QOpenGLShaderProgram& program, int indexCurrentPrimitive) const
 {
-	initializePolytopeEdgeBuffer();
 	program.setUniformValue("u_currentSphereIndex", indexCurrentPrimitive);
-	program.setUniformValue("u_radius", m_radius);
 	program.setUniformValue("u_isEdge", true);
+
+	dynamic_cast<Cylinder*>(m_refPrimitive.get())->setRadius(m_radius);
+
+	m_refPrimitive->setGLUniforms(program);
 }
 
 const std::string PolytopeEdge::getVertexShader() const
