@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClCompile Include="src\CoxeterPresentation.cpp" />
     <ClCompile Include="src\ToddCoxeter.cpp" />
+    <ClCompile Include="src\PolytopeEdge.cpp" />
     <ClCompile Include="src\VerticeSet.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +161,7 @@
     <ClInclude Include="include\model\PolytopeShaderBuilder.h" />
     <ClInclude Include="include\model\ShaderBuilder.h" />
     <ClInclude Include="include\model\VerticeSet.h" />
+    <ClInclude Include="src\PolytopeEdge.cpp" />
     <None Include="include\model\PolytopeFragmentShader.glsl" />
     <ClInclude Include="include\model\ToddCoxeter.h" />
     <ClInclude Include="include\model\ImplicitFunction.h" />

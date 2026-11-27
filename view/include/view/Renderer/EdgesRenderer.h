@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer/Renderer.h"
 #include "model/PolytopeEdge.h"
-#include "Renderer/RenderImplicitFunction.h"
+#include "Renderer/RenderImplicitFunctionSet.h"
 #include "Renderer/PolytopeEdgeLightRenderer.h"
 #include "model/GeometryFromTopology.h"
 #include <memory>
@@ -17,6 +17,5 @@ public:
 
 private:
 	PolytopeGeometry<Dim>* m_poly = nullptr;
-	// Each renderer will own a renderer instance (either full SDF renderer or a lightweight renderer).
-	std::vector<std::unique_ptr<Renderer>> m_renderers;
+	std::unique_ptr<RenderImplicitFunctionSet<3>> m_renderer;
 };

@@ -5,51 +5,33 @@
 template <size_t Dim>
 void EdgesRenderer<Dim>::initializeGLResources(bool fullShadedRendering)
 {
-	if (!m_poly)
+	m_renderer.reset();
+
+	if (!m_poly || m_poly->vertices.empty())
 		return;
 
-	m_renderers.clear();
+	std::vector<Vec<3, float>> vertices_a;
+	std::vector<Vec<3, float>> vertices_b;
+
 
 	for (const auto& e : m_poly->edges)
 	{
 		if (e.size() < 2) continue;
-		auto a = m_poly->vertices[e[0]];
-		auto b = m_poly->vertices[e[1]];
-
-		std::pair<PolytopeEdge::Point, PolytopeEdge::Point> seg{ a, b };
-		float r = 0.1f;
-
-		if (fullShadedRendering)
-		{
-			auto edge = std::make_unique<PolytopeEdge>(seg, r);
-			auto renderer = std::make_unique<RenderImplicitFunction<3>>(std::move(edge));
-			renderer->initializeGLResources();
-
-			m_renderers.push_back(std::move(renderer));
-		}
-		else
-		{
-			// Lightweight renderer that draws a simple line between the two endpoints in NDC
-			auto renderer = std::make_unique<PolytopeEdgeLightRenderer>(seg);
-			renderer->initializeGLResources();
-
-			m_renderers.push_back(std::move(renderer));
-		}
+		vertices_a.push_back(m_poly->vertices[e[0]]);
+		vertices_b.push_back(m_poly->vertices[e[1]]);
 	}
 
+	constexpr float radius = 0.1f;
+	auto edgeSet = std::make_unique<PolytopeEdge>(vertices_a, vertices_b, radius);
+	m_renderer = std::make_unique<RenderImplicitFunctionSet<3>>(std::move(edgeSet));
+	m_renderer->initializeGLResources();
 }
 
 template <size_t Dim>
 void EdgesRenderer<Dim>::render(const ndv::RenderContext& context)
 {
-	if (m_renderers.empty())
-		return;
-
-	for (auto& r : m_renderers)
-	{
-		if (r)
-			r->render(context);
-	}
+	if (m_renderer)
+		m_renderer->render(context);
 }
 
 template class EdgesRenderer<2>;

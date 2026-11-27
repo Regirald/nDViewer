@@ -21,6 +21,9 @@
     <ClCompile Include="src\ToddCoxeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\PolytopeEdge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\VerticeSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="include\model\cylinder.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PolytopeEdge.cpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
