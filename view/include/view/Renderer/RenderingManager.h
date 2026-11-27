@@ -22,7 +22,7 @@ public:
 		renderContainer.push_back(std::make_unique<RenderMesh<Dim>>(mesh));
 	}
 	template <size_t Dim>
-	inline void setImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
+	inline void setImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> implicitFunction)
 	{
 		renderContainer.push_back(std::make_unique<RenderImplicitFunction<Dim>>(implicitFunction));
 	}

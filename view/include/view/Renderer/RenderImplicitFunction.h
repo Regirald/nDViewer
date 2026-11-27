@@ -9,13 +9,13 @@ template <size_t Dim>
 class RenderImplicitFunction : public Renderer
 {
 public:
-	explicit RenderImplicitFunction(std::unique_ptr<ImplicitFunction<Dim>> implicitFunction);
+	explicit RenderImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> implicitFunction);
 	~RenderImplicitFunction();
 
 	void initializeGLResources();
 	void render(const ndv::RenderContext& context) override;
 
-	std::unique_ptr<ImplicitFunction<Dim>> m_implicitFunction;
+	std::shared_ptr<ImplicitFunction<Dim>> m_implicitFunction;
 	QOpenGLShaderProgram m_program;
 	QOpenGLExtraFunctions* gl = nullptr;
 	bool m_initialized = false;

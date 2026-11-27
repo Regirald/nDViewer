@@ -8,6 +8,11 @@
 #include <QVector3D>
 class PolytopeEdge : public ImplicitFunction<3> {
 public:
+	std::shared_ptr<ImplicitFunction<3>> clone() const override
+	{
+		return std::make_shared<PolytopeEdge>(*this);
+	}
+
 	using Point = ImplicitFunction<3>::Point;
 
 	// A single cylinder defined by two endpoints and a m_radius

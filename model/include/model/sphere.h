@@ -5,6 +5,11 @@
 
 class Sphere : public ImplicitFunction<3> {
 public:
+    std::shared_ptr<ImplicitFunction<3>> clone() const override
+    {
+        return std::make_shared<Sphere>(*this);
+    }
+
 	Sphere(Vec<3, float> center = { 0.f, 0.f, 0.f }, float radius = 1.f)
         : m_center(center), m_radius(radius){
         initializeUniformNames();
@@ -19,8 +24,7 @@ public:
             m_radius;
     }
 
-    Vec<3, float> m_center = { 0.f, 0.f, 0.f };
-    float m_radius = 1.f;
+
 
 
     const std::string buildSDF() const override
@@ -46,10 +50,23 @@ public:
         program.setUniformValue(m_uniformsNames[2].c_str(), m_radius);
     }
 
+
+	void setRadius(float radius) {
+		m_radius = radius;
+		m_boundsMin = QVector3D(m_center[0] - m_radius, m_center[1] - m_radius, m_center[2] - m_radius);
+		m_boundsMax = QVector3D(m_center[0] + m_radius, m_center[1] + m_radius, m_center[2] + m_radius);
+	}
+
 private:
+
     void initializeUniformNames()
     {
+        ImplicitFunction<3>::initializeUniformNames();
         m_uniformsNames.push_back("u_radius");
         m_uniformsNames.push_back("u_center");
     }
+
+
+    Vec<3, float> m_center = { 0.f, 0.f, 0.f };
+    float m_radius = 1.f;
 };

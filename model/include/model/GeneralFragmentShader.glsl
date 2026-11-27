@@ -11,9 +11,6 @@ uniform mat4 u_invView;
 uniform mat4 u_projection;
 uniform mat4 u_invProjection;
 
-uniform vec3 u_boundsMin;
-uniform vec3 u_boundsMax;
-
 uniform float u_maxDistance;
 uniform int u_maxSteps;
 uniform float u_epsilon;

@@ -78,7 +78,7 @@ void VerticeSet::setGLUniforms(QOpenGLShaderProgram& program, int indexCurrentPr
 {
 	program.setUniformValue("u_currentSphereIndex", indexCurrentPrimitive);
 
-	dynamic_cast<Sphere*>(m_refPrimitive.get())->m_radius = radius;
+	dynamic_cast<Sphere*>(m_refPrimitive.get())->setRadius(radius);
 
 	m_refPrimitive->setGLUniforms(program);
 

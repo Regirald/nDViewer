@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     auto s0ptr = std::make_shared<Sphere>(sphere0);
     auto s1ptr = std::make_shared<Sphere>(sphere1);
 	auto s2ptr = std::make_shared<Sphere>(sphere2);
-    auto sphere3 = std::static_pointer_cast<ImplicitFunction<3>>(s0ptr) - std::static_pointer_cast<ImplicitFunction<3>>(s1ptr); // Union of two spheres
+    auto sphere3 = std::static_pointer_cast<ImplicitFunction<3>>(s0ptr) + std::static_pointer_cast<ImplicitFunction<3>>(s1ptr); // Union of two spheres
 
     // 2. Sample into scalar field
     int res = 5;
@@ -76,6 +76,11 @@ int main(int argc, char* argv[])
 
 
     MainWindow* mainWidget = new MainWindow();
+	Viewer* viewer = mainWidget->getViewer();
+    viewer->setImplicitFunction<3>(s0ptr);
+    viewer->setImplicitFunction<3>(s1ptr);
+    viewer->setImplicitFunction<3>(s2ptr);
+    viewer->setImplicitFunction<3>(sphere3);
     mainWidget->resize(1200, 800);
     mainWidget->show();
 

@@ -22,7 +22,7 @@ public:
     }
 
     template <size_t Dim>
-    inline void setImplicitFunction(ImplicitFunction<Dim>* implicitFunction)
+    inline void setImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> implicitFunction)
     {
         renderingManager.setImplicitFunction(implicitFunction);
     }

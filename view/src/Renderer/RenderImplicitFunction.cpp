@@ -6,7 +6,7 @@
 #include "model/ImplicitFunction.h"
 
 template<size_t Dim>
-RenderImplicitFunction<Dim>::RenderImplicitFunction(std::unique_ptr<ImplicitFunction<Dim>> implicitFunction)
+RenderImplicitFunction<Dim>::RenderImplicitFunction(std::shared_ptr<ImplicitFunction<Dim>> implicitFunction)
     : m_implicitFunction(std::move(implicitFunction))
 {
 }

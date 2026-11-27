@@ -6,6 +6,11 @@
 
 class Cylinder : public ImplicitFunction<3> {
 public:
+	std::shared_ptr<ImplicitFunction<3>> clone() const override
+	{
+		return std::make_shared<Cylinder>(*this);
+	}
+
 
 
 	Cylinder(Vec<3, float> a, Vec<3, float> b, float radius)
@@ -55,6 +60,7 @@ public:
 
 private:
 	void initializeUniformNames() {
+		ImplicitFunction<3>::initializeUniformNames();
 		m_uniformsNames.push_back("u_a");
 		m_uniformsNames.push_back("u_b");
 		m_uniformsNames.push_back("u_radius");

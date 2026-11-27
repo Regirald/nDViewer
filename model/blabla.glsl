@@ -1,58 +1,122 @@
 
 #version 330 core
 
-#extension GL_ARB_shader_storage_buffer_object : require
+in vec2 v_uv;
 
-layout(location = 0) in vec2 a_quadPosition;
-noperspective out vec2 v_uv;
-
-// Camera
-uniform mat4 u_viewProjection;
-uniform mat4 u_invView;
 uniform vec3 u_cameraPos;
+uniform vec3 u_lightDir;
+uniform vec3 u_face_normal;
+uniform mat4 u_view;
+uniform mat4 u_invView;
+uniform mat4 u_projection;
+uniform mat4 u_invProjection;
+
+uniform float u_maxDistance;
+uniform int u_maxSteps;
+uniform float u_epsilon;
+
+uniform vec3 u_boundsMin_2;
+uniform vec3 u_boundsMax_3;
+uniform float u_radius_4;
+uniform vec3 u_center_5;
+uniform vec3 u_boundsMin_6;
+uniform vec3 u_boundsMax_7;
+uniform float u_radius_8;
+uniform vec3 u_center_9;
+uniform vec3 u_boundsMin;
+uniform vec3 u_boundsMax;
+uniform float u_k;
 
 
-// Sphere selection
-uniform int u_currentSphereIndex;
-uniform float u_radius;
-
-// Sphere data
-layout(std430, binding = 0) buffer VerticeSetData
+float sampleSDF_0(vec3 p)
 {
-    vec4 u_vertices[];
-};
+    return length(p - u_center) - u_radius;
+}
+float sampleSDF_1(vec3 p)
+{
+    return length(p - u_center) - u_radius;
+}
+float sampleSDF(vec3 p)
+{
+    float d1 = sampleSDF_0(p);
+    float d2 = sampleSDF_1(p);
+    float k = u_k;
+    if (k <= 0.0) return min(d1, d2);
+    float h = clamp(0.5 + 0.5*(d2 - d1)/k, 0.0, 1.0);
+    return mix(d2, d1, h) - k*h*(1.0 - h);
+}
+
+
+bool intersectAABB(vec3 ro, vec3 rd, out float tmin, out float tmax)
+{
+	vec3 invDir = 1.0 / rd;
+	vec3 t0 = (u_boundsMin - ro) * invDir;
+	vec3 t1 = (u_boundsMax - ro) * invDir;
+
+	vec3 tsmaller = min(t0, t1);
+	vec3 tbigger = max(t0, t1);
+
+	tmin = max(max(tsmaller.x, tsmaller.y), tsmaller.z);
+	tmax = min(min(tbigger.x, tbigger.y), tbigger.z);
+
+	return tmax > max(tmin, 0.0);
+}
+
+vec3 estimateNormal(vec3 p)
+{
+	float e = 0.002;
+
+	return normalize(vec3(
+		sampleSDF(p + vec3(e, 0, 0)) - sampleSDF(p - vec3(e, 0, 0)),
+		sampleSDF(p + vec3(0, e, 0)) - sampleSDF(p - vec3(0, e, 0)),
+		sampleSDF(p + vec3(0, 0, e)) - sampleSDF(p - vec3(0, 0, e))
+	));
+}
+
+vec4 shadeSurface(vec3 p, vec3 rayDir)
+{
+	vec3 n = estimateNormal(p);
+	vec3 rayDirReflected = reflect(rayDir, n);
+	float intensity = dot(u_lightDir, rayDirReflected);
+	vec3 white = vec3(0.85);
+	vec3 grey = vec3(0.75);
+	vec3 color = grey * (1.0 - intensity) + white * intensity;
+	return vec4(color, 1.0);
+}
 
 void main()
 {
-    vec3 centerWorld = u_vertices[u_currentSphereIndex].xyz;
+	vec2 ndc = v_uv * 2.0 - 1.0;
+	vec4 rayClip = vec4(ndc, -1.0, 1.0);
+	vec4 rayView = u_invProjection * rayClip;
+	rayView /= rayView.w;
+	vec3 rayDir = normalize((u_invView * vec4(rayView.xyz, 0.0)).xyz);
+	vec3 rayOrigin = u_cameraPos;
 
-    // Direction from camera to sphere center
-    vec3 viewDir = normalize(centerWorld - u_cameraPos);
+	float tmin, tmax;
+	if (!intersectAABB(rayOrigin, rayDir, tmin, tmax))
+		discard;
 
-    float d = length(centerWorld - u_cameraPos);
-    float r = u_radius;
+	float t = max(tmin, 0.0);
+	for (int i = 0; i < u_maxSteps; ++i)
+	{
+		vec3 p = rayOrigin + t * rayDir;
+		float d = sampleSDF(p);
 
-    if (d - r < 0.0)
-    {
-        gl_Position = vec4(a_quadPosition, 0.0, 1.0);
-        v_uv = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
-        return; 
-    }
+		if (abs(d) < u_epsilon)
+		{
+			gl_FragColor = shadeSurface(p, rayDir);
 
-    d = max(d, r * 1.01);
-    float billboardRadius = r * d / sqrt(d * d - r * r);
+			vec4 clip = u_projection * u_view * vec4(p, 1.0);
+			float ndcDepth = clip.z / clip.w;
+			gl_FragDepth = ndcDepth * 0.5 + 0.5;
+			return;
+		}
 
-    // Camera-facing orthonormal basis
-    vec3 right = normalize(cross(viewDir, normalize(u_invView[1].xyz)));
-    vec3 up = normalize(cross(right, viewDir));
+		t += max(abs(d) * 0.7, 0.001);
+		if (t > tmax || t > u_maxDistance)
+			break;
+	}
 
-    // Construct billboard vertex
-    vec3 worldPosition = centerWorld + (right * a_quadPosition.x + up * a_quadPosition.y) * billboardRadius;
-    if (inside)
-        worldPosition = viewDir * billboardRadius;
-
-    gl_Position = u_viewProjection * vec4(worldPosition, 1.0);
-
-    v_uv = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
+	discard;
 }
-

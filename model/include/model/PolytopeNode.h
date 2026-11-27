@@ -9,6 +9,11 @@
 
 class PolytopeNode : public ImplicitFunction<3> {
 public:
+	std::shared_ptr<ImplicitFunction<3>> clone() const override
+	{
+		return std::make_shared<PolytopeNode>(*this);
+	}
+
 	using Point = ImplicitFunction<3>::Point;
 
 	// Each node is defined by a position and a m_radius

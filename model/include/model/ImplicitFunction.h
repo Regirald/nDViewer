@@ -3,6 +3,7 @@
 #include "ShaderBuilder.h"
 #include <string>
 #include <algorithm>
+#include <memory>
 #include <QOpenGLShaderProgram>
 
 
@@ -13,7 +14,9 @@ public:
     using Point = Vec<Dim, float>;
 
     virtual ~ImplicitFunction() = default;
+    virtual std::shared_ptr<ImplicitFunction<Dim>> clone() const = 0;
 
+    virtual void initializeUniformNames();
     virtual float evaluateSDF(const Point& p) const = 0;
 
     virtual const std::string buildSDF() const;
@@ -26,10 +29,15 @@ public:
     QVector3D m_boundsMax;
 
 	std::string m_dstFunctionName = "sampleSDF";
-	std::vector<std::string> m_uniformsNames = {"u_boundsMin", "u_boundsMax"};
+	std::vector<std::string> m_uniformsNames;
 };
 
-
+template <size_t Dim>
+inline void ImplicitFunction<Dim>::initializeUniformNames()
+{
+    m_uniformsNames.push_back("u_boundsMin");
+    m_uniformsNames.push_back("u_boundsMax");
+}
 
 template <size_t Dim>
 inline const std::string ImplicitFunction<Dim>::buildUniforms() const
@@ -75,7 +83,7 @@ inline const std::string ImplicitFunction<Dim>::getVertexShader() const
 template <size_t Dim>
 inline const std::string ImplicitFunction<Dim>::getFragmentShader() const
 {
-    std::string dstFunction = buildSDF();
     std::string uniforms = buildUniforms();
+    std::string dstFunction = buildSDF();
     return ShaderBuilder::buildFragmentShader(uniforms, dstFunction);
 }
