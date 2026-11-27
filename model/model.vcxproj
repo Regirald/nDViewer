@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="blabla.glsl" />
     <ClInclude Include="include\model\AccelerationStructureBVH.h" />
+    <ClInclude Include="include\model\cylinder.h" />
     <ClInclude Include="include\model\GeneralFragmentShader.glsl" />
     <ClInclude Include="include\model\GeneralVertexShader.glsl" />
     <ClInclude Include="include\model\ImplicitFunctionSet.h" />

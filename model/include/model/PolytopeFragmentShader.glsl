@@ -73,6 +73,48 @@ bool intersectSphere(
 }
 
 
+
+// --------------------------------------------------
+// Ray / sphere Cylinder
+// --------------------------------------------------
+
+bool intersectSphere(
+    vec3 ro,
+    vec3 rd,
+    vec3 a,
+    vec3 b,
+    float radius,
+    out float t
+)
+{
+
+    vec3 ab = b - a;
+    vec3 ao = ro - a;
+    float abLengthSq = dot(ab, ab);
+    float abDotAo = dot(ab, ao);
+    float abDotRd = dot(ab, rd);
+    float aCoeff = abLengthSq - abDotRd * abDotRd;
+    float bCoeff = abLengthSq * dot(ao, rd) - abDotAo * abDotRd;
+    float cCoeff = abLengthSq * dot(ao, ao) - abDotAo * abDotAo - radius * radius * abLengthSq;
+    float discriminant = bCoeff * bCoeff - aCoeff * cCoeff;
+    if (discriminant < 0.0)
+        return false;
+    float sqrtDiscriminant = sqrt(discriminant);
+    float t1 = (-bCoeff - sqrtDiscriminant) / aCoeff;
+    float t2 = (-bCoeff + sqrtDiscriminant) / aCoeff;
+    // Check if the intersection points are within the cylinder's height
+    float y1 = dot(ab, (ro + t1 * rd) - a);
+    float y2 = dot(ab, (ro + t2 * rd) - a);
+    if ((y1 < 0.0 || y1 > abLengthSq) && (y2 < 0.0 || y2 > abLengthSq))
+        return false;
+    // Choose the closest valid intersection point
+    if (y1 >= 0.0 && y1 <= abLengthSq)
+        t = t1;
+    else
+        t = t2;
+    return t > 0.0;
+}
+
 // --------------------------------------------------
 // Ray reconstruction
 // --------------------------------------------------

@@ -86,6 +86,9 @@
     <ClInclude Include="include\model\GeneralVertexShader.glsl">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\cylinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\model\PolytopeVertexShader.glsl">
